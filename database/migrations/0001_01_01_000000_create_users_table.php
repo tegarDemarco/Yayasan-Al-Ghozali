@@ -15,8 +15,18 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('username')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['pengurus_yayasan', 'kepala_sekolah', 'guru', 'admin_sekolah']);
+            $table->enum('jenjang', ['SD', 'MTs', 'SMK'])->nullable();
+            $table->unsignedBigInteger('sekolah_id')->nullable();
+            $table->string('nip')->nullable();
+            $table->string('jabatan')->nullable();
+            $table->string('foto')->nullable();
+            $table->string('telepon')->nullable();
+            $table->text('alamat')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });
