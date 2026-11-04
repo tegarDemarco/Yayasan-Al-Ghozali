@@ -1053,7 +1053,11 @@
 
             <a href="{{ route('presensi.index') }}" class="nav-item {{ request()->routeIs('presensi.*') ? 'active' : '' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Presensi
+                @if(auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah())
+                    Lihat Presensi Guru
+                @else
+                    Presensi
+                @endif
             </a>
 
             <a href="{{ route('jurnal.index') }}" class="nav-item {{ request()->routeIs('jurnal.*') ? 'active' : '' }}">
