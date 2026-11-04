@@ -17,11 +17,11 @@
 </div>
 
 <div class="card">
-    <form method="GET" action="{{ route('guru.index') }}">
+    <form method="GET" action="{{ route('guru.index') }}" autocomplete="off">
         <div class="filter-bar">
             <div class="search-box">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
-                <input type="text" name="search" class="form-control" placeholder="Cari nama guru..." value="{{ request('search') }}">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                <input type="text" name="search" class="form-control" placeholder="Cari nama guru..." value="{{ request('search') }}" autocomplete="off">
             </div>
             <select name="jenjang" class="form-control" style="width:auto;">
                 <option value="">Semua Jenjang</option>

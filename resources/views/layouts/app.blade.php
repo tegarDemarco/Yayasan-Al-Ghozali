@@ -818,15 +818,183 @@
             max-width: 320px;
         }
 
-        .search-box svg {
+        .search-box svg.search-icon,
+        .search-box > svg {
             position: absolute;
             left: 12px; top: 50%;
             transform: translateY(-50%);
             width: 16px; height: 16px;
             color: var(--text-muted);
+            pointer-events: none;
+            z-index: 2;
         }
 
-        .search-box .form-control { padding-left: 38px; }
+        .search-box .form-control {
+            padding-left: 38px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .search-history-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            min-width: 290px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+            z-index: 120;
+            overflow: hidden;
+            animation: searchDropdownFade 0.15s ease-out;
+            display: none;
+        }
+
+        @keyframes searchDropdownFade {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .search-history-clear-all {
+            background: none;
+            border: none;
+            font-size: 11px;
+            color: var(--red);
+            cursor: pointer;
+            font-weight: 600;
+            padding: 2px 4px;
+            border-radius: 4px;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .search-history-clear-all:hover {
+            background: #fee2e2;
+            text-decoration: underline;
+        }
+
+        .search-history-list {
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 4px 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .search-history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: background var(--transition);
+        }
+
+        .search-history-item:hover {
+            background: var(--primary-50);
+            color: var(--primary-dark);
+        }
+
+        .search-history-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .search-history-text svg {
+            width: 14px;
+            height: 14px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .search-history-remove {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+        }
+
+        .search-history-remove:hover {
+            background: #fee2e2;
+            color: var(--red);
+        }
+
+        .search-history-empty {
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 12.5px;
+            color: var(--text-muted);
+        }
+
+        .search-history-suggestions {
+            padding: 10px 12px 12px;
+            border-top: 1px dashed var(--border);
+            background: #fafafa;
+        }
+
+        .search-history-suggestions-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .search-suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .search-suggestion-chip {
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-weight: 500;
+        }
+
+        .search-suggestion-chip:hover {
+            background: var(--primary-50);
+            border-color: var(--primary-200);
+            color: var(--primary);
+        }
 
         /* ===== PAGE HEADER ===== */
         .page-header {
@@ -1351,6 +1519,198 @@
             }
         });
     }
+
+    // ===== Search History & Recommendations System =====
+    (function initSearchHistory() {
+        const searchBoxes = document.querySelectorAll('.search-box');
+        if (!searchBoxes.length) return;
+
+        const path = window.location.pathname;
+        let contextKey = 'general';
+        let defaultSuggestions = ['Matematika', 'IPA', 'Kelas IV'];
+
+        if (path.includes('guru')) {
+            contextKey = 'guru';
+            defaultSuggestions = ['Matematika', 'IPA', 'Bahasa Indonesia', 'Brebes', 'PNS', 'GTY'];
+        } else if (path.includes('jadwal-mengajar')) {
+            contextKey = 'jadwal';
+            defaultSuggestions = ['Matematika', 'Kelas IV-A', 'Fisika', 'Ruang 1', 'Ganjil'];
+        } else if (path.includes('rpp')) {
+            contextKey = 'rpp';
+            defaultSuggestions = ['RPP Matematika', 'Modul Ajar', 'Kelas VII', 'Semester Ganjil'];
+        }
+
+        const storageKey = 'yayasan_search_history_' + contextKey;
+
+        function getHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(storageKey)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveHistory(item) {
+            if (!item || !item.trim()) return;
+            const text = item.trim();
+            let history = getHistory().filter(h => h.toLowerCase() !== text.toLowerCase());
+            history.unshift(text);
+            if (history.length > 8) history = history.slice(0, 8);
+            localStorage.setItem(storageKey, JSON.stringify(history));
+        }
+
+        function removeHistoryItem(textToRemove) {
+            let history = getHistory().filter(h => h !== textToRemove);
+            localStorage.setItem(storageKey, JSON.stringify(history));
+        }
+
+        function clearAllHistory() {
+            localStorage.removeItem(storageKey);
+        }
+
+        searchBoxes.forEach(box => {
+            const input = box.querySelector('input[name="search"]');
+            if (!input) return;
+
+            input.setAttribute('autocomplete', 'off');
+
+            if (input.value && input.value.trim()) {
+                saveHistory(input.value.trim());
+            }
+
+            const form = input.closest('form');
+            if (form) {
+                form.setAttribute('autocomplete', 'off');
+                form.addEventListener('submit', () => {
+                    if (input.value && input.value.trim()) {
+                        saveHistory(input.value.trim());
+                    }
+                });
+            }
+
+            const dropdown = document.createElement('div');
+            dropdown.className = 'search-history-dropdown';
+            box.appendChild(dropdown);
+
+            function renderDropdown(filterText = '') {
+                const history = getHistory();
+                const q = filterText.toLowerCase().trim();
+                const filtered = q ? history.filter(h => h.toLowerCase().includes(q)) : history;
+
+                let html = '';
+
+                if (history.length > 0) {
+                    html += `
+                        <div class="search-history-header">
+                            <span>Riwayat Pencarian</span>
+                            <button type="button" class="search-history-clear-all" data-action="clear-all">Hapus Semua</button>
+                        </div>
+                    `;
+
+                    if (filtered.length > 0) {
+                        html += '<ul class="search-history-list">';
+                        filtered.forEach(term => {
+                            const escapedTerm = term.replace(/"/g, '&quot;');
+                            html += `
+                                <li class="search-history-item" data-value="${escapedTerm}">
+                                    <span class="search-history-text">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>${term}</span>
+                                    </span>
+                                    <button type="button" class="search-history-remove" title="Hapus dari riwayat" data-remove="${escapedTerm}">&times;</button>
+                                </li>
+                            `;
+                        });
+                        html += '</ul>';
+                    } else {
+                        html += '<div class="search-history-empty">Tidak ada riwayat yang cocok</div>';
+                    }
+                } else {
+                    html += '<div class="search-history-empty">Belum ada riwayat pencarian</div>';
+                }
+
+                if (defaultSuggestions && defaultSuggestions.length > 0) {
+                    html += `
+                        <div class="search-history-suggestions">
+                            <div class="search-history-suggestions-title">Rekomendasi Pencarian</div>
+                            <div class="search-suggestion-chips">
+                                ${defaultSuggestions.map(s => `<span class="search-suggestion-chip" data-value="${s}">${s}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                dropdown.innerHTML = html;
+
+                const clearBtn = dropdown.querySelector('[data-action="clear-all"]');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        clearAllHistory();
+                        renderDropdown(input.value);
+                    });
+                }
+
+                dropdown.querySelectorAll('.search-history-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        if (e.target.closest('.search-history-remove')) return;
+                        const val = item.getAttribute('data-value');
+                        input.value = val;
+                        dropdown.style.display = 'none';
+                        if (form) form.submit();
+                    });
+                });
+
+                dropdown.querySelectorAll('.search-history-remove').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const val = btn.getAttribute('data-remove');
+                        removeHistoryItem(val);
+                        renderDropdown(input.value);
+                    });
+                });
+
+                dropdown.querySelectorAll('.search-suggestion-chip').forEach(chip => {
+                    chip.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const val = chip.getAttribute('data-value');
+                        input.value = val;
+                        dropdown.style.display = 'none';
+                        if (form) form.submit();
+                    });
+                });
+            }
+
+            input.addEventListener('focus', () => {
+                renderDropdown(input.value);
+                dropdown.style.display = 'block';
+            });
+
+            input.addEventListener('click', () => {
+                renderDropdown(input.value);
+                dropdown.style.display = 'block';
+            });
+
+            input.addEventListener('input', () => {
+                renderDropdown(input.value);
+                dropdown.style.display = 'block';
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!box.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    dropdown.style.display = 'none';
+                }
+            });
+        });
+    })();
 </script>
 
 @stack('scripts')

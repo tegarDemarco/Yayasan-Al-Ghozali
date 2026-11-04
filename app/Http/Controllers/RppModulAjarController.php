@@ -35,9 +35,35 @@ class RppModulAjarController extends Controller
             $query->where('tipe', $request->tipe);
         }
 
+        if (! $user->isGuru() && $request->filled('guru_id')) {
+            $query->where('guru_id', $request->guru_id);
+        }
+
+        if ($request->filled('semester')) {
+            $query->where('semester', $request->semester);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                    ->orWhere('mata_pelajaran', 'like', "%{$search}%")
+                    ->orWhere('kelas', 'like', "%{$search}%")
+                    ->orWhereHas('guru.user', fn ($g) => $g->where('name', 'like', "%{$search}%"));
+            });
+        }
+
         $rpps = $query->latest()->paginate(10)->withQueryString();
 
-        return view('rpp.index', compact('rpps'));
+        $guruQuery = Guru::with('user')->where('status', 'aktif');
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $guruQuery->where('sekolah_id', $sekolahId);
+        }
+
+        $gurus = ! $user->isGuru() ? $guruQuery->get() : collect();
+
+        return view('rpp.index', compact('rpps', 'gurus'));
     }
 
     public function create(): View
