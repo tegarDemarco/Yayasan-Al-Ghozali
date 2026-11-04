@@ -6,8 +6,8 @@ use App\Models\EvaluasiKinerja;
 use App\Models\Guru;
 use App\Models\JadwalMengajar;
 use App\Models\JurnalMengajar;
-use App\Models\Penilaian;
 use App\Models\PengajuanIzinCuti;
+use App\Models\Penilaian;
 use App\Models\PresensiGuru;
 use App\Models\RppModulAjar;
 use App\Models\Sekolah;
@@ -316,40 +316,40 @@ class DatabaseSeeder extends Seeder
 
         foreach ($allGurus as $guru) {
             $jenjang = $guru->jenjang;
-            $kepsekId = match($jenjang) {
-                'SD'  => User::where('username', 'kepsek_sd')->value('id'),
+            $kepsekId = match ($jenjang) {
+                'SD' => User::where('username', 'kepsek_sd')->value('id'),
                 'MTs' => User::where('username', 'kepsek_mts')->value('id'),
                 'SMK' => User::where('username', 'kepsek_smk')->value('id'),
             };
 
             // Pengangkatan SK untuk setiap guru
             $noSk = sprintf('SK/%03d/YAG/%s/%d', $skCounter[$jenjang]++, $jenjang, date('Y'));
-            \App\Models\SkTugas::create([
-                'guru_id'          => $guru->id,
-                'sekolah_id'       => $guru->sekolah_id,
-                'no_sk'            => $noSk,
-                'judul_sk'         => 'SK Pengangkatan sebagai Guru Tetap Yayasan – ' . $guru->spesialisasi,
-                'jenis_sk'         => 'Pengangkatan',
-                'tanggal_sk'       => $guru->tanggal_bergabung ?? Carbon::now()->subYear(),
-                'berlaku_mulai'    => $guru->tanggal_bergabung ?? Carbon::now()->subYear(),
-                'berlaku_sampai'   => null,
-                'keterangan'       => 'Ditetapkan berdasarkan hasil seleksi dan penilaian kinerja. Guru dinyatakan memenuhi syarat sebagai tenaga pengajar tetap di ' . $guru->sekolah->nama_sekolah . '.',
+            SkTugas::create([
+                'guru_id' => $guru->id,
+                'sekolah_id' => $guru->sekolah_id,
+                'no_sk' => $noSk,
+                'judul_sk' => 'SK Pengangkatan sebagai Guru Tetap Yayasan – '.$guru->spesialisasi,
+                'jenis_sk' => 'Pengangkatan',
+                'tanggal_sk' => $guru->tanggal_bergabung ?? Carbon::now()->subYear(),
+                'berlaku_mulai' => $guru->tanggal_bergabung ?? Carbon::now()->subYear(),
+                'berlaku_sampai' => null,
+                'keterangan' => 'Ditetapkan berdasarkan hasil seleksi dan penilaian kinerja. Guru dinyatakan memenuhi syarat sebagai tenaga pengajar tetap di '.$guru->sekolah->nama_sekolah.'.',
                 'diterbitkan_oleh' => $kepsekId,
             ]);
 
             // SK Tugas Tambahan untuk beberapa guru
             if ($guru->id % 2 === 0) {
                 $noSk2 = sprintf('SK/%03d/YAG/%s/%d', $skCounter[$jenjang]++, $jenjang, date('Y'));
-                \App\Models\SkTugas::create([
-                    'guru_id'          => $guru->id,
-                    'sekolah_id'       => $guru->sekolah_id,
-                    'no_sk'            => $noSk2,
-                    'judul_sk'         => 'SK Penugasan sebagai Wali Kelas Tahun Ajaran 2025/2026',
-                    'jenis_sk'         => 'Tugas Tambahan',
-                    'tanggal_sk'       => Carbon::now()->subMonths(3),
-                    'berlaku_mulai'    => Carbon::parse('2025-07-15'),
-                    'berlaku_sampai'   => Carbon::parse('2026-06-30'),
-                    'keterangan'       => 'Ditugaskan sebagai wali kelas dalam rangka meningkatkan kualitas bimbingan dan pembinaan peserta didik pada tahun ajaran 2025/2026.',
+                SkTugas::create([
+                    'guru_id' => $guru->id,
+                    'sekolah_id' => $guru->sekolah_id,
+                    'no_sk' => $noSk2,
+                    'judul_sk' => 'SK Penugasan sebagai Wali Kelas Tahun Ajaran 2025/2026',
+                    'jenis_sk' => 'Tugas Tambahan',
+                    'tanggal_sk' => Carbon::now()->subMonths(3),
+                    'berlaku_mulai' => Carbon::parse('2025-07-15'),
+                    'berlaku_sampai' => Carbon::parse('2026-06-30'),
+                    'keterangan' => 'Ditugaskan sebagai wali kelas dalam rangka meningkatkan kualitas bimbingan dan pembinaan peserta didik pada tahun ajaran 2025/2026.',
                     'diterbitkan_oleh' => $kepsekId,
                 ]);
             }
@@ -365,60 +365,60 @@ class DatabaseSeeder extends Seeder
 
         foreach ($sdGurus as $guru) {
             foreach (['RPP', 'Modul Ajar'] as $tipe) {
-                \App\Models\RppModulAjar::create([
-                    'guru_id'         => $guru->id,
-                    'sekolah_id'      => $guru->sekolah_id,
-                    'tipe'            => $tipe,
-                    'judul'           => $tipe . ' ' . $guru->spesialisasi . ' Kelas IV Semester Ganjil',
-                    'mata_pelajaran'  => $guru->spesialisasi,
-                    'kelas'           => 'Kelas IV-A',
-                    'tahun_ajaran'    => '2025/2026',
-                    'semester'        => 'Ganjil',
-                    'pertemuan_ke'    => 1,
+                RppModulAjar::create([
+                    'guru_id' => $guru->id,
+                    'sekolah_id' => $guru->sekolah_id,
+                    'tipe' => $tipe,
+                    'judul' => $tipe.' '.$guru->spesialisasi.' Kelas IV Semester Ganjil',
+                    'mata_pelajaran' => $guru->spesialisasi,
+                    'kelas' => 'Kelas IV-A',
+                    'tahun_ajaran' => '2025/2026',
+                    'semester' => 'Ganjil',
+                    'pertemuan_ke' => 1,
                     'status_validasi' => $tipe === 'RPP' ? 'disetujui' : 'menunggu',
-                    'catatan_validasi'=> $tipe === 'RPP' ? 'Dokumen sudah lengkap dan sesuai standar kurikulum.' : null,
+                    'catatan_validasi' => $tipe === 'RPP' ? 'Dokumen sudah lengkap dan sesuai standar kurikulum.' : null,
                     'divalidasi_oleh' => $tipe === 'RPP' ? $kepsekSdId : null,
-                    'divalidasi_at'   => $tipe === 'RPP' ? Carbon::now()->subDays(5) : null,
+                    'divalidasi_at' => $tipe === 'RPP' ? Carbon::now()->subDays(5) : null,
                 ]);
             }
         }
 
         foreach ($mtsGurus as $guru) {
-            \App\Models\RppModulAjar::create([
-                'guru_id'         => $guru->id,
-                'sekolah_id'      => $guru->sekolah_id,
-                'tipe'            => 'RPP',
-                'judul'           => 'RPP ' . $guru->spesialisasi . ' Kelas VII Semester Ganjil',
-                'mata_pelajaran'  => $guru->spesialisasi,
-                'kelas'           => 'VII-A',
-                'tahun_ajaran'    => '2025/2026',
-                'semester'        => 'Ganjil',
-                'pertemuan_ke'    => 1,
+            RppModulAjar::create([
+                'guru_id' => $guru->id,
+                'sekolah_id' => $guru->sekolah_id,
+                'tipe' => 'RPP',
+                'judul' => 'RPP '.$guru->spesialisasi.' Kelas VII Semester Ganjil',
+                'mata_pelajaran' => $guru->spesialisasi,
+                'kelas' => 'VII-A',
+                'tahun_ajaran' => '2025/2026',
+                'semester' => 'Ganjil',
+                'pertemuan_ke' => 1,
                 'status_validasi' => 'disetujui',
-                'catatan_validasi'=> 'Telah diverifikasi. Format sudah sesuai dengan standar madrasah.',
+                'catatan_validasi' => 'Telah diverifikasi. Format sudah sesuai dengan standar madrasah.',
                 'divalidasi_oleh' => $kepsekMtsId,
-                'divalidasi_at'   => Carbon::now()->subDays(3),
+                'divalidasi_at' => Carbon::now()->subDays(3),
             ]);
         }
 
         // ===== JURNAL MENGAJAR DATA =====
         foreach ($allGurus as $guru) {
             for ($i = 1; $i <= 3; $i++) {
-                \App\Models\JurnalMengajar::create([
-                    'guru_id'            => $guru->id,
-                    'tanggal'            => Carbon::now()->subDays($i * 2),
-                    'mata_pelajaran'     => $guru->spesialisasi,
-                    'kelas'              => match($guru->jenjang) {
-                        'SD' => 'Kelas '.['IV-A','V-B','VI-A'][$i-1],
-                        'MTs' => ['VII-A','VIII-B','IX-A'][$i-1],
-                        default => ['X TKJ','XI AK','XII TKJ'][$i-1],
+                JurnalMengajar::create([
+                    'guru_id' => $guru->id,
+                    'tanggal' => Carbon::now()->subDays($i * 2),
+                    'mata_pelajaran' => $guru->spesialisasi,
+                    'kelas' => match ($guru->jenjang) {
+                        'SD' => 'Kelas '.['IV-A', 'V-B', 'VI-A'][$i - 1],
+                        'MTs' => ['VII-A', 'VIII-B', 'IX-A'][$i - 1],
+                        default => ['X TKJ', 'XI AK', 'XII TKJ'][$i - 1],
                     },
-                    'pertemuan_ke'       => $i,
-                    'materi'             => 'Materi Pertemuan ' . $i . ': Pokok bahasan ' . $guru->spesialisasi . ' – konsep dasar dan penerapan dalam kehidupan sehari-hari.',
-                    'kegiatan'           => 'Pendahuluan (10 mnt): Apersepsi dan motivasi. Inti (60 mnt): Penjelasan materi, diskusi kelompok, latihan soal. Penutup (10 mnt): Kesimpulan dan evaluasi.',
+                    'pertemuan_ke' => $i,
+                    'materi' => 'Materi Pertemuan '.$i.': Pokok bahasan '.$guru->spesialisasi.' – konsep dasar dan penerapan dalam kehidupan sehari-hari.',
+                    'kegiatan' => 'Pendahuluan (10 mnt): Apersepsi dan motivasi. Inti (60 mnt): Penjelasan materi, diskusi kelompok, latihan soal. Penutup (10 mnt): Kesimpulan dan evaluasi.',
                     'jumlah_siswa_hadir' => rand(28, 35),
-                    'catatan'            => $i === 2 ? 'Beberapa siswa membutuhkan bimbingan tambahan pada materi ini.' : null,
-                    'status'             => 'terkirim',
+                    'catatan' => $i === 2 ? 'Beberapa siswa membutuhkan bimbingan tambahan pada materi ini.' : null,
+                    'status' => 'terkirim',
                 ]);
             }
         }
@@ -431,18 +431,18 @@ class DatabaseSeeder extends Seeder
         foreach ($sdGurus->take(2) as $guru) {
             foreach ($siswaSd as $siswa) {
                 foreach (['Ulangan Harian', 'UTS'] as $jenis) {
-                    \App\Models\Penilaian::create([
-                        'guru_id'          => $guru->id,
-                        'sekolah_id'       => $guru->sekolah_id,
-                        'nama_siswa'       => $siswa,
-                        'nis'              => '2025' . rand(1000, 9999),
-                        'kelas'            => 'Kelas IV-A',
-                        'mata_pelajaran'   => $guru->spesialisasi,
-                        'jenis_penilaian'  => $jenis,
-                        'nilai'            => rand(65, 98),
-                        'tahun_ajaran'     => '2025/2026',
-                        'semester'         => 'Ganjil',
-                        'tanggal_penilaian'=> Carbon::now()->subDays(rand(5, 30)),
+                    Penilaian::create([
+                        'guru_id' => $guru->id,
+                        'sekolah_id' => $guru->sekolah_id,
+                        'nama_siswa' => $siswa,
+                        'nis' => '2025'.rand(1000, 9999),
+                        'kelas' => 'Kelas IV-A',
+                        'mata_pelajaran' => $guru->spesialisasi,
+                        'jenis_penilaian' => $jenis,
+                        'nilai' => rand(65, 98),
+                        'tahun_ajaran' => '2025/2026',
+                        'semester' => 'Ganjil',
+                        'tanggal_penilaian' => Carbon::now()->subDays(rand(5, 30)),
                     ]);
                 }
             }
@@ -450,56 +450,58 @@ class DatabaseSeeder extends Seeder
 
         foreach ($mtsGurus->take(2) as $guru) {
             foreach ($siswaMts as $siswa) {
-                \App\Models\Penilaian::create([
-                    'guru_id'          => $guru->id,
-                    'sekolah_id'       => $guru->sekolah_id,
-                    'nama_siswa'       => $siswa,
-                    'nis'              => '2025' . rand(1000, 9999),
-                    'kelas'            => 'VII-A',
-                    'mata_pelajaran'   => $guru->spesialisasi,
-                    'jenis_penilaian'  => 'Ulangan Harian',
-                    'nilai'            => rand(70, 95),
-                    'tahun_ajaran'     => '2025/2026',
-                    'semester'         => 'Ganjil',
-                    'tanggal_penilaian'=> Carbon::now()->subDays(rand(3, 20)),
+                Penilaian::create([
+                    'guru_id' => $guru->id,
+                    'sekolah_id' => $guru->sekolah_id,
+                    'nama_siswa' => $siswa,
+                    'nis' => '2025'.rand(1000, 9999),
+                    'kelas' => 'VII-A',
+                    'mata_pelajaran' => $guru->spesialisasi,
+                    'jenis_penilaian' => 'Ulangan Harian',
+                    'nilai' => rand(70, 95),
+                    'tahun_ajaran' => '2025/2026',
+                    'semester' => 'Ganjil',
+                    'tanggal_penilaian' => Carbon::now()->subDays(rand(3, 20)),
                 ]);
             }
         }
 
         // ===== PENGAJUAN IZIN DATA =====
         foreach ($allGurus->take(5) as $guru) {
-            $kepsekId = match($guru->jenjang) {
-                'SD'  => $kepsekSdId,
+            $kepsekId = match ($guru->jenjang) {
+                'SD' => $kepsekSdId,
                 'MTs' => $kepsekMtsId,
                 'SMK' => $kepsekSmkId,
             };
 
             // Izin disetujui
-            \App\Models\PengajuanIzinCuti::create([
-                'guru_id'          => $guru->id,
-                'sekolah_id'       => $guru->sekolah_id,
-                'jenis_pengajuan'  => 'Izin',
-                'tanggal_mulai'    => Carbon::now()->subDays(10),
-                'tanggal_selesai'  => Carbon::now()->subDays(10),
-                'jumlah_hari'      => 1,
-                'alasan'           => 'Menghadiri acara keluarga yang tidak dapat ditinggalkan.',
-                'status_approval'  => 'disetujui',
-                'disetujui_oleh'   => $kepsekId,
+            PengajuanIzinCuti::create([
+                'guru_id' => $guru->id,
+                'sekolah_id' => $guru->sekolah_id,
+                'jenis_pengajuan' => 'Izin',
+                'tanggal_mulai' => Carbon::now()->subDays(10),
+                'tanggal_selesai' => Carbon::now()->subDays(10),
+                'jumlah_hari' => 1,
+                'alasan' => 'Menghadiri acara keluarga yang tidak dapat ditinggalkan.',
+                'status_approval' => 'disetujui',
+                'disetujui_oleh' => $kepsekId,
                 'catatan_approval' => 'Disetujui. Harap pastikan tugas mengajar digantikan oleh guru piket.',
-                'disetujui_at'     => Carbon::now()->subDays(9),
+                'disetujui_at' => Carbon::now()->subDays(9),
             ]);
 
             // Pengajuan menunggu
-            \App\Models\PengajuanIzinCuti::create([
-                'guru_id'          => $guru->id,
-                'sekolah_id'       => $guru->sekolah_id,
-                'jenis_pengajuan'  => 'Cuti',
-                'tanggal_mulai'    => Carbon::now()->addDays(5),
-                'tanggal_selesai'  => Carbon::now()->addDays(7),
-                'jumlah_hari'      => 3,
-                'alasan'           => 'Cuti tahunan untuk keperluan pribadi dan keluarga.',
-                'status_approval'  => 'menunggu',
+            PengajuanIzinCuti::create([
+                'guru_id' => $guru->id,
+                'sekolah_id' => $guru->sekolah_id,
+                'jenis_pengajuan' => 'Cuti',
+                'tanggal_mulai' => Carbon::now()->addDays(5),
+                'tanggal_selesai' => Carbon::now()->addDays(7),
+                'jumlah_hari' => 3,
+                'alasan' => 'Cuti tahunan untuk keperluan pribadi dan keluarga.',
+                'status_approval' => 'menunggu',
             ]);
         }
+
+        $this->call(NotificationSeeder::class);
     }
 }

@@ -4,9 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\EvaluasiKinerja;
 use App\Models\Guru;
-use App\Models\PresensiGuru;
 use App\Models\Sekolah;
-use Carbon\Carbon;
+use App\Notifications\AppNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -70,7 +69,7 @@ class EvaluasiKinerjaController extends Controller
             default => 'Kurang',
         };
 
-        EvaluasiKinerja::create([
+        $evaluasi = EvaluasiKinerja::create([
             ...$validated,
             'sekolah_id' => $sekolahId,
             'nilai_akhir' => $nilaiAkhir,
@@ -78,6 +77,18 @@ class EvaluasiKinerjaController extends Controller
             'dievaluasi_oleh' => $user->id,
             'dievaluasi_at' => now(),
         ]);
+
+        $guru = Guru::find($validated['guru_id']);
+        if ($guru && $guru->user) {
+            $guru->user->notify(new AppNotification(
+                title: 'Evaluasi Kinerja Diterbitkan',
+                message: "Evaluasi kinerja semester {$validated['semester']} TA {$validated['tahun_ajaran']} telah diterbitkan dengan predikat {$predikat} (Nilai: {$nilaiAkhir}).",
+                url: route('evaluasi-kinerja.show', $evaluasi->id),
+                type: 'evaluasi',
+                icon: 'bar-chart-2',
+                senderName: $user->name,
+            ));
+        }
 
         return redirect()->route('evaluasi-kinerja.index')->with('success', 'Evaluasi kinerja berhasil disimpan.');
     }

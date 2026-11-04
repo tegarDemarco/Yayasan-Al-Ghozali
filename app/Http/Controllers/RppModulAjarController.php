@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Guru;
 use App\Models\RppModulAjar;
 use App\Models\Sekolah;
+use App\Models\User;
+use App\Notifications\AppNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class RppModulAjarController extends Controller
@@ -63,7 +66,7 @@ class RppModulAjarController extends Controller
 
         $filePath = $request->file('file')->store('rpp-modul', 'public');
 
-        RppModulAjar::create([
+        $rpp = RppModulAjar::create([
             'guru_id' => $guru->id,
             'sekolah_id' => $guru->sekolah_id,
             'judul' => $validated['judul'],
@@ -75,6 +78,21 @@ class RppModulAjarController extends Controller
             'tipe' => $validated['tipe'],
             'file_path' => $filePath,
         ]);
+
+        $kepsekAndAdmins = User::where('sekolah_id', $guru->sekolah_id)
+            ->whereIn('role', ['kepala_sekolah', 'admin_sekolah'])
+            ->get();
+
+        foreach ($kepsekAndAdmins as $receiver) {
+            $receiver->notify(new AppNotification(
+                title: 'RPP / Modul Ajar Baru Diunggah',
+                message: "{$user->name} mengunggah {$validated['tipe']} \"{$validated['judul']}\" untuk mapel {$validated['mata_pelajaran']}.",
+                url: route('rpp.index'),
+                type: 'rpp',
+                icon: 'file-text',
+                senderName: $user->name,
+            ));
+        }
 
         return redirect()->route('rpp.index')->with('success', 'RPP/Modul Ajar berhasil diunggah. Menunggu validasi.');
     }
@@ -93,6 +111,19 @@ class RppModulAjarController extends Controller
             'divalidasi_at' => now(),
         ]);
 
+        $guruUser = $rppModulAjar->guru?->user;
+        if ($guruUser) {
+            $statusText = $request->status_validasi === 'disetujui' ? 'disetujui' : 'ditolak';
+            $guruUser->notify(new AppNotification(
+                title: 'Validasi RPP/Modul Ajar: '.ucfirst($statusText),
+                message: "Dokumen {$rppModulAjar->tipe} \"{$rppModulAjar->judul}\" telah {$statusText} oleh Kepala Sekolah.",
+                url: route('rpp.index'),
+                type: $request->status_validasi === 'disetujui' ? 'success' : 'warning',
+                icon: $request->status_validasi === 'disetujui' ? 'check-circle' : 'x-circle',
+                senderName: auth()->user()->name,
+            ));
+        }
+
         $pesan = $request->status_validasi === 'disetujui'
             ? 'RPP/Modul Ajar berhasil divalidasi.'
             : 'RPP/Modul Ajar ditolak.';
@@ -103,7 +134,7 @@ class RppModulAjarController extends Controller
     public function destroy(RppModulAjar $rppModulAjar): RedirectResponse
     {
         if ($rppModulAjar->file_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($rppModulAjar->file_path);
+            Storage::disk('public')->delete($rppModulAjar->file_path);
         }
 
         $rppModulAjar->delete();

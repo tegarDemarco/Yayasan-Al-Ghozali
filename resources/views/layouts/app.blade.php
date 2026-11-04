@@ -265,6 +265,178 @@
             border: 2px solid #fff;
         }
 
+        .notif-badge {
+            position: absolute;
+            top: -4px; right: -4px;
+            min-width: 18px; height: 18px;
+            padding: 0 4px;
+            background: var(--red);
+            color: #fff;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+            line-height: 1;
+        }
+
+        .notif-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 360px;
+            max-width: 90vw;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 150;
+            overflow: hidden;
+            animation: notifFadeIn 0.15s ease-out;
+        }
+
+        @keyframes notifFadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .notif-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+        }
+
+        .notif-header-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .notif-mark-all {
+            background: none;
+            border: none;
+            font-size: 11.5px;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+
+        .notif-mark-all:hover {
+            background: var(--primary-50);
+            text-decoration: underline;
+        }
+
+        .notif-list {
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+            color: inherit;
+            transition: background var(--transition);
+            position: relative;
+        }
+
+        .notif-item:hover {
+            background: var(--primary-50);
+        }
+
+        .notif-item.unread {
+            background: #f0fdf4;
+        }
+
+        .notif-item.unread::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: var(--primary);
+        }
+
+        .notif-item-icon {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notif-icon-izin { background: #dbeafe; color: var(--blue); }
+        .notif-icon-rpp { background: var(--primary-100); color: var(--primary); }
+        .notif-icon-sk_tugas { background: #ede9fe; color: var(--purple); }
+        .notif-icon-evaluasi { background: var(--accent-light); color: var(--yellow); }
+        .notif-icon-success { background: var(--primary-100); color: var(--primary); }
+        .notif-icon-warning { background: var(--accent-light); color: var(--yellow); }
+        .notif-icon-error { background: #fee2e2; color: var(--red); }
+        .notif-icon-info { background: #e0f2fe; color: #0284c7; }
+
+        .notif-item-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notif-item-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            line-height: 1.3;
+        }
+
+        .notif-item-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .notif-item-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .notif-footer {
+            padding: 10px 16px;
+            text-align: center;
+            background: #f8fafc;
+            border-top: 1px solid var(--border);
+        }
+
+        .notif-footer a {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .notif-footer a:hover {
+            text-decoration: underline;
+        }
+
         .topbar-profile {
             display: flex;
             align-items: center;
@@ -856,6 +1028,21 @@
         </a>
 
         @auth
+        <a href="{{ route('notifikasi.index') }}" class="nav-item {{ request()->routeIs('notifikasi.*') ? 'active' : '' }}" id="nav-notifikasi">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+            <span style="flex:1;">Notifikasi</span>
+            @php
+                $sidebarUnread = auth()->user()->unreadNotifications()->count();
+            @endphp
+            @if($sidebarUnread > 0)
+                <span class="badge" style="background:var(--red);color:#fff;font-size:10.5px;padding:1px 6px;margin-left:auto;border-radius:10px;">
+                    {{ $sidebarUnread > 99 ? '99+' : $sidebarUnread }}
+                </span>
+            @endif
+        </a>
+        @endauth
+
+        @auth
             @if(auth()->user()->isGuru() || auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah())
             <div class="sidebar-section">Akademik</div>
 
@@ -989,10 +1176,80 @@
         <div class="topbar-title">@yield('page-title', 'Dashboard')</div>
 
         <div class="topbar-actions">
-            <button class="topbar-btn" title="Notifikasi" id="topbar-notif-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
-                <span class="notif-dot"></span>
-            </button>
+            @auth
+            <div class="notif-wrapper" style="position: relative;" id="notif-wrapper">
+                <button class="topbar-btn" title="Notifikasi" id="topbar-notif-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+                    @php
+                        $unreadTopCount = auth()->user()->unreadNotifications()->count();
+                    @endphp
+                    @if($unreadTopCount > 0)
+                        <span class="notif-badge" id="topbar-notif-badge">{{ $unreadTopCount > 99 ? '99+' : $unreadTopCount }}</span>
+                    @endif
+                </button>
+
+                <!-- Dropdown Content -->
+                <div class="notif-dropdown" id="topbar-notif-dropdown" style="display: none;">
+                    <div class="notif-header">
+                        <div class="notif-header-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+                            <span>Notifikasi</span>
+                            @if($unreadTopCount > 0)
+                                <span class="badge" style="background:#dcfce7;color:#15803d;font-size:10.5px;padding:1px 6px;">{{ $unreadTopCount }} baru</span>
+                            @endif
+                        </div>
+                        @if($unreadTopCount > 0)
+                        <form method="POST" action="{{ route('notifikasi.mark-all-read') }}" style="margin: 0;">
+                            @csrf
+                            <button type="submit" class="notif-mark-all" title="Tandai semua sudah dibaca">
+                                Tandai dibaca
+                            </button>
+                        </form>
+                        @endif
+                    </div>
+
+                    <div class="notif-list">
+                        @php
+                            $recentNotifications = auth()->user()->notifications()->take(5)->get();
+                        @endphp
+
+                        @forelse($recentNotifications as $notif)
+                            @php
+                                $notifData = $notif->data;
+                                $isItemUnread = is_null($notif->read_at);
+                                $iconName = $notifData['icon'] ?? 'bell';
+                                $itemType = $notifData['type'] ?? 'info';
+                            @endphp
+                            <a href="{{ route('notifikasi.read-and-redirect', $notif->id) }}" class="notif-item {{ $isItemUnread ? 'unread' : '' }}">
+                                <div class="notif-item-icon notif-icon-{{ $itemType }}">
+                                    <i data-lucide="{{ $iconName }}" style="width: 16px; height: 16px;"></i>
+                                </div>
+                                <div class="notif-item-body">
+                                    <div class="notif-item-title">{{ $notifData['title'] ?? 'Pemberitahuan' }}</div>
+                                    <div class="notif-item-desc">{{ $notifData['message'] ?? '' }}</div>
+                                    <div class="notif-item-time">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        {{ $notif->created_at->diffForHumans() }}
+                                    </div>
+                                </div>
+                                @if($isItemUnread)
+                                    <span class="status-dot green" title="Belum dibaca" style="margin-left:4px;margin-top:4px;"></span>
+                                @endif
+                            </a>
+                        @empty
+                            <div style="padding: 32px 16px; text-align: center; color: var(--text-muted);">
+                                <i data-lucide="bell-off" style="width: 32px; height: 32px; margin: 0 auto 8px; display: block; opacity: 0.5;"></i>
+                                <p style="font-size: 13px; font-weight: 500;">Tidak ada notifikasi baru</p>
+                            </div>
+                        @endforelse
+                    </div>
+
+                    <div class="notif-footer">
+                        <a href="{{ route('notifikasi.index') }}">Lihat Semua Notifikasi &rarr;</a>
+                    </div>
+                </div>
+            </div>
+            @endauth
 
             @auth
             <div style="display:flex;align-items:center;gap:10px;padding:4px 12px;border:1px solid var(--border);border-radius:var(--radius);">
@@ -1059,6 +1316,36 @@
             flashAlert.style.opacity = '0';
             setTimeout(() => flashAlert.remove(), 400);
         }, 4000);
+    }
+
+    // Toggle notification dropdown
+    const notifBtn = document.getElementById('topbar-notif-btn');
+    const notifDropdown = document.getElementById('topbar-notif-dropdown');
+
+    if (notifBtn && notifDropdown) {
+        notifBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = notifDropdown.style.display === 'block';
+            notifDropdown.style.display = isOpen ? 'none' : 'block';
+            notifBtn.setAttribute('aria-expanded', !isOpen);
+            if (!isOpen) {
+                lucide.createIcons();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+                notifDropdown.style.display = 'none';
+                notifBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                notifDropdown.style.display = 'none';
+                notifBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
     }
 </script>
 
