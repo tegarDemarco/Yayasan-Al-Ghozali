@@ -17,16 +17,50 @@
 </div>
 
 <div class="card">
-    <form method="GET">
+    <form method="GET" action="{{ route('jadwal-mengajar.index') }}" autocomplete="off">
         <div class="filter-bar">
+            <div class="search-box">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                <input type="text" name="search" class="form-control" placeholder="Cari mapel / kelas / guru..." value="{{ request('search') }}" autocomplete="off">
+            </div>
+
             <select name="hari" class="form-control" style="width:auto;">
                 <option value="">Semua Hari</option>
                 @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'] as $hari)
                 <option value="{{ $hari }}" {{ request('hari') === $hari ? 'selected' : '' }}>{{ $hari }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="btn btn-secondary">Filter</button>
-            @if(request()->filled('hari'))
+
+            @if(!auth()->user()->isGuru() && $gurus->isNotEmpty())
+            <select name="guru_id" class="form-control" style="width:auto;">
+                <option value="">Semua Guru</option>
+                @foreach($gurus as $g)
+                <option value="{{ $g->id }}" {{ request('guru_id') == $g->id ? 'selected' : '' }}>{{ $g->user->name ?? $g->nip }}</option>
+                @endforeach
+            </select>
+            @endif
+
+            @if(auth()->user()->isPengurusYayasan() && $sekolahs->isNotEmpty())
+            <select name="sekolah_id" class="form-control" style="width:auto;">
+                <option value="">Semua Jenjang</option>
+                @foreach($sekolahs as $s)
+                <option value="{{ $s->id }}" {{ request('sekolah_id') == $s->id ? 'selected' : '' }}>{{ $s->jenjang }} - {{ $s->nama_sekolah }}</option>
+                @endforeach
+            </select>
+            @endif
+
+            <select name="semester" class="form-control" style="width:auto;">
+                <option value="">Semua Semester</option>
+                <option value="Ganjil" {{ request('semester') === 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
+                <option value="Genap" {{ request('semester') === 'Genap' ? 'selected' : '' }}>Genap</option>
+            </select>
+
+            <button type="submit" class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" /></svg>
+                Filter
+            </button>
+
+            @if(request()->anyFilled(['search', 'hari', 'guru_id', 'sekolah_id', 'semester']))
             <a href="{{ route('jadwal-mengajar.index') }}" class="btn btn-secondary">Reset</a>
             @endif
         </div>

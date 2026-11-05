@@ -265,6 +265,178 @@
             border: 2px solid #fff;
         }
 
+        .notif-badge {
+            position: absolute;
+            top: -4px; right: -4px;
+            min-width: 18px; height: 18px;
+            padding: 0 4px;
+            background: var(--red);
+            color: #fff;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+            line-height: 1;
+        }
+
+        .notif-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 360px;
+            max-width: 90vw;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 150;
+            overflow: hidden;
+            animation: notifFadeIn 0.15s ease-out;
+        }
+
+        @keyframes notifFadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .notif-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+        }
+
+        .notif-header-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .notif-mark-all {
+            background: none;
+            border: none;
+            font-size: 11.5px;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+
+        .notif-mark-all:hover {
+            background: var(--primary-50);
+            text-decoration: underline;
+        }
+
+        .notif-list {
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+            color: inherit;
+            transition: background var(--transition);
+            position: relative;
+        }
+
+        .notif-item:hover {
+            background: var(--primary-50);
+        }
+
+        .notif-item.unread {
+            background: #f0fdf4;
+        }
+
+        .notif-item.unread::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: var(--primary);
+        }
+
+        .notif-item-icon {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notif-icon-izin { background: #dbeafe; color: var(--blue); }
+        .notif-icon-rpp { background: var(--primary-100); color: var(--primary); }
+        .notif-icon-sk_tugas { background: #ede9fe; color: var(--purple); }
+        .notif-icon-evaluasi { background: var(--accent-light); color: var(--yellow); }
+        .notif-icon-success { background: var(--primary-100); color: var(--primary); }
+        .notif-icon-warning { background: var(--accent-light); color: var(--yellow); }
+        .notif-icon-error { background: #fee2e2; color: var(--red); }
+        .notif-icon-info { background: #e0f2fe; color: #0284c7; }
+
+        .notif-item-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notif-item-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            line-height: 1.3;
+        }
+
+        .notif-item-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .notif-item-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .notif-footer {
+            padding: 10px 16px;
+            text-align: center;
+            background: #f8fafc;
+            border-top: 1px solid var(--border);
+        }
+
+        .notif-footer a {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .notif-footer a:hover {
+            text-decoration: underline;
+        }
+
         .topbar-profile {
             display: flex;
             align-items: center;
@@ -646,15 +818,183 @@
             max-width: 320px;
         }
 
-        .search-box svg {
+        .search-box svg.search-icon,
+        .search-box > svg {
             position: absolute;
             left: 12px; top: 50%;
             transform: translateY(-50%);
             width: 16px; height: 16px;
             color: var(--text-muted);
+            pointer-events: none;
+            z-index: 2;
         }
 
-        .search-box .form-control { padding-left: 38px; }
+        .search-box .form-control {
+            padding-left: 38px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .search-history-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            min-width: 290px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+            z-index: 120;
+            overflow: hidden;
+            animation: searchDropdownFade 0.15s ease-out;
+            display: none;
+        }
+
+        @keyframes searchDropdownFade {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .search-history-clear-all {
+            background: none;
+            border: none;
+            font-size: 11px;
+            color: var(--red);
+            cursor: pointer;
+            font-weight: 600;
+            padding: 2px 4px;
+            border-radius: 4px;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .search-history-clear-all:hover {
+            background: #fee2e2;
+            text-decoration: underline;
+        }
+
+        .search-history-list {
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 4px 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .search-history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: background var(--transition);
+        }
+
+        .search-history-item:hover {
+            background: var(--primary-50);
+            color: var(--primary-dark);
+        }
+
+        .search-history-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .search-history-text svg {
+            width: 14px;
+            height: 14px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .search-history-remove {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+        }
+
+        .search-history-remove:hover {
+            background: #fee2e2;
+            color: var(--red);
+        }
+
+        .search-history-empty {
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 12.5px;
+            color: var(--text-muted);
+        }
+
+        .search-history-suggestions {
+            padding: 10px 12px 12px;
+            border-top: 1px dashed var(--border);
+            background: #fafafa;
+        }
+
+        .search-history-suggestions-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .search-suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .search-suggestion-chip {
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-weight: 500;
+        }
+
+        .search-suggestion-chip:hover {
+            background: var(--primary-50);
+            border-color: var(--primary-200);
+            color: var(--primary);
+        }
 
         /* ===== PAGE HEADER ===== */
         .page-header {
@@ -856,6 +1196,21 @@
         </a>
 
         @auth
+        <a href="{{ route('notifikasi.index') }}" class="nav-item {{ request()->routeIs('notifikasi.*') ? 'active' : '' }}" id="nav-notifikasi">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+            <span style="flex:1;">Notifikasi</span>
+            @php
+                $sidebarUnread = auth()->user()->unreadNotifications()->count();
+            @endphp
+            @if($sidebarUnread > 0)
+                <span class="badge" style="background:var(--red);color:#fff;font-size:10.5px;padding:1px 6px;margin-left:auto;border-radius:10px;">
+                    {{ $sidebarUnread > 99 ? '99+' : $sidebarUnread }}
+                </span>
+            @endif
+        </a>
+        @endauth
+
+        @auth
             @if(auth()->user()->isGuru() || auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah())
             <div class="sidebar-section">Akademik</div>
 
@@ -866,7 +1221,11 @@
 
             <a href="{{ route('presensi.index') }}" class="nav-item {{ request()->routeIs('presensi.*') ? 'active' : '' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Presensi
+                @if(auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah())
+                    Lihat Presensi Guru
+                @else
+                    Presensi
+                @endif
             </a>
 
             <a href="{{ route('jurnal.index') }}" class="nav-item {{ request()->routeIs('jurnal.*') ? 'active' : '' }}">
@@ -901,11 +1260,13 @@
             </a>
             @endif
 
+            @if(auth()->user()->isGuru())
             {{-- SK Tugas: guru hanya bisa lihat miliknya sendiri --}}
             <a href="{{ route('sk-tugas.index') }}" class="nav-item {{ request()->routeIs('sk-tugas.*') ? 'active' : '' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z" /></svg>
                 SK Tugas
             </a>
+            @endif
 
             @if(auth()->user()->isGuru())
             <a href="{{ route('evaluasi-kinerja.index') }}" class="nav-item {{ request()->routeIs('evaluasi-kinerja.*') ? 'active' : '' }}">
@@ -989,10 +1350,80 @@
         <div class="topbar-title">@yield('page-title', 'Dashboard')</div>
 
         <div class="topbar-actions">
-            <button class="topbar-btn" title="Notifikasi" id="topbar-notif-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
-                <span class="notif-dot"></span>
-            </button>
+            @auth
+            <div class="notif-wrapper" style="position: relative;" id="notif-wrapper">
+                <button class="topbar-btn" title="Notifikasi" id="topbar-notif-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+                    @php
+                        $unreadTopCount = auth()->user()->unreadNotifications()->count();
+                    @endphp
+                    @if($unreadTopCount > 0)
+                        <span class="notif-badge" id="topbar-notif-badge">{{ $unreadTopCount > 99 ? '99+' : $unreadTopCount }}</span>
+                    @endif
+                </button>
+
+                <!-- Dropdown Content -->
+                <div class="notif-dropdown" id="topbar-notif-dropdown" style="display: none;">
+                    <div class="notif-header">
+                        <div class="notif-header-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+                            <span>Notifikasi</span>
+                            @if($unreadTopCount > 0)
+                                <span class="badge" style="background:#dcfce7;color:#15803d;font-size:10.5px;padding:1px 6px;">{{ $unreadTopCount }} baru</span>
+                            @endif
+                        </div>
+                        @if($unreadTopCount > 0)
+                        <form method="POST" action="{{ route('notifikasi.mark-all-read') }}" style="margin: 0;">
+                            @csrf
+                            <button type="submit" class="notif-mark-all" title="Tandai semua sudah dibaca">
+                                Tandai dibaca
+                            </button>
+                        </form>
+                        @endif
+                    </div>
+
+                    <div class="notif-list">
+                        @php
+                            $recentNotifications = auth()->user()->notifications()->take(5)->get();
+                        @endphp
+
+                        @forelse($recentNotifications as $notif)
+                            @php
+                                $notifData = $notif->data;
+                                $isItemUnread = is_null($notif->read_at);
+                                $iconName = $notifData['icon'] ?? 'bell';
+                                $itemType = $notifData['type'] ?? 'info';
+                            @endphp
+                            <a href="{{ route('notifikasi.read-and-redirect', $notif->id) }}" class="notif-item {{ $isItemUnread ? 'unread' : '' }}">
+                                <div class="notif-item-icon notif-icon-{{ $itemType }}">
+                                    <i data-lucide="{{ $iconName }}" style="width: 16px; height: 16px;"></i>
+                                </div>
+                                <div class="notif-item-body">
+                                    <div class="notif-item-title">{{ $notifData['title'] ?? 'Pemberitahuan' }}</div>
+                                    <div class="notif-item-desc">{{ $notifData['message'] ?? '' }}</div>
+                                    <div class="notif-item-time">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        {{ $notif->created_at->diffForHumans() }}
+                                    </div>
+                                </div>
+                                @if($isItemUnread)
+                                    <span class="status-dot green" title="Belum dibaca" style="margin-left:4px;margin-top:4px;"></span>
+                                @endif
+                            </a>
+                        @empty
+                            <div style="padding: 32px 16px; text-align: center; color: var(--text-muted);">
+                                <i data-lucide="bell-off" style="width: 32px; height: 32px; margin: 0 auto 8px; display: block; opacity: 0.5;"></i>
+                                <p style="font-size: 13px; font-weight: 500;">Tidak ada notifikasi baru</p>
+                            </div>
+                        @endforelse
+                    </div>
+
+                    <div class="notif-footer">
+                        <a href="{{ route('notifikasi.index') }}">Lihat Semua Notifikasi &rarr;</a>
+                    </div>
+                </div>
+            </div>
+            @endauth
 
             @auth
             <div style="display:flex;align-items:center;gap:10px;padding:4px 12px;border:1px solid var(--border);border-radius:var(--radius);">
@@ -1060,6 +1491,228 @@
             setTimeout(() => flashAlert.remove(), 400);
         }, 4000);
     }
+
+    // Toggle notification dropdown
+    const notifBtn = document.getElementById('topbar-notif-btn');
+    const notifDropdown = document.getElementById('topbar-notif-dropdown');
+
+    if (notifBtn && notifDropdown) {
+        notifBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = notifDropdown.style.display === 'block';
+            notifDropdown.style.display = isOpen ? 'none' : 'block';
+            notifBtn.setAttribute('aria-expanded', !isOpen);
+            if (!isOpen) {
+                lucide.createIcons();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+                notifDropdown.style.display = 'none';
+                notifBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                notifDropdown.style.display = 'none';
+                notifBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    // ===== Search History & Recommendations System =====
+    (function initSearchHistory() {
+        const searchBoxes = document.querySelectorAll('.search-box');
+        if (!searchBoxes.length) return;
+
+        const path = window.location.pathname;
+        let contextKey = 'general';
+        let defaultSuggestions = ['Matematika', 'IPA', 'Kelas IV'];
+
+        if (path.includes('guru')) {
+            contextKey = 'guru';
+            defaultSuggestions = ['Matematika', 'IPA', 'Bahasa Indonesia', 'Brebes', 'PNS', 'GTY'];
+        } else if (path.includes('jadwal-mengajar')) {
+            contextKey = 'jadwal';
+            defaultSuggestions = ['Matematika', 'Kelas IV-A', 'Fisika', 'Ruang 1', 'Ganjil'];
+        } else if (path.includes('rpp')) {
+            contextKey = 'rpp';
+            defaultSuggestions = ['RPP Matematika', 'Modul Ajar', 'Kelas VII', 'Semester Ganjil'];
+        }
+
+        const storageKey = 'yayasan_search_history_' + contextKey;
+
+        function getHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(storageKey)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveHistory(item) {
+            if (!item || !item.trim()) return;
+            const text = item.trim();
+            let history = getHistory().filter(h => h.toLowerCase() !== text.toLowerCase());
+            history.unshift(text);
+            if (history.length > 8) history = history.slice(0, 8);
+            localStorage.setItem(storageKey, JSON.stringify(history));
+        }
+
+        function removeHistoryItem(textToRemove) {
+            let history = getHistory().filter(h => h !== textToRemove);
+            localStorage.setItem(storageKey, JSON.stringify(history));
+        }
+
+        function clearAllHistory() {
+            localStorage.removeItem(storageKey);
+        }
+
+        searchBoxes.forEach(box => {
+            const input = box.querySelector('input[name="search"]');
+            if (!input) return;
+
+            input.setAttribute('autocomplete', 'off');
+
+            if (input.value && input.value.trim()) {
+                saveHistory(input.value.trim());
+            }
+
+            const form = input.closest('form');
+            if (form) {
+                form.setAttribute('autocomplete', 'off');
+                form.addEventListener('submit', () => {
+                    if (input.value && input.value.trim()) {
+                        saveHistory(input.value.trim());
+                    }
+                });
+            }
+
+            const dropdown = document.createElement('div');
+            dropdown.className = 'search-history-dropdown';
+            box.appendChild(dropdown);
+
+            function renderDropdown(filterText = '') {
+                const history = getHistory();
+                const q = filterText.toLowerCase().trim();
+                const filtered = q ? history.filter(h => h.toLowerCase().includes(q)) : history;
+
+                let html = '';
+
+                if (history.length > 0) {
+                    html += `
+                        <div class="search-history-header">
+                            <span>Riwayat Pencarian</span>
+                            <button type="button" class="search-history-clear-all" data-action="clear-all">Hapus Semua</button>
+                        </div>
+                    `;
+
+                    if (filtered.length > 0) {
+                        html += '<ul class="search-history-list">';
+                        filtered.forEach(term => {
+                            const escapedTerm = term.replace(/"/g, '&quot;');
+                            html += `
+                                <li class="search-history-item" data-value="${escapedTerm}">
+                                    <span class="search-history-text">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>${term}</span>
+                                    </span>
+                                    <button type="button" class="search-history-remove" title="Hapus dari riwayat" data-remove="${escapedTerm}">&times;</button>
+                                </li>
+                            `;
+                        });
+                        html += '</ul>';
+                    } else {
+                        html += '<div class="search-history-empty">Tidak ada riwayat yang cocok</div>';
+                    }
+                } else {
+                    html += '<div class="search-history-empty">Belum ada riwayat pencarian</div>';
+                }
+
+                if (defaultSuggestions && defaultSuggestions.length > 0) {
+                    html += `
+                        <div class="search-history-suggestions">
+                            <div class="search-history-suggestions-title">Rekomendasi Pencarian</div>
+                            <div class="search-suggestion-chips">
+                                ${defaultSuggestions.map(s => `<span class="search-suggestion-chip" data-value="${s}">${s}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                dropdown.innerHTML = html;
+
+                const clearBtn = dropdown.querySelector('[data-action="clear-all"]');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        clearAllHistory();
+                        renderDropdown(input.value);
+                    });
+                }
+
+                dropdown.querySelectorAll('.search-history-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        if (e.target.closest('.search-history-remove')) return;
+                        const val = item.getAttribute('data-value');
+                        input.value = val;
+                        dropdown.style.display = 'none';
+                        if (form) form.submit();
+                    });
+                });
+
+                dropdown.querySelectorAll('.search-history-remove').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const val = btn.getAttribute('data-remove');
+                        removeHistoryItem(val);
+                        renderDropdown(input.value);
+                    });
+                });
+
+                dropdown.querySelectorAll('.search-suggestion-chip').forEach(chip => {
+                    chip.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const val = chip.getAttribute('data-value');
+                        input.value = val;
+                        dropdown.style.display = 'none';
+                        if (form) form.submit();
+                    });
+                });
+            }
+
+            input.addEventListener('focus', () => {
+                renderDropdown(input.value);
+                dropdown.style.display = 'block';
+            });
+
+            input.addEventListener('click', () => {
+                renderDropdown(input.value);
+                dropdown.style.display = 'block';
+            });
+
+            input.addEventListener('input', () => {
+                renderDropdown(input.value);
+                dropdown.style.display = 'block';
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!box.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    dropdown.style.display = 'none';
+                }
+            });
+        });
+    })();
 </script>
 
 @stack('scripts')

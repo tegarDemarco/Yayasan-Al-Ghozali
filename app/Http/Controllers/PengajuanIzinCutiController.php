@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Guru;
 use App\Models\PengajuanIzinCuti;
 use App\Models\Sekolah;
+use App\Models\User;
+use App\Notifications\AppNotification;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -56,11 +59,11 @@ class PengajuanIzinCutiController extends Controller
             $lampiranPath = $request->file('lampiran')->store('lampiran-izin', 'public');
         }
 
-        $mulai = \Carbon\Carbon::parse($validated['tanggal_mulai']);
-        $selesai = \Carbon\Carbon::parse($validated['tanggal_selesai']);
+        $mulai = Carbon::parse($validated['tanggal_mulai']);
+        $selesai = Carbon::parse($validated['tanggal_selesai']);
         $jumlahHari = $mulai->diffInDays($selesai) + 1;
 
-        PengajuanIzinCuti::create([
+        $pengajuan = PengajuanIzinCuti::create([
             'guru_id' => $guru->id,
             'sekolah_id' => $guru->sekolah_id,
             'jenis_pengajuan' => $validated['jenis_pengajuan'],
@@ -70,6 +73,21 @@ class PengajuanIzinCutiController extends Controller
             'alasan' => $validated['alasan'],
             'lampiran' => $lampiranPath,
         ]);
+
+        $approvers = User::where('sekolah_id', $guru->sekolah_id)
+            ->whereIn('role', ['kepala_sekolah', 'admin_sekolah'])
+            ->get();
+
+        foreach ($approvers as $approver) {
+            $approver->notify(new AppNotification(
+                title: 'Pengajuan Izin/Cuti Baru',
+                message: "{$user->name} mengajukan {$validated['jenis_pengajuan']} ({$validated['tanggal_mulai']} s.d {$validated['tanggal_selesai']}).",
+                url: route('pengajuan-izin.index'),
+                type: 'izin',
+                icon: 'calendar',
+                senderName: $user->name,
+            ));
+        }
 
         return redirect()->route('pengajuan-izin.index')->with('success', 'Pengajuan berhasil dikirim. Menunggu persetujuan.');
     }
@@ -87,6 +105,19 @@ class PengajuanIzinCutiController extends Controller
             'disetujui_oleh' => auth()->id(),
             'disetujui_at' => now(),
         ]);
+
+        $guruUser = $pengajuanIzinCuti->guru?->user;
+        if ($guruUser) {
+            $statusText = $request->status_approval === 'disetujui' ? 'disetujui' : 'ditolak';
+            $guruUser->notify(new AppNotification(
+                title: 'Pengajuan Izin/Cuti '.ucfirst($statusText),
+                message: "Pengajuan {$pengajuanIzinCuti->jenis_pengajuan} Anda telah {$statusText}".($request->catatan_approval ? ": \"{$request->catatan_approval}\"" : '.'),
+                url: route('pengajuan-izin.index'),
+                type: $request->status_approval === 'disetujui' ? 'success' : 'warning',
+                icon: $request->status_approval === 'disetujui' ? 'check-circle' : 'x-circle',
+                senderName: auth()->user()->name,
+            ));
+        }
 
         $pesan = $request->status_approval === 'disetujui'
             ? 'Pengajuan berhasil disetujui.'

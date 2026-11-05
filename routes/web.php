@@ -7,8 +7,9 @@ use App\Http\Controllers\EvaluasiKinerjaController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\JadwalMengajarController;
 use App\Http\Controllers\JurnalMengajarController;
-use App\Http\Controllers\PenilaianController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PengajuanIzinCutiController;
+use App\Http\Controllers\PenilaianController;
 use App\Http\Controllers\PresensiGuruController;
 use App\Http\Controllers\RekapBebanMengajarController;
 use App\Http\Controllers\RppModulAjarController;
@@ -81,4 +82,12 @@ Route::middleware('auth')->group(function () {
     // Evaluasi Kinerja
     Route::resource('evaluasi-kinerja', EvaluasiKinerjaController::class)->except(['edit', 'update'])
         ->middleware('role:pengurus_yayasan,kepala_sekolah,guru');
+
+    // Notifikasi
+    Route::get('notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::get('notifikasi/data', [NotifikasiController::class, 'unreadData'])->name('notifikasi.data');
+    Route::get('notifikasi/{id}/baca', [NotifikasiController::class, 'readAndRedirect'])->name('notifikasi.read-and-redirect');
+    Route::post('notifikasi/{id}/mark-as-read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.mark-as-read');
+    Route::post('notifikasi/mark-all-read', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.mark-all-read');
+    Route::delete('notifikasi/{id}', [NotifikasiController::class, 'destroy'])->name('notifikasi.destroy');
 });

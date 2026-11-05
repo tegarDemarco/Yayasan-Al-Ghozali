@@ -28,11 +28,48 @@ class JadwalMengajarController extends Controller
             $query->where('hari', $request->hari);
         }
 
-        $jadwals = $query->orderByRaw("FIELD(hari, 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu')")
+        if (! $user->isGuru() && $request->filled('guru_id')) {
+            $query->where('guru_id', $request->guru_id);
+        }
+
+        if ($user->isPengurusYayasan() && $request->filled('sekolah_id')) {
+            $query->where('sekolah_id', $request->sekolah_id);
+        }
+
+        if ($request->filled('semester')) {
+            $query->where('semester', $request->semester);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('mata_pelajaran', 'like', "%{$search}%")
+                    ->orWhere('kelas', 'like', "%{$search}%")
+                    ->orWhere('ruangan', 'like', "%{$search}%")
+                    ->orWhereHas('guru.user', fn ($g) => $g->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        $caseHari = "CASE hari
+            WHEN 'Senin' THEN 1
+            WHEN 'Selasa' THEN 2
+            WHEN 'Rabu' THEN 3
+            WHEN 'Kamis' THEN 4
+            WHEN 'Jumat' THEN 5
+            WHEN 'Sabtu' THEN 6
+            ELSE 7 END";
+
+        $jadwals = $query->orderByRaw($caseHari)
             ->orderBy('jam_mulai')->paginate(15)->withQueryString();
 
-        $gurus = $user->isPengurusYayasan() || $user->isAdminSekolah() || $user->isKepalaSekolah()
-            ? Guru::with('user')->where('status', 'aktif')->get()
+        $guruQuery = Guru::with('user')->where('status', 'aktif');
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $guruQuery->where('sekolah_id', $sekolahId);
+        }
+
+        $gurus = ($user->isPengurusYayasan() || $user->isAdminSekolah() || $user->isKepalaSekolah())
+            ? $guruQuery->get()
             : collect();
 
         $sekolahs = Sekolah::all();

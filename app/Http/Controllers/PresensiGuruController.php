@@ -42,12 +42,12 @@ class PresensiGuruController extends Controller
     public function create(): View
     {
         $user = auth()->user();
-        $gurus = Guru::with('user')->where('status', 'aktif')->get();
 
         if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
-            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
-            $gurus = $gurus->where('sekolah_id', $sekolahId);
+            abort(403, 'Kepala Sekolah tidak diizinkan menambah presensi.');
         }
+
+        $gurus = Guru::with('user')->where('status', 'aktif')->get();
 
         return view('presensi.create', compact('gurus'));
     }
@@ -55,6 +55,14 @@ class PresensiGuruController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $user = auth()->user();
+
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            abort(403, 'Kepala Sekolah tidak diizinkan menambah presensi.');
+        }
+
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            abort(403, 'Kepala Sekolah tidak diizinkan menambah presensi.');
+        }
 
         if ($user->isGuru()) {
             $guru = Guru::where('user_id', $user->id)->firstOrFail();
@@ -91,6 +99,12 @@ class PresensiGuruController extends Controller
 
     public function destroy(PresensiGuru $presensi): RedirectResponse
     {
+        $user = auth()->user();
+
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            abort(403, 'Kepala Sekolah tidak diizinkan menghapus presensi.');
+        }
+
         $presensi->delete();
 
         return redirect()->route('presensi.index')->with('success', 'Data presensi berhasil dihapus.');

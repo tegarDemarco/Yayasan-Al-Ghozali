@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Guru;
 use App\Models\Sekolah;
 use App\Models\SkTugas;
+use App\Notifications\AppNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class SkTugasController extends Controller
@@ -61,12 +63,23 @@ class SkTugasController extends Controller
             $filePath = $request->file('file')->store('sk-tugas', 'public');
         }
 
-        SkTugas::create([
+        $skTugas = SkTugas::create([
             ...$validated,
             'sekolah_id' => $guru->sekolah_id,
             'file_path' => $filePath,
             'diterbitkan_oleh' => $user->id,
         ]);
+
+        if ($guru->user) {
+            $guru->user->notify(new AppNotification(
+                title: 'SK Tugas Baru Diterbitkan',
+                message: "SK No. {$validated['no_sk']} \"{$validated['judul_sk']}\" telah diterbitkan untuk Anda.",
+                url: route('sk-tugas.show', $skTugas->id),
+                type: 'sk_tugas',
+                icon: 'award',
+                senderName: $user->name,
+            ));
+        }
 
         return redirect()->route('sk-tugas.index')->with('success', 'SK Tugas berhasil diterbitkan.');
     }
@@ -81,7 +94,7 @@ class SkTugasController extends Controller
     public function destroy(SkTugas $skTugas): RedirectResponse
     {
         if ($skTugas->file_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($skTugas->file_path);
+            Storage::disk('public')->delete($skTugas->file_path);
         }
         $skTugas->delete();
 

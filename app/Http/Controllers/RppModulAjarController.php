@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Guru;
 use App\Models\RppModulAjar;
 use App\Models\Sekolah;
+use App\Models\User;
+use App\Notifications\AppNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class RppModulAjarController extends Controller
@@ -32,9 +35,35 @@ class RppModulAjarController extends Controller
             $query->where('tipe', $request->tipe);
         }
 
+        if (! $user->isGuru() && $request->filled('guru_id')) {
+            $query->where('guru_id', $request->guru_id);
+        }
+
+        if ($request->filled('semester')) {
+            $query->where('semester', $request->semester);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                    ->orWhere('mata_pelajaran', 'like', "%{$search}%")
+                    ->orWhere('kelas', 'like', "%{$search}%")
+                    ->orWhereHas('guru.user', fn ($g) => $g->where('name', 'like', "%{$search}%"));
+            });
+        }
+
         $rpps = $query->latest()->paginate(10)->withQueryString();
 
-        return view('rpp.index', compact('rpps'));
+        $guruQuery = Guru::with('user')->where('status', 'aktif');
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $guruQuery->where('sekolah_id', $sekolahId);
+        }
+
+        $gurus = ! $user->isGuru() ? $guruQuery->get() : collect();
+
+        return view('rpp.index', compact('rpps', 'gurus'));
     }
 
     public function create(): View
@@ -63,7 +92,7 @@ class RppModulAjarController extends Controller
 
         $filePath = $request->file('file')->store('rpp-modul', 'public');
 
-        RppModulAjar::create([
+        $rpp = RppModulAjar::create([
             'guru_id' => $guru->id,
             'sekolah_id' => $guru->sekolah_id,
             'judul' => $validated['judul'],
@@ -75,6 +104,21 @@ class RppModulAjarController extends Controller
             'tipe' => $validated['tipe'],
             'file_path' => $filePath,
         ]);
+
+        $kepsekAndAdmins = User::where('sekolah_id', $guru->sekolah_id)
+            ->whereIn('role', ['kepala_sekolah', 'admin_sekolah'])
+            ->get();
+
+        foreach ($kepsekAndAdmins as $receiver) {
+            $receiver->notify(new AppNotification(
+                title: 'RPP / Modul Ajar Baru Diunggah',
+                message: "{$user->name} mengunggah {$validated['tipe']} \"{$validated['judul']}\" untuk mapel {$validated['mata_pelajaran']}.",
+                url: route('rpp.index'),
+                type: 'rpp',
+                icon: 'file-text',
+                senderName: $user->name,
+            ));
+        }
 
         return redirect()->route('rpp.index')->with('success', 'RPP/Modul Ajar berhasil diunggah. Menunggu validasi.');
     }
@@ -93,6 +137,19 @@ class RppModulAjarController extends Controller
             'divalidasi_at' => now(),
         ]);
 
+        $guruUser = $rppModulAjar->guru?->user;
+        if ($guruUser) {
+            $statusText = $request->status_validasi === 'disetujui' ? 'disetujui' : 'ditolak';
+            $guruUser->notify(new AppNotification(
+                title: 'Validasi RPP/Modul Ajar: '.ucfirst($statusText),
+                message: "Dokumen {$rppModulAjar->tipe} \"{$rppModulAjar->judul}\" telah {$statusText} oleh Kepala Sekolah.",
+                url: route('rpp.index'),
+                type: $request->status_validasi === 'disetujui' ? 'success' : 'warning',
+                icon: $request->status_validasi === 'disetujui' ? 'check-circle' : 'x-circle',
+                senderName: auth()->user()->name,
+            ));
+        }
+
         $pesan = $request->status_validasi === 'disetujui'
             ? 'RPP/Modul Ajar berhasil divalidasi.'
             : 'RPP/Modul Ajar ditolak.';
@@ -103,7 +160,7 @@ class RppModulAjarController extends Controller
     public function destroy(RppModulAjar $rppModulAjar): RedirectResponse
     {
         if ($rppModulAjar->file_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($rppModulAjar->file_path);
+            Storage::disk('public')->delete($rppModulAjar->file_path);
         }
 
         $rppModulAjar->delete();

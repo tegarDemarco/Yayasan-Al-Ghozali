@@ -10,7 +10,6 @@ use App\Models\RppModulAjar;
 use App\Models\Sekolah;
 use App\Models\SkTugas;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -94,7 +93,15 @@ class DashboardController extends Controller
     {
         $guru = Guru::where('user_id', $user->id)->with('sekolah')->first();
         if (! $guru) {
-            return ['guru' => null];
+            return [
+                'guru' => null,
+                'jadwalHariIni' => collect(),
+                'presensiHariIni' => null,
+                'jurnalBulanIni' => 0,
+                'penilaianMenunggu' => 0,
+                'pengajuanMenunggu' => 0,
+                'pengumuman' => collect(),
+            ];
         }
 
         $today = Carbon::today();
