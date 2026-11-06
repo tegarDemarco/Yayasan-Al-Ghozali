@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Sistem Informasi') – Yayasan Al-Ghozaly</title>
-    <meta name="description" content="Sistem Informasi Manajemen Guru Yayasan Al-Ghozaly – SD, MTs, SMK">
+    <title>@yield('title', 'Sistem Akademik') – Yayasan Al Ghozaly</title>
+    <meta name="description" content="Sistem Informasi Akademik Yayasan Al Ghozaly – SD, MTs, dan SMK">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -20,183 +20,352 @@
 
     <style>
         :root {
-            --primary: #16a34a;
-            --primary-dark: #15803d;
-            --primary-light: #22c55e;
-            --primary-50: #f0fdf4;
-            --primary-100: #dcfce7;
-            --primary-200: #bbf7d0;
-            --secondary: #064e3b;
-            --accent: #f59e0b;
-            --accent-light: #fef3c7;
-            --sidebar-bg: #0f2419;
-            --sidebar-hover: #1a3a2a;
-            --sidebar-active: #16a34a;
-            --sidebar-text: #9ca3af;
-            --sidebar-text-active: #ffffff;
-            --body-bg: #f8fafc;
+            /* Forest Green Palette (from Wireframes) */
+            --forest-950: #091a14;
+            --forest-900: #0f2821;
+            --forest-850: #12332a;
+            --forest-800: #153e32;
+            --forest-750: #1a483a;
+            --forest-700: #205847;
+            --forest-600: #2b705b;
+            --forest-500: #388d74;
+            --forest-100: #dcf2ea;
+            --forest-50:  #eef7f3;
+
+            /* Surface & Canvas */
+            --canvas-bg: #f4f7f5;
             --card-bg: #ffffff;
-            --border: #e2e8f0;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --text-muted: #94a3b8;
-            --red: #ef4444;
-            --yellow: #f59e0b;
-            --blue: #3b82f6;
-            --purple: #8b5cf6;
-            --radius: 12px;
-            --radius-sm: 8px;
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --sidebar-width: 260px;
-            --header-height: 64px;
-            --transition: 0.2s ease;
+            --card-border: #e8edea;
+            --card-hover-border: #cfe0d8;
+
+            /* Text Colors */
+            --text-heading: #111827;
+            --text-body: #374151;
+            --text-muted: #6b7280;
+            --text-subtle: #9ca3af;
+
+            /* Accents */
+            --status-green-bg: #dcfce7;
+            --status-green-text: #15803d;
+            --status-green-dot: #16a34a;
+
+            --status-amber-bg: #fef3c7;
+            --status-amber-text: #b45309;
+            --status-amber-dot: #d97706;
+
+            --status-red-bg: #fee2e2;
+            --status-red-text: #b91c1c;
+            --status-red-dot: #ef4444;
+
+            --status-blue-bg: #e0f2fe;
+            --status-blue-text: #0369a1;
+            --status-blue-dot: #0284c7;
+
+            /* Layout Measurements */
+            --sidebar-width: 256px;
+            --topbar-height: 64px;
+            --radius-xl: 18px;
+            --radius-lg: 14px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --radius-pill: 9999px;
+            --shadow-subtle: 0 1px 3px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.02);
+            --shadow-card: 0 2px 6px -1px rgba(0,0,0,0.04), 0 1px 4px -1px rgba(0,0,0,0.02);
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        html { font-size: 15px; scroll-behavior: smooth; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--body-bg);
-            color: var(--text-primary);
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--canvas-bg);
+            color: var(--text-body);
             line-height: 1.5;
-            overflow-x: hidden;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* ===== SIDEBAR ===== */
-        .sidebar {
+        .app-sidebar {
             position: fixed;
-            top: 0; left: 0;
+            top: 0;
+            left: 0;
+            bottom: 0;
             width: var(--sidebar-width);
-            height: 100vh;
-            background: var(--sidebar-bg);
+            background-color: var(--forest-900);
             display: flex;
             flex-direction: column;
             z-index: 100;
-            transition: transform var(--transition);
             overflow-y: auto;
             overflow-x: hidden;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
         }
 
-        .sidebar::-webkit-scrollbar { width: 4px; }
-        .sidebar::-webkit-scrollbar-track { background: transparent; }
-        .sidebar::-webkit-scrollbar-thumb { background: var(--sidebar-hover); border-radius: 2px; }
+        .app-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .app-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
 
-        .sidebar-brand {
-            padding: 20px 20px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+        /* Sidebar Brand */
+        .sidebar-brand-wrapper {
+            padding: 24px 20px 16px;
             display: flex;
             align-items: center;
             gap: 12px;
             text-decoration: none;
         }
 
-        .sidebar-brand-icon {
-            width: 42px; height: 42px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        .brand-ag-badge {
+            width: 38px;
+            height: 38px;
             border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
+            border: 1.5px solid rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 14px;
+            letter-spacing: 0.5px;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+            background: rgba(255, 255, 255, 0.03);
         }
 
-        .sidebar-brand-text { flex: 1; min-width: 0; }
-        .sidebar-brand-name {
-            font-size: 14px; font-weight: 700; color: #fff;
-            line-height: 1.2;
+        .brand-text-col {
+            display: flex;
+            flex-direction: column;
         }
-        .sidebar-brand-sub {
-            font-size: 11px; color: var(--sidebar-text);
+
+        .brand-main-title {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.2px;
+        }
+
+        .brand-sub-caption {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 9.5px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
             margin-top: 2px;
         }
 
-        .sidebar-section {
-            padding: 16px 12px 8px;
-            font-size: 10px; font-weight: 600;
-            color: rgba(255,255,255,0.25);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        .sidebar-nav { flex: 1; padding: 8px 12px; }
-
-        .nav-item {
+        /* Unit Active Card in Sidebar */
+        .sidebar-unit-box {
+            margin: 6px 14px 16px;
+            padding: 10px 12px;
+            background: var(--forest-850);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 10px 12px;
-            border-radius: var(--radius-sm);
+        }
+
+        .unit-indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #22c55e;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+            flex-shrink: 0;
+        }
+
+        .unit-info-content {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .unit-info-name {
+            color: #ffffff;
+            font-size: 12.5px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .unit-info-desc {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Menu Section Header */
+        .sidebar-menu-header {
+            padding: 8px 18px 6px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.9px;
+            text-transform: uppercase;
+        }
+
+        /* Sidebar Nav */
+        .sidebar-nav-container {
+            flex: 1;
+            padding: 4px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 14px;
+            border-radius: var(--radius-md);
+            color: rgba(255, 255, 255, 0.65);
             text-decoration: none;
-            color: var(--sidebar-text);
-            font-size: 13.5px;
+            font-size: 13px;
             font-weight: 500;
-            transition: all var(--transition);
-            margin-bottom: 2px;
+            transition: all 0.15s ease;
             position: relative;
         }
 
-        .nav-item:hover {
-            background: var(--sidebar-hover);
-            color: #fff;
+        .sidebar-link:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
         }
 
-        .nav-item.active {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(22,163,74,0.3);
-        }
-
-        .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
-
-        .nav-badge {
-            margin-left: auto;
-            background: var(--red);
-            color: #fff;
-            font-size: 10px;
+        .sidebar-link.active {
+            background-color: var(--forest-750);
+            color: #ffffff;
             font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-link i,
+        .sidebar-link svg {
+            width: 17px;
+            height: 17px;
+            flex-shrink: 0;
+            color: currentColor;
+            opacity: 0.85;
+        }
+
+        .sidebar-link.active i,
+        .sidebar-link.active svg {
+            opacity: 1;
+            color: #4ade80;
+        }
+
+        .sidebar-count-badge {
+            margin-left: auto;
+            background: #2b705b;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 10px;
             min-width: 18px;
             text-align: center;
         }
 
-        .sidebar-footer {
-            padding: 12px;
-            border-top: 1px solid rgba(255,255,255,0.06);
+        .sidebar-link.active .sidebar-count-badge {
+            background: #ffffff;
+            color: var(--forest-900);
         }
 
-        .sidebar-user {
+        /* Sidebar Profile & Footer */
+        .sidebar-bottom-area {
+            padding: 16px 14px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-footer-org {
+            font-size: 10.5px;
+            color: rgba(255, 255, 255, 0.4);
+            line-height: 1.4;
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+
+        .sidebar-user-block {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 10px 12px;
-            border-radius: var(--radius-sm);
-            background: rgba(255,255,255,0.05);
+            margin-bottom: 12px;
+            padding: 6px 4px;
         }
 
-        .sidebar-avatar {
-            width: 36px; height: 36px;
+        .user-avatar-circle {
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: 700; color: #fff;
+            background: #1e5241;
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
         }
 
-        .sidebar-user-info { flex: 1; min-width: 0; }
-        .sidebar-user-name {
-            font-size: 13px; font-weight: 600; color: #fff;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        .user-block-details {
+            overflow: hidden;
         }
-        .sidebar-user-role {
-            font-size: 11px; color: var(--sidebar-text); margin-top: 1px;
+
+        .user-block-name {
+            color: #ffffff;
+            font-size: 12.5px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-block-role {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-logout-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: var(--radius-pill);
+            padding: 7px 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 11.5px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .sidebar-logout-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
         }
 
         /* ===== MAIN LAYOUT ===== */
-        .main-wrapper {
+        .app-main {
             margin-left: var(--sidebar-width);
             min-height: 100vh;
             display: flex;
@@ -204,289 +373,973 @@
         }
 
         /* ===== TOPBAR ===== */
-        .topbar {
-            height: var(--header-height);
-            background: #fff;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            padding: 0 24px;
-            gap: 16px;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            box-shadow: 0 1px 0 var(--border);
-        }
-
-        .topbar-toggle {
-            display: none;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-secondary);
-            padding: 6px;
-            border-radius: var(--radius-sm);
-        }
-
-        .topbar-title {
-            flex: 1;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .topbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .topbar-btn {
-            width: 38px; height: 38px;
-            border-radius: var(--radius-sm);
-            background: none;
-            border: 1px solid var(--border);
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--text-secondary);
-            transition: all var(--transition);
-            position: relative;
-        }
-
-        .topbar-btn:hover { background: var(--primary-50); border-color: var(--primary-200); color: var(--primary); }
-        .topbar-btn svg { width: 18px; height: 18px; }
-
-        .notif-dot {
-            position: absolute;
-            top: 6px; right: 6px;
-            width: 8px; height: 8px;
-            background: var(--red);
-            border-radius: 50%;
-            border: 2px solid #fff;
-        }
-
-        .notif-badge {
-            position: absolute;
-            top: -4px; right: -4px;
-            min-width: 18px; height: 18px;
-            padding: 0 4px;
-            background: var(--red);
-            color: #fff;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #fff;
-            line-height: 1;
-        }
-
-        .notif-dropdown {
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            width: 360px;
-            max-width: 90vw;
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
-            z-index: 150;
-            overflow: hidden;
-            animation: notifFadeIn 0.15s ease-out;
-        }
-
-        @keyframes notifFadeIn {
-            from { opacity: 0; transform: translateY(-6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .notif-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
+        .app-topbar {
+            height: var(--topbar-height);
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--card-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: #fff;
+            padding: 0 28px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
         }
 
-        .notif-header-title {
-            font-size: 13.5px;
-            font-weight: 700;
-            color: var(--text-primary);
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .mobile-nav-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-body);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .topbar-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .topbar-breadcrumb-root {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .topbar-breadcrumb-root:hover {
+            color: var(--text-heading);
+        }
+
+        .topbar-breadcrumb-sep {
+            color: var(--text-subtle);
+            font-size: 11px;
+        }
+
+        .topbar-breadcrumb-current {
+            color: var(--text-heading);
+            font-weight: 600;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Topbar Pill Selectors (Peran & Unit) */
+        .topbar-pill-select {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 5px 12px;
             display: flex;
             align-items: center;
             gap: 6px;
-        }
-
-        .notif-mark-all {
-            background: none;
-            border: none;
-            font-size: 11.5px;
-            color: var(--primary);
+            font-size: 12.5px;
             cursor: pointer;
-            font-weight: 600;
-            padding: 3px 6px;
-            border-radius: 4px;
+            transition: border-color 0.15s;
         }
 
-        .notif-mark-all:hover {
-            background: var(--primary-50);
-            text-decoration: underline;
+        .topbar-pill-select:hover {
+            border-color: var(--forest-500);
         }
 
-        .notif-list {
-            max-height: 380px;
+        .topbar-pill-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .topbar-pill-value {
+            color: var(--text-heading);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .topbar-pill-value select {
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            color: var(--text-heading);
+            font-family: inherit;
+            font-size: 12.5px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* Topbar Icon Buttons */
+        .topbar-icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s;
+        }
+
+        .topbar-icon-btn:hover {
+            border-color: var(--forest-500);
+            color: var(--forest-700);
+        }
+
+        .topbar-icon-btn svg,
+        .topbar-icon-btn i {
+            width: 17px;
+            height: 17px;
+        }
+
+        .notif-unread-dot {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            width: 7px;
+            height: 7px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            border: 1.5px solid #ffffff;
+        }
+
+        /* Notification Dropdown */
+        .notif-dropdown-panel {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 340px;
+            max-width: 90vw;
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            z-index: 150;
+            display: none;
+            overflow: hidden;
+        }
+
+        .notif-dropdown-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .notif-dropdown-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        .notif-dropdown-list {
+            max-height: 320px;
             overflow-y: auto;
         }
 
-        .notif-item {
+        .notif-entry-row {
+            padding: 10px 16px;
             display: flex;
+            gap: 10px;
             align-items: flex-start;
-            gap: 12px;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #f3f4f6;
             text-decoration: none;
             color: inherit;
-            transition: background var(--transition);
+            transition: background 0.15s;
+        }
+
+        .notif-entry-row:hover {
+            background-color: var(--forest-50);
+        }
+
+        .notif-entry-row.unread {
+            background-color: #f6fcf8;
+        }
+
+        /* ===== PAGE CONTENT WRAPPER ===== */
+        .page-content-area {
+            flex: 1;
+            padding: 24px 28px 40px;
+            max-width: 1440px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Page Heading & Eyebrow */
+        .page-header-block {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .page-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--forest-700);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 4px;
+        }
+
+        .page-main-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-heading);
+            letter-spacing: -0.3px;
+            line-height: 1.25;
+        }
+
+        .page-sub-caption {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ===== WIREFRAME COMPONENTS ===== */
+
+        /* 1. Hero Banner (Wireframe Style) */
+        .hero-banner-card {
+            background: linear-gradient(135deg, #164034 0%, #113328 100%);
+            border-radius: var(--radius-xl);
+            padding: 24px 30px;
+            color: #ffffff;
+            margin-bottom: 20px;
             position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 16px rgba(18, 51, 40, 0.18);
         }
 
-        .notif-item:hover {
-            background: var(--primary-50);
-        }
-
-        .notif-item.unread {
-            background: #f0fdf4;
-        }
-
-        .notif-item.unread::before {
+        /* Concentric circles background watermark */
+        .hero-banner-card::before {
             content: '';
             position: absolute;
-            left: 0; top: 0; bottom: 0;
-            width: 3px;
-            background: var(--primary);
+            right: -60px;
+            top: -100px;
+            width: 360px;
+            height: 360px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 0 0 40px rgba(255, 255, 255, 0.02),
+                        inset 0 0 0 80px rgba(255, 255, 255, 0.02),
+                        inset 0 0 0 120px rgba(255, 255, 255, 0.02);
+            pointer-events: none;
         }
 
-        .notif-item-icon {
-            width: 36px; height: 36px;
+        .hero-banner-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-date-tag {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.9px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .hero-headline {
+            font-size: 22px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.2px;
+            margin-bottom: 4px;
+        }
+
+        .hero-description {
+            font-size: 13.5px;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 650px;
+            line-height: 1.45;
+        }
+
+        .hero-badge-pill {
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            padding: 8px 16px;
+            border-radius: var(--radius-pill);
+            color: #ffffff;
+            font-size: 12.5px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        /* 2. Four Stats Grid */
+        .stats-four-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .stat-white-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 104px;
+            box-shadow: var(--shadow-subtle);
+            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+        }
+
+        .stat-white-card:hover {
+            border-color: var(--card-hover-border);
+            box-shadow: var(--shadow-card);
+        }
+
+        .stat-card-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .stat-label-text {
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .stat-icon-square {
+            width: 32px;
+            height: 32px;
             border-radius: 8px;
+            background-color: var(--forest-50);
+            color: var(--forest-700);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
 
-        .notif-icon-izin { background: #dbeafe; color: var(--blue); }
-        .notif-icon-rpp { background: var(--primary-100); color: var(--primary); }
-        .notif-icon-sk_tugas { background: #ede9fe; color: var(--purple); }
-        .notif-icon-evaluasi { background: var(--accent-light); color: var(--yellow); }
-        .notif-icon-success { background: var(--primary-100); color: var(--primary); }
-        .notif-icon-warning { background: var(--accent-light); color: var(--yellow); }
-        .notif-icon-error { background: #fee2e2; color: var(--red); }
-        .notif-icon-info { background: #e0f2fe; color: #0284c7; }
-
-        .notif-item-body {
-            flex: 1;
-            min-width: 0;
+        .stat-icon-square svg,
+        .stat-icon-square i {
+            width: 16px;
+            height: 16px;
         }
 
-        .notif-item-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 2px;
+        .stat-value-big {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-heading);
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+
+        .stat-subtext-detail {
+            font-size: 11.5px;
+            color: var(--text-subtle);
+            margin-top: 4px;
+        }
+
+        /* 3. Four Quick Action Cards */
+        .action-four-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .action-white-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: var(--shadow-subtle);
+            transition: all 0.15s ease;
+        }
+
+        .action-white-card:hover {
+            border-color: var(--forest-500);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-card);
+            background-color: #fafcfb;
+        }
+
+        .action-icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background-color: var(--forest-50);
+            color: var(--forest-800);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background-color 0.15s, color 0.15s;
+        }
+
+        .action-white-card:hover .action-icon-box {
+            background-color: var(--forest-800);
+            color: #ffffff;
+        }
+
+        .action-icon-box svg,
+        .action-icon-box i {
+            width: 17px;
+            height: 17px;
+        }
+
+        .action-text-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .action-title-text {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text-heading);
             line-height: 1.3;
         }
 
-        .notif-item-desc {
-            font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        .action-desc-text {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
         }
 
-        .notif-item-time {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 4px;
+        /* 4. Two Column Dashboard Content */
+        .dashboard-split-layout {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .surface-white-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .card-header-flex {
             display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-heading);
+            letter-spacing: -0.2px;
+        }
+
+        .card-section-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .card-header-link {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--forest-700);
+            text-decoration: none;
+            display: inline-flex;
             align-items: center;
             gap: 4px;
         }
 
-        .notif-footer {
-            padding: 10px 16px;
-            text-align: center;
-            background: #f8fafc;
-            border-top: 1px solid var(--border);
-        }
-
-        .notif-footer a {
-            font-size: 12.5px;
-            font-weight: 600;
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .notif-footer a:hover {
+        .card-header-link:hover {
+            color: var(--forest-900);
             text-decoration: underline;
         }
 
-        .topbar-profile {
+        /* Wireframe Table Styling */
+        .wireframe-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .wireframe-table th {
+            text-align: left;
+            padding: 10px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #edf1ee;
+        }
+
+        .wireframe-table td {
+            padding: 14px 14px;
+            border-bottom: 1px solid #f3f5f4;
+            color: var(--text-body);
+            vertical-align: middle;
+        }
+
+        .wireframe-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .wireframe-table tr:hover td {
+            background-color: #f9fbf9;
+        }
+
+        /* Pill Status Badges */
+        .pill-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 11.5px;
+            font-weight: 600;
+            line-height: 1.4;
+            width: fit-content;
+        }
+
+        .pill-status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: currentColor;
+        }
+
+        .pill-status-menunggu,
+        .pill-status-draft {
+            background-color: var(--status-amber-bg);
+            color: var(--status-amber-text);
+        }
+
+        .pill-status-selesai,
+        .pill-status-terpublikasi,
+        .pill-status-valid {
+            background-color: var(--status-green-bg);
+            color: var(--status-green-text);
+        }
+
+        .pill-status-perlu_tindakan,
+        .pill-status-revisi {
+            background-color: var(--status-red-bg);
+            color: var(--status-red-text);
+        }
+
+        .pill-status-info {
+            background-color: var(--status-blue-bg);
+            color: var(--status-blue-text);
+        }
+
+        /* Action Buttons */
+        .btn-pill-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 14px;
+            border-radius: var(--radius-pill);
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .btn-pill-primary {
+            background-color: var(--status-green-bg);
+            color: var(--status-green-text);
+        }
+        .btn-pill-primary:hover {
+            background-color: #bbf7d0;
+        }
+
+        .btn-pill-secondary {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        .btn-pill-secondary:hover {
+            background-color: #e5e7eb;
+        }
+
+        .btn-pill-danger {
+            background-color: var(--status-red-bg);
+            color: var(--status-red-text);
+        }
+        .btn-pill-danger:hover {
+            background-color: #fecaca;
+        }
+
+        .btn-pill-done {
+            background-color: var(--status-green-bg);
+            color: var(--status-green-text);
+            cursor: default;
+        }
+
+        .btn-forest-primary {
+            background-color: var(--forest-800);
+            color: #ffffff;
+            border-radius: var(--radius-md);
+            padding: 9px 18px;
+            font-size: 13.5px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .btn-forest-primary:hover {
+            background-color: var(--forest-900);
+            box-shadow: 0 2px 8px rgba(18, 51, 40, 0.2);
+        }
+
+        /* Timeline list (Guru Dashboard) */
+        .timeline-agenda-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .timeline-agenda-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f4f2;
+        }
+
+        .timeline-agenda-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-time-badge {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            width: 48px;
+            flex-shrink: 0;
+        }
+
+        .timeline-content-col {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .timeline-item-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        .timeline-item-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Right Column Cards */
+        .sidebar-item-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f4f2;
+        }
+
+        .sidebar-item-box:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .sidebar-item-icon-square {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background-color: var(--forest-50);
+            color: var(--forest-700);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar-item-icon-square svg,
+        .sidebar-item-icon-square i {
+            width: 15px;
+            height: 15px;
+        }
+
+        .sidebar-item-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-heading);
+            line-height: 1.3;
+        }
+
+        .sidebar-item-desc {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-top: 3px;
+            line-height: 1.4;
+        }
+
+        /* Period Summary Card */
+        .period-summary-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f4f2;
+            font-size: 12.5px;
+        }
+
+        .period-summary-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .period-row-key {
+            color: var(--text-muted);
+        }
+
+        .period-row-val {
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        /* Info Banner Callout (as in screen-validasi-kepala) */
+        .info-callout-box {
+            background-color: #f7faf8;
+            border: 1px solid #e2ece6;
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 12.5px;
+            color: #2b5446;
+            line-height: 1.5;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 6px 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            cursor: pointer;
-            background: none;
-            transition: all var(--transition);
         }
 
-        .topbar-profile:hover { background: var(--primary-50); border-color: var(--primary-200); }
-
-        .topbar-avatar {
-            width: 30px; height: 30px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 12px; font-weight: 700; color: #fff;
-        }
-
-        .topbar-username { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-        .topbar-role { font-size: 11px; color: var(--text-muted); }
-
-        /* ===== PAGE CONTENT ===== */
-        .page-content { flex: 1; padding: 28px 28px 40px; }
-
-        /* ===== BREADCRUMB ===== */
-        .breadcrumb {
+        /* Filter & Search Bar Card */
+        .table-filter-bar {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 20px;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
         }
 
-        .breadcrumb a { color: var(--text-muted); text-decoration: none; }
-        .breadcrumb a:hover { color: var(--primary); }
-        .breadcrumb-sep { font-size: 10px; }
-        .breadcrumb-current { color: var(--text-primary); font-weight: 500; }
+        .filter-controls-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            max-width: 600px;
+        }
 
-        /* ===== CARDS ===== */
+        .search-input-wrap {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-input-wrap svg,
+        .search-input-wrap i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 15px;
+            color: var(--text-subtle);
+            pointer-events: none;
+        }
+
+        .form-control-input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text-heading);
+            background: #ffffff;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .form-control-input:focus {
+            border-color: var(--forest-500);
+            box-shadow: 0 0 0 3px rgba(43, 112, 91, 0.1);
+        }
+
+        .form-control-select {
+            padding: 8px 30px 8px 12px;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text-heading);
+            background: #ffffff;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .form-control-select:focus {
+            border-color: var(--forest-500);
+        }
+
+        .filter-data-count {
+            font-size: 12px;
+            color: var(--text-subtle);
+            font-weight: 500;
+        }
+
+        .footnote-prototype {
+            text-align: center;
+            font-size: 11.5px;
+            color: var(--text-subtle);
+            margin-top: 24px;
+        }
+
+        /* Bottom Footer */
+        .app-footer {
+            text-align: center;
+            padding: 24px 0 32px;
+            color: var(--text-subtle);
+            font-size: 12px;
+        }
+
+        /* Flash Message */
+        .flash-alert-card {
+            background-color: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flash-alert-danger {
+            background-color: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        /* SVG Safety & Legacy Stat Cards Styling */
+        svg {
+            max-width: 100%;
+        }
+
+        .stats-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stat-icon svg,
+        .stat-icon i {
+            width: 20px !important;
+            height: 20px !important;
+            max-width: 20px;
+            max-height: 20px;
+        }
+
+        .stat-icon.icon-green { background-color: var(--forest-50); color: var(--forest-700); }
+        .stat-icon.icon-blue { background-color: #e0f2fe; color: #0284c7; }
+        .stat-icon.icon-yellow { background-color: #fef3c7; color: #b45309; }
+        .stat-icon.icon-red { background-color: #fee2e2; color: #dc2626; }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-heading);
+            line-height: 1.1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* ===== General System Compatibility & Forms Styling ===== */
         .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-            box-shadow: var(--shadow);
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            box-shadow: var(--shadow-subtle);
+            margin-bottom: 20px;
         }
 
         .card-header {
@@ -499,991 +1352,781 @@
         .card-title {
             font-size: 15px;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--text-heading);
         }
 
-        .card-subtitle { font-size: 13px; color: var(--text-muted); }
-
-        /* ===== STATS CARDS ===== */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
+        .card-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
         }
 
-        .stat-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
+        .page-header {
+            margin-bottom: 20px;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
+            justify-content: space-between;
             gap: 16px;
-            box-shadow: var(--shadow);
-            transition: all var(--transition);
-            position: relative;
-            overflow: hidden;
+            flex-wrap: wrap;
         }
 
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 4px; height: 100%;
-            background: var(--accent-color, var(--primary));
-        }
-
-        .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-
-        .stat-icon {
-            width: 48px; height: 48px;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .stat-icon svg { width: 22px; height: 22px; }
-
-        .stat-info { flex: 1; }
-        .stat-value {
-            font-size: 26px;
+        .page-header-left h1 {
+            font-size: 24px;
             font-weight: 800;
-            color: var(--text-primary);
-            line-height: 1;
-            margin-bottom: 4px;
+            color: var(--text-heading);
+            letter-spacing: -0.3px;
         }
-        .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-        .stat-change {
-            font-size: 11px;
-            font-weight: 600;
+
+        .page-header-left p {
+            font-size: 13px;
+            color: var(--text-muted);
             margin-top: 4px;
         }
-        .stat-change.up { color: var(--primary); }
-        .stat-change.down { color: var(--red); }
 
-        /* Color variants */
-        .accent-green { --accent-color: var(--primary); }
-        .accent-blue { --accent-color: var(--blue); }
-        .accent-yellow { --accent-color: var(--yellow); }
-        .accent-red { --accent-color: var(--red); }
-        .accent-purple { --accent-color: var(--purple); }
-
-        .icon-green { background: var(--primary-100); color: var(--primary); }
-        .icon-blue { background: #dbeafe; color: var(--blue); }
-        .icon-yellow { background: var(--accent-light); color: var(--yellow); }
-        .icon-red { background: #fee2e2; color: var(--red); }
-        .icon-purple { background: #ede9fe; color: var(--purple); }
-
-        /* ===== TABLES ===== */
-        .table-wrapper { overflow-x: auto; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13.5px;
-        }
-
-        thead th {
-            background: var(--primary-50);
-            color: var(--primary-dark);
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            padding: 12px 14px;
-            text-align: left;
-            border-bottom: 2px solid var(--primary-200);
-            white-space: nowrap;
-        }
-
-        tbody td {
-            padding: 13px 14px;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-primary);
-            vertical-align: middle;
-        }
-
-        tbody tr:last-child td { border-bottom: none; }
-
-        tbody tr:hover { background: var(--primary-50); }
-
-        /* ===== BADGES ===== */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11.5px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .badge-green { background: var(--primary-100); color: var(--primary-dark); }
-        .badge-red { background: #fee2e2; color: #b91c1c; }
-        .badge-yellow { background: var(--accent-light); color: #92400e; }
-        .badge-blue { background: #dbeafe; color: #1d4ed8; }
-        .badge-gray { background: #f1f5f9; color: var(--text-secondary); }
-        .badge-purple { background: #ede9fe; color: #6d28d9; }
-        .badge-orange { background: #ffedd5; color: #9a3412; }
-
-        /* ===== BUTTONS ===== */
+        /* Common Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            padding: 9px 18px;
-            border-radius: var(--radius-sm);
-            font-size: 13.5px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            text-decoration: none;
-            transition: all var(--transition);
-            white-space: nowrap;
-        }
-
-        .btn svg { width: 16px; height: 16px; }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(22,163,74,0.25);
-        }
-
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(22,163,74,0.35); }
-
-        .btn-secondary {
-            background: #fff;
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover { background: var(--primary-50); border-color: var(--primary-200); color: var(--primary); }
-
-        .btn-danger {
-            background: #fee2e2;
-            color: #b91c1c;
-            border: 1px solid #fecaca;
-        }
-
-        .btn-danger:hover { background: #fecaca; }
-
-        .btn-warning {
-            background: var(--accent-light);
-            color: #92400e;
-            border: 1px solid #fde68a;
-        }
-
-        .btn-sm { padding: 6px 12px; font-size: 12.5px; }
-        .btn-icon { padding: 7px; }
-
-        /* ===== FORMS ===== */
-        .form-group { margin-bottom: 18px; }
-
-        .form-label {
-            display: block;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
             font-size: 13px;
             font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-        }
-
-        .form-label span.req { color: var(--red); margin-left: 2px; }
-
-        .form-control {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 13.5px;
-            color: var(--text-primary);
-            background: #fff;
-            transition: all var(--transition);
+            text-decoration: none;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
             font-family: inherit;
         }
 
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(22,163,74,0.1);
+        .btn-primary {
+            background-color: var(--forest-800);
+            color: #ffffff;
+            border-color: var(--forest-800);
+        }
+        .btn-primary:hover {
+            background-color: var(--forest-900);
+            border-color: var(--forest-900);
+            box-shadow: 0 2px 8px rgba(18, 51, 40, 0.2);
         }
 
-        .form-control::placeholder { color: var(--text-muted); }
-
-        select.form-control {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 16px;
-            padding-right: 40px;
+        .btn-secondary {
+            background-color: #ffffff;
+            color: var(--text-body);
+            border-color: var(--card-border);
+        }
+        .btn-secondary:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
         }
 
-        textarea.form-control { resize: vertical; min-height: 90px; }
+        .btn-warning {
+            background-color: #fef3c7;
+            color: #b45309;
+            border-color: #fde68a;
+        }
+        .btn-warning:hover {
+            background-color: #fde68a;
+        }
 
-        .form-error { font-size: 12px; color: var(--red); margin-top: 4px; }
+        .btn-danger {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border-color: #fecaca;
+        }
+        .btn-danger:hover {
+            background-color: #fecaca;
+        }
 
-        .form-grid { display: grid; gap: 16px; }
-        .form-grid-2 { grid-template-columns: 1fr 1fr; }
-        .form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-
-        /* ===== ALERTS ===== */
-        .alert {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 14px 16px;
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 12px;
             border-radius: var(--radius-sm);
-            font-size: 13.5px;
-            margin-bottom: 20px;
         }
 
-        .alert svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
-        .alert-success { background: var(--primary-100); color: var(--primary-dark); border: 1px solid var(--primary-200); }
-        .alert-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
-        .alert-warning { background: var(--accent-light); color: #92400e; border: 1px solid #fde68a; }
-        .alert-info { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
-
-        /* ===== PAGINATION ===== */
-        .pagination {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 0;
-            border-top: 1px solid var(--border);
-            margin-top: 4px;
+        .btn-icon {
+            padding: 6px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
         }
 
-        .pagination-info { font-size: 13px; color: var(--text-muted); }
-
-        .pagination-links {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .page-link {
-            min-width: 34px; height: 34px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: var(--radius-sm);
-            font-size: 13px;
-            font-weight: 500;
-            text-decoration: none;
-            color: var(--text-secondary);
-            border: 1px solid var(--border);
-            transition: all var(--transition);
-            padding: 0 8px;
-        }
-
-        .page-link:hover { background: var(--primary-50); border-color: var(--primary-200); color: var(--primary); }
-        .page-link.active { background: var(--primary); border-color: var(--primary); color: #fff; }
-        .page-link.disabled { opacity: 0.4; pointer-events: none; }
-
-        /* ===== EMPTY STATE ===== */
-        .empty-state {
-            text-align: center;
-            padding: 48px 24px;
-            color: var(--text-muted);
-        }
-
-        .empty-state svg {
-            width: 56px; height: 56px;
-            color: #cbd5e1;
-            margin: 0 auto 16px;
-            display: block;
-        }
-
-        .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
-        .empty-state p { font-size: 13.5px; }
-
-        /* ===== FILTERS ===== */
+        /* Filters & Form Controls */
         .filter-bar {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 18px;
             flex-wrap: wrap;
-        }
-
-        .filter-bar .form-control {
-            width: auto;
-            min-width: 160px;
+            margin-bottom: 16px;
         }
 
         .search-box {
             position: relative;
             flex: 1;
-            max-width: 320px;
+            min-width: 220px;
         }
 
-        .search-box svg.search-icon,
-        .search-box > svg {
+        .search-icon {
             position: absolute;
-            left: 12px; top: 50%;
+            left: 12px;
+            top: 50%;
             transform: translateY(-50%);
-            width: 16px; height: 16px;
-            color: var(--text-muted);
+            width: 15px;
+            height: 15px;
+            color: var(--text-subtle);
             pointer-events: none;
-            z-index: 2;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text-heading);
+            background: #ffffff;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .form-control:focus {
+            border-color: var(--forest-500);
+            box-shadow: 0 0 0 3px rgba(43, 112, 91, 0.1);
         }
 
         .search-box .form-control {
-            padding-left: 38px;
-            position: relative;
-            z-index: 1;
+            padding-left: 36px;
         }
 
-        .search-history-dropdown {
-            position: absolute;
-            top: calc(100% + 6px);
-            left: 0;
-            right: 0;
-            min-width: 290px;
-            background: #ffffff;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
-            z-index: 120;
-            overflow: hidden;
-            animation: searchDropdownFade 0.15s ease-out;
-            display: none;
+        .form-group {
+            margin-bottom: 16px;
         }
 
-        @keyframes searchDropdownFade {
-            from { opacity: 0; transform: translateY(-4px); }
-            to { opacity: 1; transform: translateY(0); }
+        .form-label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-heading);
+            margin-bottom: 6px;
         }
 
-        .search-history-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            background: #f8fafc;
-            border-bottom: 1px solid var(--border);
+        .req {
+            color: #ef4444;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .form-grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .form-grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .form-error {
+            font-size: 11.5px;
+            color: #ef4444;
+            margin-top: 4px;
+        }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 14px;
             font-size: 11px;
             font-weight: 700;
             color: var(--text-muted);
+            letter-spacing: 0.6px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            border-bottom: 1px solid #edf1ee;
         }
 
-        .search-history-clear-all {
-            background: none;
-            border: none;
-            font-size: 11px;
-            color: var(--red);
-            cursor: pointer;
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f3f5f4;
+            color: var(--text-body);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #f9fbf9;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: var(--radius-pill);
+            font-size: 11.5px;
             font-weight: 600;
-            padding: 2px 4px;
-            border-radius: 4px;
-            text-transform: none;
-            letter-spacing: normal;
+            line-height: 1.4;
         }
 
-        .search-history-clear-all:hover {
-            background: #fee2e2;
-            text-decoration: underline;
+        .badge-green { background-color: #dcfce7; color: #15803d; }
+        .badge-blue { background-color: #e0f2fe; color: #0369a1; }
+        .badge-yellow { background-color: #fef3c7; color: #b45309; }
+        .badge-red { background-color: #fee2e2; color: #b91c1c; }
+        .badge-purple { background-color: #ede9fe; color: #6d28d9; }
+        .badge-orange { background-color: #ffedd5; color: #c2410c; }
+        .badge-gray { background-color: #f3f4f6; color: #4b5563; }
+
+        /* Jenjang Badges */
+        .jenjang-sd {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            background-color: #e0f2fe;
+            color: #0284c7;
         }
 
-        .search-history-list {
-            max-height: 220px;
-            overflow-y: auto;
-            padding: 4px 0;
-            margin: 0;
-            list-style: none;
+        .jenjang-mts {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            background-color: #fef3c7;
+            color: #b45309;
         }
 
-        .search-history-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            font-size: 13px;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: background var(--transition);
+        .jenjang-smk {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            background-color: #fce7f3;
+            color: #be185d;
         }
 
-        .search-history-item:hover {
-            background: var(--primary-50);
-            color: var(--primary-dark);
-        }
-
-        .search-history-text {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .search-history-text svg {
-            width: 14px;
-            height: 14px;
-            color: var(--text-muted);
-            flex-shrink: 0;
-        }
-
-        .search-history-remove {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 14px;
-            line-height: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition);
-        }
-
-        .search-history-remove:hover {
-            background: #fee2e2;
-            color: var(--red);
-        }
-
-        .search-history-empty {
-            padding: 14px 12px;
+        /* Empty State */
+        .empty-state {
             text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 36px;
+            height: 36px;
+            color: var(--text-subtle);
+            margin: 0 auto 10px;
+            display: block;
+        }
+
+        .empty-state h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 4px;
+        }
+
+        .empty-state p {
             font-size: 12.5px;
             color: var(--text-muted);
         }
 
-        .search-history-suggestions {
-            padding: 10px 12px 12px;
-            border-top: 1px dashed var(--border);
-            background: #fafafa;
-        }
-
-        .search-history-suggestions-title {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        .search-suggestion-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-
-        .search-suggestion-chip {
-            background: #fff;
-            border: 1px solid var(--border);
-            padding: 3px 9px;
-            border-radius: 12px;
-            font-size: 11.5px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all var(--transition);
-            font-weight: 500;
-        }
-
-        .search-suggestion-chip:hover {
-            background: var(--primary-50);
-            border-color: var(--primary-200);
-            color: var(--primary);
-        }
-
-        /* ===== PAGE HEADER ===== */
-        .page-header {
+        /* Pagination */
+        .pagination {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .page-header-left h1 {
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--text-primary);
-            line-height: 1.2;
-        }
-
-        .page-header-left p {
-            font-size: 13.5px;
+            margin-top: 16px;
+            font-size: 12px;
             color: var(--text-muted);
-            margin-top: 4px;
         }
 
-        /* ===== CHART CONTAINERS ===== */
-        .chart-container { position: relative; width: 100%; }
-
-        /* ===== ACTIVITY FEED ===== */
-        .activity-item {
+        .pagination-links {
             display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
+            gap: 4px;
         }
 
-        .activity-item:last-child { border-bottom: none; }
-
-        .activity-dot {
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+        .page-link {
+            padding: 5px 11px;
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--text-body);
+            background: #ffffff;
+            font-weight: 600;
         }
 
-        .activity-dot svg { width: 14px; height: 14px; }
-        .activity-dot.green { background: var(--primary-100); color: var(--primary); }
-        .activity-dot.blue { background: #dbeafe; color: var(--blue); }
-        .activity-dot.yellow { background: var(--accent-light); color: var(--yellow); }
-        .activity-dot.red { background: #fee2e2; color: var(--red); }
+        .page-link.active {
+            background: var(--forest-800);
+            color: #ffffff;
+            border-color: var(--forest-800);
+        }
 
-        .activity-text { flex: 1; }
-        .activity-text p { font-size: 13px; color: var(--text-primary); line-height: 1.4; }
-        .activity-time { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
-
-        /* ===== MODAL ===== */
+        /* Modal Dialog */
         .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.5);
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
             z-index: 200;
-            display: flex; align-items: center; justify-content: center;
             padding: 20px;
-            backdrop-filter: blur(2px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity var(--transition);
         }
 
-        .modal-overlay.active { opacity: 1; pointer-events: all; }
-
-        .modal {
-            background: #fff;
-            border-radius: var(--radius);
-            padding: 24px;
+        .modal-box {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
             width: 100%;
-            max-width: 540px;
-            box-shadow: var(--shadow-lg);
-            transform: scale(0.95);
-            transition: transform var(--transition);
+            max-width: 480px;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        .modal-overlay.active .modal { transform: scale(1); }
-        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        .modal-title { font-size: 16px; font-weight: 700; }
-        .modal-close { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 6px; }
-        .modal-close:hover { background: var(--border); }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-
-        /* ===== STATUS INDICATORS ===== */
-        .status-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 8px;
         }
 
-        .status-dot.green { background: var(--primary); }
-        .status-dot.red { background: var(--red); }
-        .status-dot.yellow { background: var(--yellow); }
-        .status-dot.gray { background: var(--text-muted); }
+        /* Mobile Overlay */
+        .sidebar-mobile-backdrop {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 90;
+        }
 
-        /* ===== RESPONSIVE ===== */
+        /* Responsive */
         @media (max-width: 1024px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.open { transform: translateX(0); }
-            .main-wrapper { margin-left: 0; }
-            .topbar-toggle { display: flex; }
-            .sidebar-overlay { display: block; }
-            .form-grid-3 { grid-template-columns: 1fr 1fr; }
+            .stats-four-grid,
+            .action-four-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .dashboard-split-layout {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 768px) {
-            .page-content { padding: 20px 16px; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
-            .topbar { padding: 0 16px; }
-            .filter-bar { flex-direction: column; align-items: stretch; }
-            .filter-bar .form-control, .search-box { max-width: 100%; min-width: 0; width: 100%; }
+            .app-sidebar {
+                transform: translateX(-100%);
+            }
+            .app-sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-mobile-backdrop.open {
+                display: block;
+            }
+            .app-main {
+                margin-left: 0;
+            }
+            .mobile-nav-toggle {
+                display: block;
+            }
+            .stats-four-grid,
+            .action-four-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-banner-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .topbar-pill-select {
+                display: none;
+            }
         }
-
-        @media (max-width: 480px) {
-            .stats-grid { grid-template-columns: 1fr; }
-        }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 99;
-        }
-
-        .sidebar-overlay.open { display: block; }
-
-        /* ===== JENJANG BADGE ===== */
-        .jenjang-sd { background: #dbeafe; color: #1e40af; border-radius: 6px; padding: 2px 8px; font-size: 11.5px; font-weight: 700; }
-        .jenjang-mts { background: #fef9c3; color: #854d0e; border-radius: 6px; padding: 2px 8px; font-size: 11.5px; font-weight: 700; }
-        .jenjang-smk { background: #fce7f3; color: #9d174d; border-radius: 6px; padding: 2px 8px; font-size: 11.5px; font-weight: 700; }
-
-        /* ===== WELCOME BANNER ===== */
-        .welcome-banner {
-            background: linear-gradient(135deg, var(--secondary) 0%, #166534 40%, var(--primary) 100%);
-            border-radius: var(--radius);
-            padding: 24px 28px;
-            color: #fff;
-            margin-bottom: 24px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .welcome-banner::before {
-            content: '';
-            position: absolute;
-            top: -30px; right: -30px;
-            width: 180px; height: 180px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50%;
-        }
-
-        .welcome-banner::after {
-            content: '';
-            position: absolute;
-            bottom: -50px; right: 80px;
-            width: 120px; height: 120px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 50%;
-        }
-
-        .welcome-banner h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-        .welcome-banner p { font-size: 13.5px; opacity: 0.8; }
     </style>
-
-    @stack('styles')
 </head>
 <body>
 
-<!-- Sidebar Overlay (mobile) -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+@php
+    $authUser = auth()->user();
+    $role = $authUser?->role ?? 'guru';
+    $jenjang = $authUser?->jenjang ?? 'SD';
+    $unitLabel = ($role === 'pengurus_yayasan')
+        ? 'Yayasan Al Ghozaly'
+        : ($jenjang . ' Al Ghozaly');
+    $unitStatus = ($role === 'pengurus_yayasan')
+        ? 'Akses lintas satuan pendidikan'
+        : 'Unit pendidikan aktif';
+
+    $roleTitles = [
+        'pengurus_yayasan' => 'Pengurus Yayasan',
+        'kepala_sekolah' => 'Kepala Sekolah',
+        'admin_sekolah' => 'Admin Sekolah',
+        'guru' => 'Guru',
+    ];
+    $roleTitle = $roleTitles[$role] ?? 'Pengguna';
+
+    // User initials
+    $nameParts = explode(' ', $authUser?->name ?? 'User');
+    $initials = count($nameParts) > 1
+        ? strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[1], 0, 1))
+        : strtoupper(substr($authUser?->name ?? 'US', 0, 2));
+
+    // Dynamic unread count
+    try {
+        $unreadCount = $authUser ? $authUser->unreadNotifications()->count() : 0;
+    } catch (\Throwable $e) {
+        $unreadCount = 0;
+    }
+@endphp
+
+<!-- Mobile Backdrop -->
+<div class="sidebar-mobile-backdrop" id="mobileBackdrop" onclick="toggleSidebar()"></div>
 
 <!-- Sidebar -->
-<aside class="sidebar" id="sidebar">
-    <a href="{{ route('dashboard') }}" class="sidebar-brand">
-        <div class="sidebar-brand-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="white" width="22" height="22">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
-            </svg>
-        </div>
-        <div class="sidebar-brand-text">
-            <div class="sidebar-brand-name">Yayasan Al-Ghozaly</div>
-            <div class="sidebar-brand-sub">Sistem Informasi Guru</div>
+<aside class="app-sidebar" id="appSidebar">
+    <!-- Brand -->
+    <a href="{{ route('dashboard') }}" class="sidebar-brand-wrapper">
+        <div class="brand-ag-badge">AG</div>
+        <div class="brand-text-col">
+            <span class="brand-main-title">Al Ghozaly</span>
+            <span class="brand-sub-caption">SISTEM AKADEMIK</span>
         </div>
     </a>
 
-    <nav class="sidebar-nav">
-        <div class="sidebar-section">Utama</div>
+    <!-- Unit Card in Sidebar -->
+    <div class="sidebar-unit-box">
+        <span class="unit-indicator-dot"></span>
+        <div class="unit-info-content">
+            <span class="unit-info-name">{{ $unitLabel }}</span>
+            <span class="unit-info-desc">{{ $unitStatus }}</span>
+        </div>
+    </div>
 
-        <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}" id="nav-dashboard">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-            Dashboard
+    <!-- Menu Section Header -->
+    <div class="sidebar-menu-header">Menu Utama</div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav-container">
+        {{-- Beranda --}}
+        <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <i data-lucide="home"></i>
+            <span>Beranda</span>
         </a>
 
-        @auth
-        <a href="{{ route('notifikasi.index') }}" class="nav-item {{ request()->routeIs('notifikasi.*') ? 'active' : '' }}" id="nav-notifikasi">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
-            <span style="flex:1;">Notifikasi</span>
-            @php
-                $sidebarUnread = auth()->user()->unreadNotifications()->count();
-            @endphp
-            @if($sidebarUnread > 0)
-                <span class="badge" style="background:var(--red);color:#fff;font-size:10.5px;padding:1px 6px;margin-left:auto;border-radius:10px;">
-                    {{ $sidebarUnread > 99 ? '99+' : $sidebarUnread }}
-                </span>
-            @endif
-        </a>
-        @endauth
-
-        @auth
-            @if(auth()->user()->isGuru() || auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah())
-            <div class="sidebar-section">Akademik</div>
-
-            <a href="{{ route('jadwal-mengajar.index') }}" class="nav-item {{ request()->routeIs('jadwal-mengajar.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
-                Jadwal Mengajar
+        @if($role === 'pengurus_yayasan')
+            {{-- Pengurus Yayasan Menu --}}
+            <a href="{{ route('sk-tugas.index') }}" class="sidebar-link {{ request()->routeIs('sk-tugas.*') ? 'active' : '' }}">
+                <i data-lucide="file-text"></i>
+                <span>SK Tugas</span>
+            </a>
+            <a href="{{ route('rekap-beban.index') }}" class="sidebar-link {{ request()->routeIs('rekap-beban.*') ? 'active' : '' }}">
+                <i data-lucide="table-properties"></i>
+                <span>Rekap Beban Mengajar</span>
+            </a>
+            <a href="{{ route('guru.index') }}" class="sidebar-link {{ request()->routeIs('guru.*') ? 'active' : '' }}">
+                <i data-lucide="users"></i>
+                <span>Data Guru</span>
             </a>
 
-            <a href="{{ route('presensi.index') }}" class="nav-item {{ request()->routeIs('presensi.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                @if(auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah())
-                    Lihat Presensi Guru
-                @else
-                    Presensi
+        @elseif($role === 'kepala_sekolah')
+            {{-- Kepala Sekolah Menu --}}
+            @php
+                try {
+                    $pendingRppCount = \App\Models\RppModulAjar::where('sekolah_id', $authUser->sekolah_id)->where('status_validasi', 'menunggu')->count();
+                    $pendingIzinCount = \App\Models\PengajuanIzinCuti::where('sekolah_id', $authUser->sekolah_id)->where('status_approval', 'menunggu')->count();
+                } catch (\Throwable $e) {
+                    $pendingRppCount = 0;
+                    $pendingIzinCount = 0;
+                }
+            @endphp
+            <a href="{{ route('rpp.index') }}" class="sidebar-link {{ request()->routeIs('rpp.*') ? 'active' : '' }}">
+                <i data-lucide="check-square"></i>
+                <span>Validasi RPP / Modul</span>
+                @if($pendingRppCount > 0)
+                    <span class="sidebar-count-badge">{{ $pendingRppCount }}</span>
                 @endif
             </a>
-
-            <a href="{{ route('jurnal.index') }}" class="nav-item {{ request()->routeIs('jurnal.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
-                Jurnal Mengajar
+            <a href="{{ route('pengajuan-izin.index') }}" class="sidebar-link {{ request()->routeIs('pengajuan-izin.*') ? 'active' : '' }}">
+                <i data-lucide="clock"></i>
+                <span>Pengajuan Izin / Cuti</span>
+                @if($pendingIzinCount > 0)
+                    <span class="sidebar-count-badge">{{ $pendingIzinCount }}</span>
+                @endif
+            </a>
+            <a href="{{ route('evaluasi-kinerja.index') }}" class="sidebar-link {{ request()->routeIs('evaluasi-kinerja.*') ? 'active' : '' }}">
+                <i data-lucide="sparkles"></i>
+                <span>Evaluasi Kinerja</span>
+            </a>
+            <a href="{{ route('jadwal-mengajar.index') }}" class="sidebar-link {{ request()->routeIs('jadwal-mengajar.*') ? 'active' : '' }}">
+                <i data-lucide="calendar"></i>
+                <span>Jadwal Mengajar</span>
+            </a>
+            <a href="{{ route('presensi.index') }}" class="sidebar-link {{ request()->routeIs('presensi.*') ? 'active' : '' }}">
+                <i data-lucide="check"></i>
+                <span>Presensi Guru</span>
+            </a>
+            <a href="{{ route('guru.index') }}" class="sidebar-link {{ request()->routeIs('guru.*') ? 'active' : '' }}">
+                <i data-lucide="users"></i>
+                <span>Data Guru</span>
             </a>
 
-            <a href="{{ route('rpp.index') }}" class="nav-item {{ request()->routeIs('rpp.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-                RPP & Modul Ajar
+        @elseif($role === 'admin_sekolah')
+            {{-- Admin Sekolah Menu --}}
+            <a href="{{ route('guru.index') }}" class="sidebar-link {{ request()->routeIs('guru.*') ? 'active' : '' }}">
+                <i data-lucide="users"></i>
+                <span>Data Guru</span>
+            </a>
+            <a href="{{ route('jadwal-mengajar.index') }}" class="sidebar-link {{ request()->routeIs('jadwal-mengajar.*') ? 'active' : '' }}">
+                <i data-lucide="calendar"></i>
+                <span>Jadwal Mengajar</span>
+            </a>
+            <a href="{{ route('presensi.index') }}" class="sidebar-link {{ request()->routeIs('presensi.*') ? 'active' : '' }}">
+                <i data-lucide="check"></i>
+                <span>Presensi Guru</span>
+            </a>
+            <a href="{{ route('rpp.index') }}" class="sidebar-link {{ request()->routeIs('rpp.*') ? 'active' : '' }}">
+                <i data-lucide="folder"></i>
+                <span>Arsip RPP / Modul</span>
+            </a>
+            <a href="{{ route('sk-tugas.index') }}" class="sidebar-link {{ request()->routeIs('sk-tugas.*') ? 'active' : '' }}">
+                <i data-lucide="file-text"></i>
+                <span>Arsip SK Tugas</span>
             </a>
 
-            <a href="{{ route('bahan-ajar.index') }}" class="nav-item {{ request()->routeIs('bahan-ajar.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                Upload Bahan Ajar
+        @else
+            {{-- Guru Menu --}}
+            <a href="{{ route('jadwal-mengajar.index') }}" class="sidebar-link {{ request()->routeIs('jadwal-mengajar.*') ? 'active' : '' }}">
+                <i data-lucide="calendar"></i>
+                <span>Jadwal Mengajar</span>
             </a>
-
-            <a href="{{ route('penilaian.index') }}" class="nav-item {{ request()->routeIs('penilaian.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
-                Penilaian
+            <a href="{{ route('presensi.index') }}" class="sidebar-link {{ request()->routeIs('presensi.*') ? 'active' : '' }}">
+                <i data-lucide="check"></i>
+                <span>Presensi Guru</span>
             </a>
-
-            @if(auth()->user()->isGuru())
-            <a href="{{ route('pengajuan-izin.index') }}" class="nav-item {{ request()->routeIs('pengajuan-izin.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" /></svg>
-                Pengajuan Izin/Cuti
+            <a href="{{ route('jurnal.index') }}" class="sidebar-link {{ request()->routeIs('jurnal.*') ? 'active' : '' }}">
+                <i data-lucide="book-open"></i>
+                <span>Jurnal Mengajar</span>
             </a>
-            @else
-            <a href="{{ route('pengajuan-izin.index') }}" class="nav-item {{ request()->routeIs('pengajuan-izin.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" /></svg>
-                Pengajuan Izin/Cuti
+            <a href="{{ route('rpp.index') }}" class="sidebar-link {{ request()->routeIs('rpp.*') ? 'active' : '' }}">
+                <i data-lucide="folder"></i>
+                <span>RPP / Modul Ajar</span>
             </a>
-            @endif
-
-            @if(auth()->user()->isGuru())
-            {{-- SK Tugas: guru hanya bisa lihat miliknya sendiri --}}
-            <a href="{{ route('sk-tugas.index') }}" class="nav-item {{ request()->routeIs('sk-tugas.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z" /></svg>
-                SK Tugas
+            <a href="{{ route('bahan-ajar.index') }}" class="sidebar-link {{ request()->routeIs('bahan-ajar.*') ? 'active' : '' }}">
+                <i data-lucide="upload-cloud"></i>
+                <span>Upload Bahan Ajar</span>
             </a>
-            @endif
-
-            @if(auth()->user()->isGuru())
-            <a href="{{ route('evaluasi-kinerja.index') }}" class="nav-item {{ request()->routeIs('evaluasi-kinerja.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
-                Evaluasi Kinerja
+            <a href="{{ route('penilaian.index') }}" class="sidebar-link {{ request()->routeIs('penilaian.*') ? 'active' : '' }}">
+                <i data-lucide="pen-tool"></i>
+                <span>Penilaian</span>
             </a>
-            @endif
-            @endif
-
-            @if(auth()->user()->isPengurusYayasan() || auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah())
-            <div class="sidebar-section">Manajemen</div>
-
-            @if(auth()->user()->isPengurusYayasan() || auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah())
-            <a href="{{ route('guru.index') }}" class="nav-item {{ request()->routeIs('guru.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
-                Data Guru
+            <a href="{{ route('rekap-beban.index') }}" class="sidebar-link {{ request()->routeIs('rekap-beban.*') ? 'active' : '' }}">
+                <i data-lucide="table-properties"></i>
+                <span>Rekap Beban Mengajar</span>
             </a>
-            @endif
-
-            <a href="{{ route('rekap-beban.index') }}" class="nav-item {{ request()->routeIs('rekap-beban.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
-                Rekap Beban Mengajar
+            <a href="{{ route('pengajuan-izin.index') }}" class="sidebar-link {{ request()->routeIs('pengajuan-izin.*') ? 'active' : '' }}">
+                <i data-lucide="clock"></i>
+                <span>Pengajuan Izin / Cuti</span>
             </a>
-
-            <a href="{{ route('sk-tugas.index') }}" class="nav-item {{ request()->routeIs('sk-tugas.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z" /></svg>
-                SK Tugas
+            <a href="{{ route('sk-tugas.index') }}" class="sidebar-link {{ request()->routeIs('sk-tugas.*') ? 'active' : '' }}">
+                <i data-lucide="file-text"></i>
+                <span>SK Tugas</span>
             </a>
-            @endif
-
-            @if(auth()->user()->isPengurusYayasan() || auth()->user()->isKepalaSekolah())
-            <a href="{{ route('evaluasi-kinerja.index') }}" class="nav-item {{ request()->routeIs('evaluasi-kinerja.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
-                Evaluasi Kinerja
+            <a href="{{ route('evaluasi-kinerja.index') }}" class="sidebar-link {{ request()->routeIs('evaluasi-kinerja.*') ? 'active' : '' }}">
+                <i data-lucide="sparkles"></i>
+                <span>Evaluasi Kinerja</span>
             </a>
-            @endif
-        @endauth
+        @endif
     </nav>
 
-    <div class="sidebar-footer">
-        @auth
-        <div class="sidebar-user">
-            <div class="sidebar-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
-            <div class="sidebar-user-info">
-                <div class="sidebar-user-name">{{ auth()->user()->name }}</div>
-                <div class="sidebar-user-role">
-                    @php
-                        $roleLabels = [
-                            'pengurus_yayasan' => 'Pengurus Yayasan',
-                            'kepala_sekolah' => 'Kepala Sekolah '.auth()->user()->jenjang,
-                            'guru' => 'Guru '.auth()->user()->jenjang,
-                            'admin_sekolah' => 'Admin Sekolah '.auth()->user()->jenjang,
-                        ];
-                    @endphp
-                    {{ $roleLabels[auth()->user()->role] ?? auth()->user()->role }}
-                </div>
+    <!-- Sidebar Bottom / Profile Card -->
+    <div class="sidebar-bottom-area">
+        <div class="sidebar-footer-org">
+            <div>Pusat administrasi pendidikan</div>
+            <div>Yayasan Al Ghozaly · 2026</div>
+        </div>
+        <div class="sidebar-user-block">
+            <div class="user-avatar-circle">{{ $initials }}</div>
+            <div class="user-block-details">
+                <div class="user-block-name">{{ $authUser?->name ?? 'Pengguna' }}</div>
+                <div class="user-block-role">{{ $roleTitle }}</div>
             </div>
         </div>
-        <form method="POST" action="{{ route('logout') }}" style="margin-top:8px;">
+        <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="nav-item" style="width:100%;background:rgba(239,68,68,0.1);color:#ef4444;border:none;cursor:pointer;text-align:left;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
-                Keluar
+            <button type="submit" class="sidebar-logout-btn">
+                <i data-lucide="log-out" style="width:13px;height:13px;"></i>
+                <span>Keluar dari sistem</span>
             </button>
         </form>
-        @endauth
     </div>
 </aside>
 
-<!-- Sidebar overlay -->
-<div class="sidebar-overlay" id="sidebarOverlay2" onclick="toggleSidebar()"></div>
-
-<!-- Main wrapper -->
-<div class="main-wrapper">
+<!-- Main Wrapper -->
+<div class="app-main">
     <!-- Topbar -->
-    <header class="topbar">
-        <button class="topbar-toggle" onclick="toggleSidebar()" id="sidebarToggle">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
-        </button>
+    <header class="app-topbar">
+        <div class="topbar-left">
+            <button class="mobile-nav-toggle" onclick="toggleSidebar()" aria-label="Buka Menu">
+                <i data-lucide="menu"></i>
+            </button>
+            <nav class="topbar-breadcrumb">
+                <a href="{{ route('dashboard') }}" class="topbar-breadcrumb-root">Yayasan Al Ghozaly</a>
+                <span class="topbar-breadcrumb-sep">/</span>
+                <span class="topbar-breadcrumb-current">@yield('page-title', 'Beranda')</span>
+            </nav>
+        </div>
 
-        <div class="topbar-title">@yield('page-title', 'Dashboard')</div>
-
-        <div class="topbar-actions">
-            @auth
-            <div class="notif-wrapper" style="position: relative;" id="notif-wrapper">
-                <button class="topbar-btn" title="Notifikasi" id="topbar-notif-btn" type="button" aria-haspopup="true" aria-expanded="false">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
-                    @php
-                        $unreadTopCount = auth()->user()->unreadNotifications()->count();
-                    @endphp
-                    @if($unreadTopCount > 0)
-                        <span class="notif-badge" id="topbar-notif-badge">{{ $unreadTopCount > 99 ? '99+' : $unreadTopCount }}</span>
+        <div class="topbar-right">
+            <!-- Notifikasi Bell -->
+            <div style="position: relative;">
+                <button class="topbar-icon-btn" id="notifBellBtn" title="Notifikasi" aria-label="Notifikasi">
+                    <i data-lucide="bell"></i>
+                    @if($unreadCount > 0)
+                        <span class="notif-unread-dot"></span>
                     @endif
                 </button>
 
-                <!-- Dropdown Content -->
-                <div class="notif-dropdown" id="topbar-notif-dropdown" style="display: none;">
-                    <div class="notif-header">
-                        <div class="notif-header-title">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
-                            <span>Notifikasi</span>
-                            @if($unreadTopCount > 0)
-                                <span class="badge" style="background:#dcfce7;color:#15803d;font-size:10.5px;padding:1px 6px;">{{ $unreadTopCount }} baru</span>
-                            @endif
-                        </div>
-                        @if($unreadTopCount > 0)
-                        <form method="POST" action="{{ route('notifikasi.mark-all-read') }}" style="margin: 0;">
+                <!-- Dropdown -->
+                <div class="notif-dropdown-panel" id="notifDropdown">
+                    <div class="notif-dropdown-header">
+                        <span class="notif-dropdown-title">Notifikasi @if($unreadCount > 0) ({{ $unreadCount }}) @endif</span>
+                        @if($unreadCount > 0)
+                        <form method="POST" action="{{ route('notifikasi.mark-all-read') }}" style="margin:0;">
                             @csrf
-                            <button type="submit" class="notif-mark-all" title="Tandai semua sudah dibaca">
-                                Tandai dibaca
-                            </button>
+                            <button type="submit" style="background:none;border:none;color:var(--forest-600);font-size:11.5px;font-weight:600;cursor:pointer;">Tandai semua dibaca</button>
                         </form>
                         @endif
                     </div>
-
-                    <div class="notif-list">
+                    <div class="notif-dropdown-list">
                         @php
-                            $recentNotifications = auth()->user()->notifications()->take(5)->get();
+                            try {
+                                $recentNotifs = $authUser ? $authUser->notifications()->take(4)->get() : collect();
+                            } catch (\Throwable $e) {
+                                $recentNotifs = collect();
+                            }
                         @endphp
-
-                        @forelse($recentNotifications as $notif)
-                            @php
-                                $notifData = $notif->data;
-                                $isItemUnread = is_null($notif->read_at);
-                                $iconName = $notifData['icon'] ?? 'bell';
-                                $itemType = $notifData['type'] ?? 'info';
-                            @endphp
-                            <a href="{{ route('notifikasi.read-and-redirect', $notif->id) }}" class="notif-item {{ $isItemUnread ? 'unread' : '' }}">
-                                <div class="notif-item-icon notif-icon-{{ $itemType }}">
-                                    <i data-lucide="{{ $iconName }}" style="width: 16px; height: 16px;"></i>
-                                </div>
-                                <div class="notif-item-body">
-                                    <div class="notif-item-title">{{ $notifData['title'] ?? 'Pemberitahuan' }}</div>
-                                    <div class="notif-item-desc">{{ $notifData['message'] ?? '' }}</div>
-                                    <div class="notif-item-time">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        {{ $notif->created_at->diffForHumans() }}
-                                    </div>
-                                </div>
-                                @if($isItemUnread)
-                                    <span class="status-dot green" title="Belum dibaca" style="margin-left:4px;margin-top:4px;"></span>
-                                @endif
-                            </a>
-                        @empty
-                            <div style="padding: 32px 16px; text-align: center; color: var(--text-muted);">
-                                <i data-lucide="bell-off" style="width: 32px; height: 32px; margin: 0 auto 8px; display: block; opacity: 0.5;"></i>
-                                <p style="font-size: 13px; font-weight: 500;">Tidak ada notifikasi baru</p>
+                        @forelse($recentNotifs as $n)
+                        <a href="{{ route('notifikasi.read-and-redirect', $n->id) }}" class="notif-entry-row {{ is_null($n->read_at) ? 'unread' : '' }}">
+                            <div style="font-size:12px;">
+                                <div style="font-weight:700;color:var(--text-heading);">{{ $n->data['title'] ?? 'Pemberitahuan' }}</div>
+                                <div style="color:var(--text-muted);font-size:11.5px;">{{ $n->data['message'] ?? '' }}</div>
+                                <div style="font-size:10.5px;color:var(--text-subtle);margin-top:2px;">{{ $n->created_at->diffForHumans() }}</div>
                             </div>
+                        </a>
+                        @empty
+                        <div style="padding:24px;text-align:center;color:var(--text-subtle);font-size:12.5px;">
+                            Tidak ada notifikasi baru
+                        </div>
                         @endforelse
                     </div>
-
-                    <div class="notif-footer">
-                        <a href="{{ route('notifikasi.index') }}">Lihat Semua Notifikasi &rarr;</a>
-                    </div>
                 </div>
             </div>
-            @endauth
 
-            @auth
-            <div style="display:flex;align-items:center;gap:10px;padding:4px 12px;border:1px solid var(--border);border-radius:var(--radius);">
-                <div class="topbar-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
-                <div>
-                    <div class="topbar-username">{{ explode(' ', auth()->user()->name)[0] }}</div>
-                    <div class="topbar-role">
-                        @php
-                            $roleShort = [
-                                'pengurus_yayasan' => 'Pengurus Yayasan',
-                                'kepala_sekolah' => 'Kepala Sekolah',
-                                'guru' => 'Guru',
-                                'admin_sekolah' => 'Admin Sekolah',
-                            ];
-                        @endphp
-                        {{ $roleShort[auth()->user()->role] ?? auth()->user()->role }}
-                    </div>
-                </div>
-            </div>
-            @endauth
+            <!-- Settings Button -->
+            <button class="topbar-icon-btn" title="Pengaturan Sistem" onclick="openSettingsModal()" aria-label="Pengaturan">
+                <i data-lucide="settings"></i>
+            </button>
         </div>
     </header>
 
-    <!-- Page content -->
-    <main class="page-content">
-
+    <!-- Page Content Container -->
+    <main class="page-content-area">
         @if(session('success'))
-        <div class="alert alert-success" id="flash-alert">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <div class="flash-alert-card" id="flashAlert">
+            <i data-lucide="check-circle" style="width:16px;height:16px;"></i>
             <span>{{ session('success') }}</span>
         </div>
         @endif
 
         @if(session('error'))
-        <div class="alert alert-danger" id="flash-alert">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+        <div class="flash-alert-card flash-alert-danger" id="flashAlert">
+            <i data-lucide="alert-circle" style="width:16px;height:16px;"></i>
             <span>{{ session('error') }}</span>
         </div>
         @endif
 
         @yield('content')
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            Sistem Informasi Akademik · Yayasan Al Ghozaly
+        </footer>
     </main>
 </div>
 
+<!-- Settings Quick Modal -->
+<div class="modal-overlay" id="settingsModal" onclick="if(event.target===this)closeSettingsModal()">
+    <div class="modal-box">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div class="modal-title">Informasi Pengguna & Sistem</div>
+            <button type="button" onclick="closeSettingsModal()" style="background:none;border:none;cursor:pointer;color:var(--text-subtle);font-size:18px;">&times;</button>
+        </div>
+        <div style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">
+            <p><strong>Nama:</strong> {{ $authUser?->name }}</p>
+            <p><strong>Email:</strong> {{ $authUser?->email }}</p>
+            <p><strong>Peran:</strong> {{ $roleTitle }}</p>
+            <p><strong>Jenjang Unit:</strong> {{ $jenjang }}</p>
+            <p><strong>Tahun Ajaran:</strong> 2026 / 2027 (Semester Ganjil)</p>
+        </div>
+        <div style="text-align:right;">
+            <button type="button" class="btn-forest-primary" onclick="closeSettingsModal()">Tutup</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Initialize Lucide icons
+    // Initialize Lucide Icons
     lucide.createIcons();
 
-    // Toggle sidebar
+    // Toggle Sidebar Mobile
     function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const overlay2 = document.getElementById('sidebarOverlay2');
+        const sidebar = document.getElementById('appSidebar');
+        const backdrop = document.getElementById('mobileBackdrop');
         sidebar.classList.toggle('open');
-        overlay.classList.toggle('open');
-        overlay2.classList.toggle('open');
+        backdrop.classList.toggle('open');
     }
 
-    // Auto-hide flash message
-    const flashAlert = document.getElementById('flash-alert');
+    // Toggle Notification
+    const notifBtn = document.getElementById('notifBellBtn');
+    const notifDropdown = document.getElementById('notifDropdown');
+    if (notifBtn && notifDropdown) {
+        notifBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notifDropdown.style.display = notifDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        document.addEventListener('click', (e) => {
+            if (!notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+                notifDropdown.style.display = 'none';
+            }
+        });
+    }
+
+    // Settings Modal
+    function openSettingsModal() {
+        document.getElementById('settingsModal').style.display = 'flex';
+    }
+    function closeSettingsModal() {
+        document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    // Auto dismiss alert
+    const flashAlert = document.getElementById('flashAlert');
     if (flashAlert) {
         setTimeout(() => {
             flashAlert.style.transition = 'opacity 0.4s';
@@ -1492,227 +2135,10 @@
         }, 4000);
     }
 
-    // Toggle notification dropdown
-    const notifBtn = document.getElementById('topbar-notif-btn');
-    const notifDropdown = document.getElementById('topbar-notif-dropdown');
-
-    if (notifBtn && notifDropdown) {
-        notifBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isOpen = notifDropdown.style.display === 'block';
-            notifDropdown.style.display = isOpen ? 'none' : 'block';
-            notifBtn.setAttribute('aria-expanded', !isOpen);
-            if (!isOpen) {
-                lucide.createIcons();
-            }
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
-                notifDropdown.style.display = 'none';
-                notifBtn.setAttribute('aria-expanded', 'false');
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                notifDropdown.style.display = 'none';
-                notifBtn.setAttribute('aria-expanded', 'false');
-            }
-        });
-    }
-
-    // ===== Search History & Recommendations System =====
-    (function initSearchHistory() {
-        const searchBoxes = document.querySelectorAll('.search-box');
-        if (!searchBoxes.length) return;
-
-        const path = window.location.pathname;
-        let contextKey = 'general';
-        let defaultSuggestions = ['Matematika', 'IPA', 'Kelas IV'];
-
-        if (path.includes('guru')) {
-            contextKey = 'guru';
-            defaultSuggestions = ['Matematika', 'IPA', 'Bahasa Indonesia', 'Brebes', 'PNS', 'GTY'];
-        } else if (path.includes('jadwal-mengajar')) {
-            contextKey = 'jadwal';
-            defaultSuggestions = ['Matematika', 'Kelas IV-A', 'Fisika', 'Ruang 1', 'Ganjil'];
-        } else if (path.includes('rpp')) {
-            contextKey = 'rpp';
-            defaultSuggestions = ['RPP Matematika', 'Modul Ajar', 'Kelas VII', 'Semester Ganjil'];
-        }
-
-        const storageKey = 'yayasan_search_history_' + contextKey;
-
-        function getHistory() {
-            try {
-                return JSON.parse(localStorage.getItem(storageKey)) || [];
-            } catch (e) {
-                return [];
-            }
-        }
-
-        function saveHistory(item) {
-            if (!item || !item.trim()) return;
-            const text = item.trim();
-            let history = getHistory().filter(h => h.toLowerCase() !== text.toLowerCase());
-            history.unshift(text);
-            if (history.length > 8) history = history.slice(0, 8);
-            localStorage.setItem(storageKey, JSON.stringify(history));
-        }
-
-        function removeHistoryItem(textToRemove) {
-            let history = getHistory().filter(h => h !== textToRemove);
-            localStorage.setItem(storageKey, JSON.stringify(history));
-        }
-
-        function clearAllHistory() {
-            localStorage.removeItem(storageKey);
-        }
-
-        searchBoxes.forEach(box => {
-            const input = box.querySelector('input[name="search"]');
-            if (!input) return;
-
-            input.setAttribute('autocomplete', 'off');
-
-            if (input.value && input.value.trim()) {
-                saveHistory(input.value.trim());
-            }
-
-            const form = input.closest('form');
-            if (form) {
-                form.setAttribute('autocomplete', 'off');
-                form.addEventListener('submit', () => {
-                    if (input.value && input.value.trim()) {
-                        saveHistory(input.value.trim());
-                    }
-                });
-            }
-
-            const dropdown = document.createElement('div');
-            dropdown.className = 'search-history-dropdown';
-            box.appendChild(dropdown);
-
-            function renderDropdown(filterText = '') {
-                const history = getHistory();
-                const q = filterText.toLowerCase().trim();
-                const filtered = q ? history.filter(h => h.toLowerCase().includes(q)) : history;
-
-                let html = '';
-
-                if (history.length > 0) {
-                    html += `
-                        <div class="search-history-header">
-                            <span>Riwayat Pencarian</span>
-                            <button type="button" class="search-history-clear-all" data-action="clear-all">Hapus Semua</button>
-                        </div>
-                    `;
-
-                    if (filtered.length > 0) {
-                        html += '<ul class="search-history-list">';
-                        filtered.forEach(term => {
-                            const escapedTerm = term.replace(/"/g, '&quot;');
-                            html += `
-                                <li class="search-history-item" data-value="${escapedTerm}">
-                                    <span class="search-history-text">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span>${term}</span>
-                                    </span>
-                                    <button type="button" class="search-history-remove" title="Hapus dari riwayat" data-remove="${escapedTerm}">&times;</button>
-                                </li>
-                            `;
-                        });
-                        html += '</ul>';
-                    } else {
-                        html += '<div class="search-history-empty">Tidak ada riwayat yang cocok</div>';
-                    }
-                } else {
-                    html += '<div class="search-history-empty">Belum ada riwayat pencarian</div>';
-                }
-
-                if (defaultSuggestions && defaultSuggestions.length > 0) {
-                    html += `
-                        <div class="search-history-suggestions">
-                            <div class="search-history-suggestions-title">Rekomendasi Pencarian</div>
-                            <div class="search-suggestion-chips">
-                                ${defaultSuggestions.map(s => `<span class="search-suggestion-chip" data-value="${s}">${s}</span>`).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                dropdown.innerHTML = html;
-
-                const clearBtn = dropdown.querySelector('[data-action="clear-all"]');
-                if (clearBtn) {
-                    clearBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        clearAllHistory();
-                        renderDropdown(input.value);
-                    });
-                }
-
-                dropdown.querySelectorAll('.search-history-item').forEach(item => {
-                    item.addEventListener('click', (e) => {
-                        if (e.target.closest('.search-history-remove')) return;
-                        const val = item.getAttribute('data-value');
-                        input.value = val;
-                        dropdown.style.display = 'none';
-                        if (form) form.submit();
-                    });
-                });
-
-                dropdown.querySelectorAll('.search-history-remove').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const val = btn.getAttribute('data-remove');
-                        removeHistoryItem(val);
-                        renderDropdown(input.value);
-                    });
-                });
-
-                dropdown.querySelectorAll('.search-suggestion-chip').forEach(chip => {
-                    chip.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const val = chip.getAttribute('data-value');
-                        input.value = val;
-                        dropdown.style.display = 'none';
-                        if (form) form.submit();
-                    });
-                });
-            }
-
-            input.addEventListener('focus', () => {
-                renderDropdown(input.value);
-                dropdown.style.display = 'block';
-            });
-
-            input.addEventListener('click', () => {
-                renderDropdown(input.value);
-                dropdown.style.display = 'block';
-            });
-
-            input.addEventListener('input', () => {
-                renderDropdown(input.value);
-                dropdown.style.display = 'block';
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!box.contains(e.target)) {
-                    dropdown.style.display = 'none';
-                }
-            });
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    dropdown.style.display = 'none';
-                }
-            });
-        });
-    })();
+    // Search input enhancements
+    document.querySelectorAll('.search-input-wrap input, .search-box input').forEach(input => {
+        input.setAttribute('autocomplete', 'off');
+    });
 </script>
 
 @stack('scripts')

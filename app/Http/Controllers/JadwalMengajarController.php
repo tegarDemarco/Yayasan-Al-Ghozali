@@ -28,6 +28,14 @@ class JadwalMengajarController extends Controller
             $query->where('hari', $request->hari);
         }
 
+        if ($request->filled('status')) {
+            if ($request->status === 'terpublikasi') {
+                $query->where('is_aktif', true);
+            } elseif ($request->status === 'draft') {
+                $query->where('is_aktif', false);
+            }
+        }
+
         if (! $user->isGuru() && $request->filled('guru_id')) {
             $query->where('guru_id', $request->guru_id);
         }
@@ -140,5 +148,13 @@ class JadwalMengajarController extends Controller
         $jadwalMengajar->delete();
 
         return redirect()->route('jadwal-mengajar.index')->with('success', 'Jadwal mengajar berhasil dihapus.');
+    }
+
+    public function publish(JadwalMengajar $jadwalMengajar): RedirectResponse
+    {
+        $jadwalMengajar->update(['is_aktif' => ! $jadwalMengajar->is_aktif]);
+        $statusText = $jadwalMengajar->is_aktif ? 'dipublikasikan' : 'diubah menjadi draft';
+
+        return back()->with('success', "Jadwal berhasil {$statusText}.");
     }
 }

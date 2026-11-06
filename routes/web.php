@@ -37,6 +37,9 @@ Route::middleware('auth')->group(function () {
     // Jadwal Mengajar
     Route::resource('jadwal-mengajar', JadwalMengajarController::class)
         ->middleware('role:pengurus_yayasan,kepala_sekolah,admin_sekolah,guru');
+    Route::post('jadwal-mengajar/{jadwalMengajar}/publish', [JadwalMengajarController::class, 'publish'])
+        ->name('jadwal-mengajar.publish')
+        ->middleware('role:pengurus_yayasan,kepala_sekolah,admin_sekolah');
 
     // Presensi Guru
     Route::resource('presensi', PresensiGuruController::class)->except(['edit', 'update', 'show'])

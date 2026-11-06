@@ -3,378 +3,455 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login – Yayasan Al-Ghozaly</title>
-    <meta name="description" content="Sistem Informasi Manajemen Guru Yayasan Al-Ghozaly">
+    <title>Masuk ke akun Anda – Yayasan Al Ghozaly</title>
+    <meta name="description" content="Sistem Informasi Akademik Yayasan Al Ghozaly">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; font-family: 'Inter', system-ui, sans-serif; }
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
-        body {
-            display: flex;
-            min-height: 100vh;
-            background: #0f2419;
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        /* Left Panel */
-        .left-panel {
-            flex: 1;
-            background: linear-gradient(155deg, #0a1f12 0%, #0f2419 30%, #1a3a2a 60%, #16a34a 100%);
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+            background-color: #eef3f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            color: #374151;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Centered Split Card Container */
+        .login-card-container {
+            width: 100%;
+            max-width: 960px;
+            background-color: #ffffff;
+            border-radius: 24px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            box-shadow: 0 20px 45px -10px rgba(18, 51, 40, 0.12), 0 8px 16px -4px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e1ebe5;
+        }
+
+        /* Left Forest Green Panel */
+        .login-left-panel {
+            background: linear-gradient(155deg, #184337 0%, #113429 100%);
+            padding: 44px 40px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 40px;
             position: relative;
             overflow: hidden;
+            color: #ffffff;
         }
 
-        .left-panel::before {
+        /* Concentric Circles Watermark */
+        .login-left-panel::before {
             content: '';
             position: absolute;
-            top: -100px; right: -100px;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(22,163,74,0.15) 0%, transparent 70%);
+            right: -120px;
+            bottom: -120px;
+            width: 440px;
+            height: 440px;
             border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 0 50px rgba(255, 255, 255, 0.02),
+                        inset 0 0 0 100px rgba(255, 255, 255, 0.02),
+                        inset 0 0 0 160px rgba(255, 255, 255, 0.02);
+            pointer-events: none;
         }
 
-        .left-panel::after {
+        .login-left-panel::after {
             content: '';
             position: absolute;
-            bottom: -80px; left: -80px;
-            width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(34,197,94,0.1) 0%, transparent 70%);
+            right: 40px;
+            top: -60px;
+            width: 240px;
+            height: 240px;
             border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            pointer-events: none;
         }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .brand-icon {
-            width: 52px; height: 52px;
-            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 24px rgba(22,163,74,0.4);
-        }
-
-        .brand-text h1 { font-size: 20px; font-weight: 800; color: #fff; line-height: 1.2; }
-        .brand-text p { font-size: 12.5px; color: rgba(255,255,255,0.55); margin-top: 2px; }
-
-        .left-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .left-content .tagline {
-            font-size: 32px;
-            font-weight: 800;
-            color: #fff;
-            line-height: 1.25;
-            margin-bottom: 16px;
-        }
-
-        .left-content .tagline span { color: #4ade80; }
-
-        .left-content .desc {
-            font-size: 14px;
-            color: rgba(255,255,255,0.6);
-            line-height: 1.7;
-            max-width: 340px;
-            margin-bottom: 32px;
-        }
-
-        .feature-list { display: flex; flex-direction: column; gap: 12px; }
-
-        .feature-item {
+        /* Brand Row */
+        .left-brand-row {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 13.5px;
-            color: rgba(255,255,255,0.75);
-        }
-
-        .feature-dot {
-            width: 32px; height: 32px;
-            background: rgba(22,163,74,0.2);
-            border: 1px solid rgba(22,163,74,0.4);
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            font-size: 14px;
-        }
-
-        .school-badges {
-            display: flex;
-            gap: 10px;
             position: relative;
-            z-index: 1;
+            z-index: 2;
         }
 
-        .school-badge {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
+        .left-brand-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            border: 1.5px solid rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .left-brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .left-brand-title {
+            font-size: 16px;
             font-weight: 700;
-            border: 1px solid rgba(255,255,255,0.15);
+            color: #ffffff;
+            line-height: 1.2;
         }
 
-        .badge-sd { background: rgba(59,130,246,0.2); color: #93c5fd; }
-        .badge-mts { background: rgba(245,158,11,0.2); color: #fcd34d; }
-        .badge-smk { background: rgba(236,72,153,0.2); color: #f9a8d4; }
+        .left-brand-sub {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
 
-        /* Right Panel */
-        .right-panel {
-            width: 480px;
-            background: #fff;
+        /* Middle Pitch Content */
+        .left-pitch-content {
+            margin: 48px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .pitch-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            color: #6ee7b7;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .pitch-headline {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.25;
+            color: #ffffff;
+            letter-spacing: -0.4px;
+            margin-bottom: 14px;
+        }
+
+        .pitch-desc {
+            font-size: 13.5px;
+            color: rgba(255, 255, 255, 0.78);
+            line-height: 1.6;
+            max-width: 360px;
+        }
+
+        /* Left Footer Badge */
+        .left-footer-units {
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 0.4px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Right White Panel */
+        .login-right-panel {
+            padding: 48px 44px;
+            background-color: #ffffff;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 48px 44px;
         }
 
-        .login-header { margin-bottom: 32px; }
-        .login-header h2 { font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
-        .login-header p { font-size: 14px; color: #64748b; }
+        .right-header-block {
+            margin-bottom: 26px;
+        }
 
-        .form-group { margin-bottom: 18px; }
+        .right-eyebrow {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #1e5645;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
 
-        .form-label {
-            display: block;
+        .right-headline {
+            font-size: 24px;
+            font-weight: 800;
+            color: #111827;
+            letter-spacing: -0.3px;
+            margin-bottom: 6px;
+        }
+
+        .right-subheadline {
             font-size: 13px;
+            color: #6b7280;
+            line-height: 1.45;
+        }
+
+        /* Form Elements */
+        .form-field-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label-title {
+            display: block;
+            font-size: 12.5px;
             font-weight: 600;
             color: #374151;
             margin-bottom: 7px;
         }
 
-        .input-wrapper {
+        .input-relative-box {
             position: relative;
         }
 
-        .input-icon {
-            position: absolute;
-            left: 13px; top: 50%;
-            transform: translateY(-50%);
-            color: #9ca3af;
-            pointer-events: none;
-        }
-
-        .input-icon svg { width: 17px; height: 17px; }
-
-        .form-control {
+        .login-form-input {
             width: 100%;
-            padding: 11px 14px 11px 42px;
-            border: 1.5px solid #e2e8f0;
+            padding: 11px 14px;
+            border: 1.5px solid #e5e7eb;
             border-radius: 10px;
-            font-size: 14px;
-            color: #0f172a;
-            background: #f8fafc;
-            transition: all 0.2s;
+            font-size: 13.5px;
             font-family: inherit;
-        }
-
-        .form-control:focus {
+            color: #111827;
+            background-color: #ffffff;
+            transition: all 0.15s ease;
             outline: none;
-            border-color: #16a34a;
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(22,163,74,0.1);
         }
 
-        .form-control::placeholder { color: #94a3b8; }
-        .form-control.is-invalid { border-color: #ef4444; background: #fff5f5; }
-
-        .invalid-feedback {
-            font-size: 12px;
-            color: #dc2626;
-            margin-top: 5px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+        .login-form-input:focus {
+            border-color: #1e5645;
+            box-shadow: 0 0 0 3px rgba(30, 86, 69, 0.1);
         }
 
-        .form-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-            margin-top: -4px;
+        .login-form-input::placeholder {
+            color: #9ca3af;
         }
 
-        .checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
-        .checkbox-wrapper input { width: 15px; height: 15px; accent-color: #16a34a; cursor: pointer; }
-        .checkbox-wrapper span { font-size: 13px; color: #64748b; cursor: pointer; }
-
-        .forgot-link {
-            font-size: 13px;
-            color: #16a34a;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .forgot-link:hover { text-decoration: underline; }
-
-        .btn-login {
-            width: 100%;
-            padding: 13px;
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 14px rgba(22,163,74,0.3);
-            font-family: inherit;
-            letter-spacing: 0.01em;
-        }
-
-        .btn-login:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(22,163,74,0.4);
-        }
-
-        .btn-login:active { transform: translateY(0); }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 24px 0 20px;
-        }
-
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #e2e8f0;
-        }
-
-        .divider span { font-size: 12px; color: #94a3b8; white-space: nowrap; }
-
-        .demo-accounts {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-radius: 10px;
-            padding: 14px 16px;
-        }
-
-        .demo-accounts h4 {
-            font-size: 11.5px;
-            font-weight: 700;
-            color: #166534;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: 10px;
-        }
-
-        .demo-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px dashed #bbf7d0;
-        }
-
-        .demo-item:last-child { border-bottom: none; }
-
-        .demo-role { font-size: 12px; color: #166534; font-weight: 600; }
-        .demo-cred {
-            font-size: 11.5px;
-            color: #15803d;
-            font-family: monospace;
-            background: #dcfce7;
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-
-        .footer-note {
-            text-align: center;
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 24px;
-        }
-
-        /* Eye toggle for password */
-        .eye-toggle {
+        .password-toggle-btn {
             position: absolute;
-            right: 13px; top: 50%;
+            right: 12px;
+            top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
-            cursor: pointer;
             color: #9ca3af;
-            padding: 2px;
-        }
-        .eye-toggle:hover { color: #64748b; }
-        .eye-toggle svg { width: 17px; height: 17px; }
-
-        @media (max-width: 900px) {
-            .left-panel { display: none; }
-            .right-panel { width: 100%; padding: 40px 28px; }
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
         }
 
-        @media (max-width: 480px) {
-            .right-panel { padding: 32px 20px; }
+        .password-toggle-btn:hover {
+            color: #4b5563;
+        }
+
+        /* Checkbox & Forgot row */
+        .form-options-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            font-size: 12.5px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            color: #4b5563;
+            user-select: none;
+        }
+
+        .checkbox-container input {
+            accent-color: #184337;
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+        }
+
+        .forgot-password-link {
+            color: #1e5645;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .forgot-password-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Submit Button */
+        .btn-login-submit {
+            width: 100%;
+            padding: 12px 18px;
+            background-color: #164235;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .btn-login-submit:hover {
+            background-color: #103328;
+            box-shadow: 0 4px 12px rgba(22, 66, 53, 0.25);
+        }
+
+        /* Prototype info note */
+        .prototype-note-box {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 11.5px;
+            color: #9ca3af;
+            line-height: 1.45;
+        }
+
+        /* Quick Demo Account Selector (Helpful for test/review) */
+        .demo-quick-box {
+            margin-top: 18px;
+            padding: 12px;
+            background-color: #f7faf8;
+            border: 1px dashed #cfe0d8;
+            border-radius: 10px;
+        }
+
+        .demo-quick-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #1e5645;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .demo-pills-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .demo-account-pill {
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .demo-account-pill:hover {
+            border-color: #1e5645;
+            color: #1e5645;
+            background-color: #eef7f3;
+        }
+
+        /* Help link footer */
+        .right-help-footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 16px;
+        }
+
+        .right-help-footer a {
+            color: #1e5645;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .right-help-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Alert message */
+        .login-error-alert {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            margin-bottom: 18px;
+        }
+
+        @media (max-width: 820px) {
+            .login-card-container {
+                grid-template-columns: 1fr;
+            }
+            .login-left-panel {
+                display: none;
+            }
+            .login-right-panel {
+                padding: 36px 24px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Left Panel -->
-    <div class="left-panel">
-        <div class="brand">
-            <div class="brand-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="white" width="26" height="26">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
-                </svg>
-            </div>
-            <div class="brand-text">
-                <h1>Yayasan Al-Ghozaly</h1>
-                <p>Sistem Informasi Manajemen Guru</p>
+<div class="login-card-container">
+    <!-- Left Forest Green Panel -->
+    <div class="login-left-panel">
+        <div class="left-brand-row">
+            <div class="left-brand-badge">AG</div>
+            <div class="left-brand-text">
+                <span class="left-brand-title">Yayasan Al Ghozaly</span>
+                <span class="left-brand-sub">SISTEM INFORMASI AKADEMIK</span>
             </div>
         </div>
 
-        <div class="left-content">
-            <p class="tagline">Bersama Membangun<br><span>Pendidikan</span> yang<br>Lebih Baik</p>
-            <p class="desc">Platform terintegrasi untuk pengelolaan administrasi guru di seluruh jenjang pendidikan Yayasan Al-Ghozaly.</p>
-            <div class="feature-list">
-                <div class="feature-item"><div class="feature-dot">📅</div> Jadwal & Jurnal Mengajar Digital</div>
-                <div class="feature-item"><div class="feature-dot">✅</div> Presensi & Monitoring Kehadiran</div>
-                <div class="feature-item"><div class="feature-dot">📄</div> RPP, Modul Ajar & Bahan Ajar</div>
-                <div class="feature-item"><div class="feature-dot">⭐</div> Penilaian & Evaluasi Kinerja</div>
-            </div>
+        <div class="left-pitch-content">
+            <div class="pitch-eyebrow">Satu Sistem · Tiga Jenjang</div>
+            <h1 class="pitch-headline">Bersama mendidik, menuju masa depan.</h1>
+            <p class="pitch-desc">
+                Ruang kerja terpadu untuk mendukung kegiatan akademik, administrasi sekolah, dan pengembangan mutu pendidikan.
+            </p>
         </div>
 
-        <div class="school-badges">
-            <div class="school-badge badge-sd">SD Al-Ghozaly</div>
-            <div class="school-badge badge-mts">MTs Al-Ghozaly</div>
-            <div class="school-badge badge-smk">SMK Al-Ghozaly</div>
+        <div class="left-footer-units">
+            SD Al Ghozaly · MTs Al Ghozaly · SMK Al Ghozaly
         </div>
     </div>
 
-    <!-- Right Panel -->
-    <div class="right-panel">
-        <div class="login-header">
-            <h2>Selamat Datang 👋</h2>
-            <p>Silakan masuk untuk melanjutkan ke sistem</p>
+    <!-- Right Form Panel -->
+    <div class="login-right-panel">
+        <div class="right-header-block">
+            <div class="right-eyebrow">Selamat Datang Kembali</div>
+            <h2 class="right-headline">Masuk ke akun Anda</h2>
+            <p class="right-subheadline">Gunakan akun resmi yang telah terdaftar di sistem Yayasan Al Ghozaly.</p>
         </div>
 
-        @if ($errors->any())
-        <div style="background:#fee2e2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#b91c1c;display:flex;align-items:center;gap:8px;">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="17" height="17" style="flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+        @if (isset($errors) && $errors->any())
+        <div class="login-error-alert">
             {{ $errors->first() }}
         </div>
         @endif
@@ -382,85 +459,84 @@
         <form method="POST" action="{{ route('login') }}">
             @csrf
 
-            <div class="form-group">
-                <label class="form-label" for="email">Email atau Username</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-                    </span>
-                    <input type="text" id="email" name="email" class="form-control {{ $errors->has('email') ? 'is-invalid' : '' }}"
-                        placeholder="Email atau username" value="{{ old('email') }}" required autofocus autocomplete="username">
+            <div class="form-field-group">
+                <label class="form-label-title" for="email">Email atau username</label>
+                <div class="input-relative-box">
+                    <input type="text" id="email" name="email" class="login-form-input"
+                           placeholder="nama@alghozaly.sch.id"
+                           value="{{ old('email', 'admin_sd') }}" required autofocus autocomplete="username">
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" for="password">Password</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                    </span>
-                    <input type="password" id="password" name="password" class="form-control"
-                        placeholder="Kata sandi" required autocomplete="current-password">
-                    <button type="button" class="eye-toggle" onclick="togglePassword()" id="eyeBtn">
-                        <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                        <svg id="eyeClosed" style="display:none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+            <div class="form-field-group">
+                <label class="form-label-title" for="password">Kata sandi</label>
+                <div class="input-relative-box">
+                    <input type="password" id="password" name="password" class="login-form-input"
+                           placeholder="Masukkan kata sandi" value="password" required autocomplete="current-password">
+                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility()" aria-label="Lihat kata sandi">
+                        <i data-lucide="eye" id="eyeIcon" style="width:16px;height:16px;"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="form-row">
-                <label class="checkbox-wrapper">
+            <div class="form-options-row">
+                <label class="checkbox-container">
                     <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>
                     <span>Ingat saya</span>
                 </label>
-                <a href="#" class="forgot-link">Lupa password?</a>
+                <a href="#" class="forgot-password-link" onclick="alert('Silakan hubungi administrator sekolah untuk mengatur ulang kata sandi Anda.')">
+                    Lupa kata sandi?
+                </a>
             </div>
 
-            <button type="submit" class="btn-login">Masuk ke Sistem</button>
+            <button type="submit" class="btn-login-submit">
+                <span>Masuk ke sistem</span>
+                <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+            </button>
         </form>
 
-        <div class="divider">
-            <span>Akun Demo Tersedia</span>
-        </div>
-
-        <div class="demo-accounts">
-            <h4>🔑 Akun Demo (Password: password)</h4>
-            <div class="demo-item">
-                <span class="demo-role">Pengurus Yayasan</span>
-                <span class="demo-cred">pengurus</span>
-            </div>
-            <div class="demo-item">
-                <span class="demo-role">Kepala Sekolah SD</span>
-                <span class="demo-cred">kepsek_sd</span>
-            </div>
-            <div class="demo-item">
-                <span class="demo-role">Admin Sekolah MTs</span>
-                <span class="demo-cred">admin_mts</span>
-            </div>
-            <div class="demo-item">
-                <span class="demo-role">Guru SD</span>
-                <span class="demo-cred">guru_sd1</span>
+        <!-- Quick Demo Switcher -->
+        <div class="demo-quick-box">
+            <div class="demo-quick-title">Coba Akun Demo (Klik untuk isi cepat):</div>
+            <div class="demo-pills-row">
+                <button type="button" class="demo-account-pill" onclick="fillAccount('admin_sd', 'password')">Admin SD</button>
+                <button type="button" class="demo-account-pill" onclick="fillAccount('guru_sd1', 'password')">Guru SD</button>
+                <button type="button" class="demo-account-pill" onclick="fillAccount('kepsek_sd', 'password')">Kepala SD</button>
+                <button type="button" class="demo-account-pill" onclick="fillAccount('pengurus', 'password')">Pengurus</button>
             </div>
         </div>
 
-        <p class="footer-note">© {{ date('Y') }} Yayasan Al-Ghozaly. All rights reserved.</p>
+        <div class="prototype-note-box">
+            Prototipe demonstrasi: tombol masuk akan membuka dashboard sesuai peran. Autentikasi terhubung ke server database.
+        </div>
+
+        <div class="right-help-footer">
+            Butuh bantuan akses? <a href="mailto:admin@alghozaly.sch.id">Hubungi Admin Sekolah</a>
+        </div>
     </div>
+</div>
 
-    <script>
-        function togglePassword() {
-            const input = document.getElementById('password');
-            const eyeOpen = document.getElementById('eyeOpen');
-            const eyeClosed = document.getElementById('eyeClosed');
-            if (input.type === 'password') {
-                input.type = 'text';
-                eyeOpen.style.display = 'none';
-                eyeClosed.style.display = 'block';
-            } else {
-                input.type = 'password';
-                eyeOpen.style.display = 'block';
-                eyeClosed.style.display = 'none';
-            }
+<script>
+    lucide.createIcons();
+
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.setAttribute('data-lucide', 'eye');
         }
-    </script>
+        lucide.createIcons();
+    }
+
+    function fillAccount(username, password) {
+        document.getElementById('email').value = username;
+        document.getElementById('password').value = password;
+    }
+</script>
+
 </body>
 </html>

@@ -28,7 +28,15 @@ class RppModulAjarController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('status_validasi', $request->status);
+            $statusMap = [
+                'valid' => 'disetujui',
+                'revisi' => 'ditolak',
+                'disetujui' => 'disetujui',
+                'ditolak' => 'ditolak',
+                'menunggu' => 'menunggu',
+            ];
+            $statusVal = $statusMap[$request->status] ?? $request->status;
+            $query->where('status_validasi', $statusVal);
         }
 
         if ($request->filled('tipe')) {
