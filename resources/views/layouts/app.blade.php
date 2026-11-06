@@ -1886,6 +1886,10 @@
                 <i data-lucide="check"></i>
                 <span>Presensi Guru</span>
             </a>
+            <a href="{{ route('rekap-beban.index') }}" class="sidebar-link {{ request()->routeIs('rekap-beban.*') ? 'active' : '' }}">
+                <i data-lucide="table-properties"></i>
+                <span>Lihat Beban Ajar</span>
+            </a>
             <a href="{{ route('guru.index') }}" class="sidebar-link {{ request()->routeIs('guru.*') ? 'active' : '' }}">
                 <i data-lucide="users"></i>
                 <span>Data Guru</span>
