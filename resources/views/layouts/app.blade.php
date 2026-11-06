@@ -1703,6 +1703,10 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
+        .modal-box-lg {
+            max-width: 620px;
+        }
+
         .modal-title {
             font-size: 16px;
             font-weight: 700;
@@ -1763,6 +1767,7 @@
 <body>
 
 @php
+    $errors = $errors ?? new \Illuminate\Support\ViewErrorBag();
     $authUser = auth()->user();
     $role = $authUser?->role ?? 'guru';
     $jenjang = $authUser?->jenjang ?? 'SD';
@@ -1960,11 +1965,20 @@
             <div>Pusat administrasi pendidikan</div>
             <div>Yayasan Al Ghozaly · 2026</div>
         </div>
-        <div class="sidebar-user-block">
-            <div class="user-avatar-circle">{{ $initials }}</div>
-            <div class="user-block-details">
+        <div class="sidebar-user-block" onclick="openSettingsModal()" style="cursor: pointer;" title="Klik untuk edit profil">
+            <div class="user-avatar-circle" style="overflow:hidden;position:relative;">
+                @if($authUser?->foto)
+                    <img src="{{ asset('storage/' . $authUser->foto) }}" alt="{{ $authUser->name }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.onerror=null;this.style.display='none';this.parentElement.textContent='{{ $initials }}';">
+                @else
+                    {{ $initials }}
+                @endif
+            </div>
+            <div class="user-block-details" style="flex:1;">
                 <div class="user-block-name">{{ $authUser?->name ?? 'Pengguna' }}</div>
-                <div class="user-block-role">{{ $roleTitle }}</div>
+                <div class="user-block-role" style="display:flex;align-items:center;justify-content:space-between;">
+                    <span>{{ $roleTitle }}</span>
+                    <i data-lucide="settings" style="width:12px;height:12px;opacity:0.75;"></i>
+                </div>
             </div>
         </div>
         <form method="POST" action="{{ route('logout') }}">
@@ -2039,7 +2053,7 @@
             </div>
 
             <!-- Settings Button -->
-            <button class="topbar-icon-btn" title="Pengaturan Sistem" onclick="openSettingsModal()" aria-label="Pengaturan">
+            <button class="topbar-icon-btn" title="Edit Profil & Pengaturan" onclick="openSettingsModal()" aria-label="Pengaturan">
                 <i data-lucide="settings"></i>
             </button>
         </div>
@@ -2070,23 +2084,155 @@
     </main>
 </div>
 
-<!-- Settings Quick Modal -->
+<!-- Edit Profile & Settings Modal -->
 <div class="modal-overlay" id="settingsModal" onclick="if(event.target===this)closeSettingsModal()">
-    <div class="modal-box">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-            <div class="modal-title">Informasi Pengguna & Sistem</div>
-            <button type="button" onclick="closeSettingsModal()" style="background:none;border:none;cursor:pointer;color:var(--text-subtle);font-size:18px;">&times;</button>
+    <div class="modal-box modal-box-lg" style="max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 22px 24px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; border-bottom: 1px solid var(--card-border); padding-bottom: 12px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:34px; height:34px; border-radius:8px; background:var(--forest-100); color:var(--forest-800); display:flex; align-items:center; justify-content:center;">
+                    <i data-lucide="user-cog" style="width:18px;height:18px;"></i>
+                </div>
+                <div>
+                    <div class="modal-title" style="margin-bottom:0; font-size:15px; font-weight:700;">Edit Profil & Data Diri</div>
+                    <div style="font-size:11.5px; color:var(--text-subtle);">Perbarui informasi data pribadi dan foto profil Anda</div>
+                </div>
+            </div>
+            <button type="button" onclick="closeSettingsModal()" style="background:none; border:none; cursor:pointer; color:var(--text-subtle); font-size:22px; line-height:1; padding:2px 6px;">&times;</button>
         </div>
-        <div style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">
-            <p><strong>Nama:</strong> {{ $authUser?->name }}</p>
-            <p><strong>Email:</strong> {{ $authUser?->email }}</p>
-            <p><strong>Peran:</strong> {{ $roleTitle }}</p>
-            <p><strong>Jenjang Unit:</strong> {{ $jenjang }}</p>
-            <p><strong>Tahun Ajaran:</strong> 2026 / 2027 (Semester Ganjil)</p>
-        </div>
-        <div style="text-align:right;">
-            <button type="button" class="btn-forest-primary" onclick="closeSettingsModal()">Tutup</button>
-        </div>
+
+        <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" id="modalProfileForm">
+            @csrf
+            @method('PUT')
+
+            <!-- Foto Profil & Quick Info -->
+            <div style="display:flex; align-items:center; gap:14px; padding:12px 14px; background:var(--forest-50); border-radius:var(--radius-md); border:1px solid #cce3dc; margin-bottom:16px;">
+                <div style="position:relative; width:62px; height:62px; flex-shrink:0;">
+                    <div id="modalAvatarDisplay" class="user-avatar-circle" style="width:62px; height:62px; font-size:20px; overflow:hidden; border:2px solid #ffffff; box-shadow:0 2px 6px rgba(0,0,0,0.1); position:relative;">
+                        <span id="modalAvatarInitials" style="{{ $authUser?->foto ? 'display:none;' : '' }}">{{ $initials }}</span>
+                        <img id="modalAvatarImg" src="{{ $authUser?->foto ? asset('storage/' . $authUser->foto) : '' }}" alt="Foto Profil" style="{{ $authUser?->foto ? 'width:100%; height:100%; object-fit:cover;' : 'display:none;' }}" onerror="this.onerror=null;this.style.display='none';document.getElementById('modalAvatarInitials').style.display='inline-block';">
+                    </div>
+                </div>
+                <div style="flex:1;">
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+                        <label for="modalFotoInput" class="btn-pill-action btn-pill-secondary" style="cursor:pointer; font-size:11.5px; padding:4px 10px; display:inline-flex; align-items:center; gap:5px;">
+                            <i data-lucide="camera" style="width:13px; height:13px;"></i>
+                            <span>Pilih Foto</span>
+                        </label>
+                        <input type="file" name="foto" id="modalFotoInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" onchange="previewModalAvatar(event)">
+
+                        @if($authUser?->foto)
+                            <button type="button" class="btn-pill-action" id="modalDeletePhotoBtn" style="font-size:11.5px; padding:4px 10px; color:#ef4444; border-color:#fca5a5; display:inline-flex; align-items:center; gap:4px;" onclick="hapusFotoProfilModal()">
+                                <i data-lucide="trash-2" style="width:12px; height:12px;"></i>
+                                <span>Hapus Foto</span>
+                            </button>
+                        @endif
+                    </div>
+                    <div style="font-size:11px; color:var(--text-subtle);">Format: JPG, PNG, atau WEBP. Maks 2 MB.</div>
+                    <div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">
+                        <span class="badge badge-success" style="font-size:10.5px;">{{ $roleTitle }}</span>
+                        <span class="badge badge-info" style="font-size:10.5px;">{{ $unitLabel }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden input for delete photo -->
+            <input type="hidden" name="hapus_foto" id="modalHapusFotoInput" value="0">
+
+            <!-- Data Fields Grid -->
+            <div class="form-grid form-grid-2" style="margin-bottom:12px;">
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label" for="modal_name">Nama Lengkap <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="modal_name" name="name" class="form-control" value="{{ old('name', $authUser?->name) }}" required>
+                    @error('name')
+                        <div class="form-error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label" for="modal_email">Email <span style="color:#ef4444;">*</span></label>
+                    <input type="email" id="modal_email" name="email" class="form-control" value="{{ old('email', $authUser?->email) }}" required>
+                    @error('email')
+                        <div class="form-error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label" for="modal_nip">NIP / NUPTK</label>
+                    <input type="text" id="modal_nip" name="nip" class="form-control" value="{{ old('nip', $authUser?->nip) }}" placeholder="Nomor Induk Pegawai">
+                    @error('nip')
+                        <div class="form-error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label" for="modal_telepon">No. Telepon / WhatsApp</label>
+                    <input type="text" id="modal_telepon" name="telepon" class="form-control" value="{{ old('telepon', $authUser?->telepon) }}" placeholder="08xxxxxxxxxx">
+                    @error('telepon')
+                        <div class="form-error">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:10px;">
+                <label class="form-label" for="modal_jabatan">Jabatan</label>
+                <input type="text" id="modal_jabatan" name="jabatan" class="form-control" value="{{ old('jabatan', $authUser?->jabatan) }}" placeholder="Contoh: Guru Pengajar / Staf">
+                @error('jabatan')
+                    <div class="form-error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label" for="modal_alamat">Alamat Tempat Tinggal</label>
+                <textarea id="modal_alamat" name="alamat" class="form-control" rows="2" placeholder="Alamat domisili saat ini...">{{ old('alamat', $authUser?->alamat) }}</textarea>
+                @error('alamat')
+                    <div class="form-error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <!-- Password Accordion / Section -->
+            <div style="border-top:1px dashed var(--card-border); padding-top:12px; margin-top:6px; margin-bottom:14px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; cursor:pointer;" onclick="togglePasswordSection()">
+                    <span style="font-size:12.5px; font-weight:700; color:var(--text-heading); display:flex; align-items:center; gap:6px;">
+                        <i data-lucide="lock" style="width:14px; height:14px;"></i>
+                        Ubah Kata Sandi (Opsional)
+                    </span>
+                    <span id="pwToggleIcon" style="font-size:11px; color:var(--forest-700); font-weight:600;">Klik untuk ubah &darr;</span>
+                </div>
+
+                <div id="passwordFieldsWrapper" style="display:none;">
+                    <div class="form-grid form-grid-2">
+                        <div class="form-group" style="margin-bottom:6px;">
+                            <label class="form-label" for="modal_password">Password Baru</label>
+                            <input type="password" id="modal_password" name="password" class="form-control" placeholder="Minimal 8 karakter" autocomplete="new-password">
+                            @error('password')
+                                <div class="form-error">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group" style="margin-bottom:6px;">
+                            <label class="form-label" for="modal_password_confirmation">Konfirmasi Password Baru</label>
+                            <input type="password" id="modal_password_confirmation" name="password_confirmation" class="form-control" placeholder="Ulangi password baru" autocomplete="new-password">
+                        </div>
+                    </div>
+                    <div style="font-size:11px; color:var(--text-subtle); margin-top:2px;">Kosongkan jika tidak bermaksud mengganti password akun.</div>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div style="display:flex; align-items:center; justify-content:space-between; padding-top:12px; border-top:1px solid var(--card-border); margin-top:12px;">
+                <a href="{{ route('profile.edit') }}" style="font-size:12px; color:var(--forest-700); text-decoration:none; display:inline-flex; align-items:center; gap:4px; font-weight:600;">
+                    <i data-lucide="external-link" style="width:13px; height:13px;"></i>
+                    <span>Halaman Lengkap Profil</span>
+                </a>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button type="button" class="btn-pill-action btn-pill-secondary" onclick="closeSettingsModal()">Batal</button>
+                    <button type="submit" class="btn-forest-primary" style="padding:7px 18px; font-size:13px;">
+                        <i data-lucide="save" style="width:14px; height:14px;"></i>
+                        <span>Simpan Perubahan</span>
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -2120,10 +2266,65 @@
     // Settings Modal
     function openSettingsModal() {
         document.getElementById('settingsModal').style.display = 'flex';
+        lucide.createIcons();
     }
     function closeSettingsModal() {
         document.getElementById('settingsModal').style.display = 'none';
     }
+
+    // Preview photo on select in modal
+    function previewModalAvatar(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById('modalAvatarImg');
+            const initials = document.getElementById('modalAvatarInitials');
+            img.src = e.target.result;
+            img.style.display = 'block';
+            if (initials) {
+                initials.style.display = 'none';
+            }
+            document.getElementById('modalHapusFotoInput').value = '0';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Mark photo for deletion in modal
+    function hapusFotoProfilModal() {
+        if (!confirm('Apakah Anda yakin ingin menghapus foto profil?')) return;
+        document.getElementById('modalHapusFotoInput').value = '1';
+        const img = document.getElementById('modalAvatarImg');
+        const initials = document.getElementById('modalAvatarInitials');
+        if (img) img.style.display = 'none';
+        if (initials) initials.style.display = 'inline-block';
+        const btn = document.getElementById('modalDeletePhotoBtn');
+        if (btn) btn.style.display = 'none';
+    }
+
+    // Toggle password section in modal
+    function togglePasswordSection(forceOpen = false) {
+        const wrapper = document.getElementById('passwordFieldsWrapper');
+        const icon = document.getElementById('pwToggleIcon');
+        if (!wrapper) return;
+
+        if (forceOpen || wrapper.style.display === 'none') {
+            wrapper.style.display = 'block';
+            if (icon) icon.innerHTML = 'Tutup &uarr;';
+        } else {
+            wrapper.style.display = 'none';
+            if (icon) icon.innerHTML = 'Klik untuk ubah &darr;';
+        }
+    }
+
+    @if($errors->any())
+        // Auto open modal if validation error occurs
+        openSettingsModal();
+        @if($errors->has('password') || $errors->has('password_confirmation'))
+            togglePasswordSection(true);
+        @endif
+    @endif
 
     // Auto dismiss alert
     const flashAlert = document.getElementById('flashAlert');

@@ -11,6 +11,7 @@ use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PengajuanIzinCutiController;
 use App\Http\Controllers\PenilaianController;
 use App\Http\Controllers\PresensiGuruController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RekapBebanMengajarController;
 use App\Http\Controllers\RppModulAjarController;
 use App\Http\Controllers\SkTugasController;
@@ -29,6 +30,11 @@ Route::middleware('auth')->group(function () {
 
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Profile Management (All authenticated users)
+    Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('profile/photo', [ProfileController::class, 'deletePhoto'])->name('profile.delete-photo');
 
     // Data Guru — pengurus yayasan, kepala sekolah, admin sekolah
     Route::resource('guru', GuruController::class)
