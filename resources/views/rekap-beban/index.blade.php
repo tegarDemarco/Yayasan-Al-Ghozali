@@ -2,39 +2,52 @@
 @section('title','Rekap Beban Mengajar')
 @section('page-title','Rekap Beban Mengajar')
 
+@php
+    $errors = $errors ?? new \Illuminate\Support\ViewErrorBag();
+@endphp
+
 @section('content')
-<div class="page-header">
-    <div class="page-header-left">
-        <h1>Rekap Beban Mengajar</h1>
-        <p>Rekapitulasi jam mengajar guru per semester</p>
+<div class="page-header-row" style="margin-bottom: 20px;">
+    <div>
+        <h1 class="page-title">Rekap Beban Mengajar</h1>
+        <p class="page-subtitle">Rekapitulasi jam mengajar guru per semester</p>
     </div>
-    @if(auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah())
-    <button class="btn btn-primary" onclick="document.getElementById('generateModal').classList.add('active')">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
-        Generate Rekap
-    </button>
-    @endif
 </div>
 
-{{-- Filter --}}
-<div class="card" style="margin-bottom:16px;">
-    <form method="GET">
-        <div class="filter-bar">
-            <input type="text" name="tahun_ajaran" class="form-control" style="width:180px;" placeholder="Tahun Ajaran (2025/2026)" value="{{ request('tahun_ajaran') }}">
+{{-- Filter & Generate Action Card --}}
+<div class="surface-white-card" style="padding: 16px 20px; margin-bottom: 20px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+        <form method="GET" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0;">
+            <input type="text" name="tahun_ajaran" class="form-control" style="width: 220px;" placeholder="Tahun Ajaran (Mis: 2025/2026)" value="{{ request('tahun_ajaran') }}">
             @if(auth()->user()->isPengurusYayasan())
-            <select name="jenjang" class="form-control" style="width:auto;">
+            <select name="jenjang" class="form-control" style="width: auto;">
                 <option value="">Semua Jenjang</option>
-                <option value="SD" {{ request('jenjang')==='SD'?'selected':'' }}>SD</option>
-                <option value="MTs" {{ request('jenjang')==='MTs'?'selected':'' }}>MTs</option>
-                <option value="SMK" {{ request('jenjang')==='SMK'?'selected':'' }}>SMK</option>
+                <option value="SD" {{ request('jenjang') === 'SD' ? 'selected' : '' }}>Unit SD</option>
+                <option value="MTs" {{ request('jenjang') === 'MTs' ? 'selected' : '' }}>Unit MTs</option>
+                <option value="SMK" {{ request('jenjang') === 'SMK' ? 'selected' : '' }}>Unit SMK</option>
             </select>
             @endif
-            <button type="submit" class="btn btn-secondary">Filter</button>
-            @if(request()->anyFilled(['tahun_ajaran','jenjang']))
-            <a href="{{ route('rekap-beban.index') }}" class="btn btn-secondary">Reset</a>
+            <button type="submit" class="btn-pill-action btn-pill-secondary">
+                <i data-lucide="filter" style="width: 14px; height: 14px;"></i>
+                <span>Filter</span>
+            </button>
+            @if(request()->anyFilled(['tahun_ajaran', 'jenjang']))
+            <a href="{{ route('rekap-beban.index') }}" class="btn-pill-action btn-pill-secondary" style="color: #ef4444;" title="Reset Filter">
+                <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                <span>Reset</span>
+            </a>
             @endif
+        </form>
+
+        @if(auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah())
+        <div>
+            <button type="button" class="btn-forest-primary" onclick="openGenerateModal()" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600;">
+                <i data-lucide="rotate-cw" style="width: 15px; height: 15px;"></i>
+                <span>Generate Rekap</span>
+            </button>
         </div>
-    </form>
+        @endif
+    </div>
 </div>
 
 <div class="card">
@@ -149,13 +162,11 @@
 
 {{-- Generate Modal --}}
 @if(auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah())
-<div class="modal-overlay" id="generateModal" onclick="if(event.target===this)this.classList.remove('active')">
+<div class="modal-overlay" id="generateModal" onclick="if(event.target===this)closeGenerateModal()">
     <div class="modal">
         <div class="modal-header">
             <div class="modal-title">Generate Rekap Beban Mengajar</div>
-            <button class="modal-close" onclick="document.getElementById('generateModal').classList.remove('active')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
+            <button type="button" class="modal-close" onclick="closeGenerateModal()">&times;</button>
         </div>
         <p style="font-size:13.5px;color:var(--text-secondary);margin-bottom:20px;">
             Sistem akan menghitung otomatis total jam mengajar setiap guru berdasarkan jadwal yang aktif.
@@ -165,16 +176,20 @@
             <div class="form-group">
                 <label class="form-label">Sekolah <span class="req">*</span></label>
                 <select name="sekolah_id" class="form-control" required>
+                    @if($sekolahs->count() > 1)
                     <option value="">-- Pilih Sekolah --</option>
+                    @endif
                     @foreach($sekolahs as $s)
-                    <option value="{{ $s->id }}">{{ $s->nama_sekolah }} ({{ $s->jenjang }})</option>
+                    <option value="{{ $s->id }}" {{ (string)old('sekolah_id', $defaultSekolahId ?? '') === (string)$s->id ? 'selected' : '' }}>
+                        {{ $s->nama_sekolah }} ({{ $s->jenjang }})
+                    </option>
                     @endforeach
                 </select>
             </div>
             <div class="form-grid form-grid-2">
                 <div class="form-group">
                     <label class="form-label">Tahun Ajaran <span class="req">*</span></label>
-                    <input type="text" name="tahun_ajaran" class="form-control" value="2025/2026" required>
+                    <input type="text" name="tahun_ajaran" class="form-control" value="{{ request('tahun_ajaran', '2025/2026') }}" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Semester <span class="req">*</span></label>
@@ -184,15 +199,31 @@
                     </select>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('generateModal').classList.remove('active')">Batal</button>
-                <button type="submit" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
-                    Generate Sekarang
+            <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px; border-top:1px solid var(--card-border); padding-top:16px;">
+                <button type="button" class="btn-pill-action btn-pill-secondary" onclick="closeGenerateModal()">Batal</button>
+                <button type="submit" class="btn-forest-primary" style="padding:8px 18px; font-size:13px;">
+                    <i data-lucide="rotate-cw" style="width:14px; height:14px;"></i>
+                    <span>Generate Sekarang</span>
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    function openGenerateModal() {
+        const modal = document.getElementById('generateModal');
+        if (modal) {
+            modal.classList.add('active');
+            if (window.lucide) lucide.createIcons();
+        }
+    }
+    function closeGenerateModal() {
+        const modal = document.getElementById('generateModal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+    }
+</script>
 @endif
 @endsection

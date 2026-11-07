@@ -88,24 +88,76 @@ class JadwalMengajarController extends Controller
     public function create(): View
     {
         $user = auth()->user();
-        $gurus = Guru::with('user')->where('status', 'aktif')->get();
-        $sekolahs = Sekolah::all();
 
-        return view('jadwal-mengajar.create', compact('gurus', 'sekolahs'));
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki akses untuk menambah jadwal.');
+        }
+
+        $guruQuery = Guru::with('user')->where('status', 'aktif');
+        $defaultSekolahId = null;
+
+        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $guruQuery->where(function ($q) use ($user, $sekolahId) {
+                if ($user->jenjang) {
+                    $q->where('jenjang', $user->jenjang);
+                }
+                if ($sekolahId) {
+                    $q->orWhere('sekolah_id', $sekolahId);
+                }
+            });
+
+            $sekolahs = Sekolah::where('id', $sekolahId)->get();
+            if ($sekolahs->isEmpty() && $user->jenjang) {
+                $sekolahs = Sekolah::where('jenjang', $user->jenjang)->get();
+            }
+            $defaultSekolahId = $sekolahs->first()?->id ?? $sekolahId;
+        } else {
+            // Pengurus Yayasan
+            $sekolahs = Sekolah::all();
+        }
+
+        $gurus = $guruQuery->get();
+
+        return view('jadwal-mengajar.create', compact('gurus', 'sekolahs', 'defaultSekolahId'));
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $user = auth()->user();
+
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki izin untuk menambah jadwal.');
+        }
+
+        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($sekolahId) {
+                $request->merge(['sekolah_id' => $sekolahId]);
+            }
+        }
+
         $validated = $request->validate([
-            'guru_id' => ['required', 'exists:gurus,id'],
+            'guru_id' => [
+                'required',
+                'exists:gurus,id',
+                function ($attribute, $value, $fail) use ($user) {
+                    if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+                        $guru = Guru::find($value);
+                        if ($guru && $user->jenjang && $guru->jenjang !== $user->jenjang) {
+                            $fail('Guru yang dipilih harus berasal dari jenjang '.$user->jenjang.'.');
+                        }
+                    }
+                },
+            ],
             'sekolah_id' => ['required', 'exists:sekolahs,id'],
-            'mata_pelajaran' => ['required', 'string'],
-            'kelas' => ['required', 'string'],
+            'mata_pelajaran' => ['required', 'string', 'max:255'],
+            'kelas' => ['required', 'string', 'max:50'],
             'hari' => ['required', 'in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu'],
             'jam_mulai' => ['required', 'date_format:H:i'],
             'jam_selesai' => ['required', 'date_format:H:i', 'after:jam_mulai'],
-            'ruangan' => ['nullable', 'string'],
-            'tahun_ajaran' => ['required', 'string'],
+            'ruangan' => ['nullable', 'string', 'max:100'],
+            'tahun_ajaran' => ['required', 'string', 'max:20'],
             'semester' => ['required', 'in:Ganjil,Genap'],
         ]);
 
@@ -116,24 +168,85 @@ class JadwalMengajarController extends Controller
 
     public function edit(JadwalMengajar $jadwalMengajar): View
     {
-        $gurus = Guru::with('user')->where('status', 'aktif')->get();
-        $sekolahs = Sekolah::all();
+        $user = auth()->user();
 
-        return view('jadwal-mengajar.edit', compact('jadwalMengajar', 'gurus', 'sekolahs'));
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki akses untuk mengedit jadwal.');
+        }
+
+        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($jadwalMengajar->sekolah_id != $sekolahId) {
+                abort(403, 'Anda tidak memiliki akses untuk mengubah jadwal sekolah lain.');
+            }
+        }
+
+        $guruQuery = Guru::with('user')->where('status', 'aktif');
+        $defaultSekolahId = $jadwalMengajar->sekolah_id;
+
+        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $guruQuery->where(function ($q) use ($user, $sekolahId) {
+                if ($user->jenjang) {
+                    $q->where('jenjang', $user->jenjang);
+                }
+                if ($sekolahId) {
+                    $q->orWhere('sekolah_id', $sekolahId);
+                }
+            });
+
+            $sekolahs = Sekolah::where('id', $sekolahId)->get();
+            if ($sekolahs->isEmpty() && $user->jenjang) {
+                $sekolahs = Sekolah::where('jenjang', $user->jenjang)->get();
+            }
+        } else {
+            $sekolahs = Sekolah::all();
+        }
+
+        $gurus = $guruQuery->get();
+
+        return view('jadwal-mengajar.edit', compact('jadwalMengajar', 'gurus', 'sekolahs', 'defaultSekolahId'));
     }
 
     public function update(Request $request, JadwalMengajar $jadwalMengajar): RedirectResponse
     {
+        $user = auth()->user();
+
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki akses untuk mengedit jadwal.');
+        }
+
+        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($jadwalMengajar->sekolah_id != $sekolahId) {
+                abort(403, 'Anda tidak memiliki akses untuk mengubah jadwal sekolah lain.');
+            }
+            if ($sekolahId) {
+                $request->merge(['sekolah_id' => $sekolahId]);
+            }
+        }
+
         $validated = $request->validate([
-            'guru_id' => ['required', 'exists:gurus,id'],
+            'guru_id' => [
+                'required',
+                'exists:gurus,id',
+                function ($attribute, $value, $fail) use ($user) {
+                    if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+                        $guru = Guru::find($value);
+                        if ($guru && $user->jenjang && $guru->jenjang !== $user->jenjang) {
+                            $fail('Guru yang dipilih harus berasal dari jenjang '.$user->jenjang.'.');
+                        }
+                    }
+                },
+            ],
             'sekolah_id' => ['required', 'exists:sekolahs,id'],
-            'mata_pelajaran' => ['required', 'string'],
-            'kelas' => ['required', 'string'],
+            'mata_pelajaran' => ['required', 'string', 'max:255'],
+            'kelas' => ['required', 'string', 'max:50'],
             'hari' => ['required', 'in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu'],
             'jam_mulai' => ['required', 'date_format:H:i'],
             'jam_selesai' => ['required', 'date_format:H:i', 'after:jam_mulai'],
-            'ruangan' => ['nullable', 'string'],
-            'tahun_ajaran' => ['required', 'string'],
+            'ruangan' => ['nullable', 'string', 'max:100'],
+            'tahun_ajaran' => ['required', 'string', 'max:20'],
             'semester' => ['required', 'in:Ganjil,Genap'],
             'is_aktif' => ['boolean'],
         ]);
@@ -145,6 +258,19 @@ class JadwalMengajarController extends Controller
 
     public function destroy(JadwalMengajar $jadwalMengajar): RedirectResponse
     {
+        $user = auth()->user();
+
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki akses untuk menghapus jadwal.');
+        }
+
+        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($jadwalMengajar->sekolah_id != $sekolahId) {
+                abort(403, 'Anda tidak memiliki akses untuk menghapus jadwal sekolah lain.');
+            }
+        }
+
         $jadwalMengajar->delete();
 
         return redirect()->route('jadwal-mengajar.index')->with('success', 'Jadwal mengajar berhasil dihapus.');
@@ -152,6 +278,19 @@ class JadwalMengajarController extends Controller
 
     public function publish(JadwalMengajar $jadwalMengajar): RedirectResponse
     {
+        $user = auth()->user();
+
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki akses untuk mempublikasikan jadwal.');
+        }
+
+        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($jadwalMengajar->sekolah_id != $sekolahId) {
+                abort(403, 'Anda tidak memiliki akses untuk mengubah status jadwal sekolah lain.');
+            }
+        }
+
         $jadwalMengajar->update(['is_aktif' => ! $jadwalMengajar->is_aktif]);
         $statusText = $jadwalMengajar->is_aktif ? 'dipublikasikan' : 'diubah menjadi draft';
 
