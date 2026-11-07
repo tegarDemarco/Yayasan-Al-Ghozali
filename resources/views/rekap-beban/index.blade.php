@@ -149,7 +149,7 @@
 
 {{-- Generate Modal --}}
 @if(auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah())
-<div class="modal-overlay" id="generateModal">
+<div class="modal-overlay" id="generateModal" onclick="if(event.target===this)this.classList.remove('active')">
     <div class="modal">
         <div class="modal-header">
             <div class="modal-title">Generate Rekap Beban Mengajar</div>

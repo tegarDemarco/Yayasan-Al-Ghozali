@@ -71,7 +71,9 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:guru,kepala_sekolah,admin_sekolah');
 
     // Pengajuan Izin / Cuti
-    Route::resource('pengajuan-izin', PengajuanIzinCutiController::class)->except(['edit', 'update'])
+    Route::resource('pengajuan-izin', PengajuanIzinCutiController::class)
+        ->parameters(['pengajuan-izin' => 'pengajuanIzinCuti'])
+        ->except(['edit', 'update'])
         ->middleware('role:guru,kepala_sekolah,admin_sekolah');
     Route::post('pengajuan-izin/{pengajuanIzinCuti}/approve', [PengajuanIzinCutiController::class, 'approve'])
         ->name('pengajuan-izin.approve')
