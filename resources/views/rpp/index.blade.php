@@ -132,14 +132,20 @@
                     </td>
 
                     <td style="text-align: right;">
-                        @if(auth()->user()->isKepalaSekolah())
-                            {{-- Kepala Sekolah Actions matching wireframe --}}
-                            @if($isDisetujui)
-                                <span class="btn-pill-action btn-pill-done">
-                                    • Selesai divalidasi
-                                </span>
-                            @else
-                                <div style="display:inline-flex;gap:6px;align-items:center;">
+                        <div style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+                            {{-- Detail button for all roles --}}
+                            <a href="{{ route('rpp.show', $rpp) }}" class="btn-pill-action btn-pill-secondary" title="Lihat Detail">
+                                <i data-lucide="eye" style="width:13px;height:13px;"></i>
+                                <span>Detail</span>
+                            </a>
+
+                            @if(auth()->user()->isKepalaSekolah())
+                                {{-- Kepala Sekolah Actions --}}
+                                @if($isDisetujui)
+                                    <span class="btn-pill-action btn-pill-done">
+                                        • Valid
+                                    </span>
+                                @else
                                     {{-- Validasi form --}}
                                     <form method="POST" action="{{ route('rpp.validasi', $rpp) }}" style="display:inline;">
                                         @csrf
@@ -154,18 +160,17 @@
                                             onclick="openRevisiModal({{ $rpp->id }}, '{{ addslashes($rpp->judul) }}')">
                                         Revisi
                                     </button>
-                                </div>
-                            @endif
-                        @else
-                            {{-- Guru / Admin actions --}}
-                            @if($rpp->file_path)
-                                <a href="{{ asset('storage/'.$rpp->file_path) }}" target="_blank" class="btn-pill-action btn-pill-secondary">
-                                    Download
-                                </a>
+                                @endif
                             @else
-                                <span class="btn-pill-action btn-pill-secondary" style="opacity:0.6;">Lihat</span>
+                                {{-- Guru / Admin actions --}}
+                                @if($rpp->file_path)
+                                    <a href="{{ asset('storage/'.$rpp->file_path) }}" target="_blank" class="btn-pill-action btn-pill-secondary">
+                                        <i data-lucide="download" style="width:13px;height:13px;"></i>
+                                        <span>Unduh</span>
+                                    </a>
+                                @endif
                             @endif
-                        @endif
+                        </div>
                     </td>
                 </tr>
                 @empty

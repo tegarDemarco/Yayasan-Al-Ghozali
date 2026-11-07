@@ -74,6 +74,13 @@ class RppModulAjarController extends Controller
         return view('rpp.index', compact('rpps', 'gurus'));
     }
 
+    public function show(RppModulAjar $rpp): View
+    {
+        $rpp->load(['guru.user', 'sekolah', 'validator']);
+
+        return view('rpp.show', compact('rpp'));
+    }
+
     public function create(): View
     {
         $user = auth()->user();
