@@ -97,8 +97,12 @@
         <div class="card" style="position:sticky;top:calc(var(--header-height) + 20px);">
             <div class="card-title" style="margin-bottom:16px;">Informasi Guru</div>
             <div style="text-align:center;padding:16px 0;">
-                <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:26px;margin:0 auto 12px;">
-                    {{ strtoupper(substr($guru->user->name, 0, 2)) }}
+                <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:26px;margin:0 auto 12px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.12);">
+                    @if($guru->user?->foto)
+                        <img src="{{ asset('storage/' . $guru->user->foto) }}" alt="{{ $guru->user->name }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.style.display='none';this.parentElement.textContent='{{ strtoupper(substr($guru->user->name, 0, 2)) }}';">
+                    @else
+                        {{ strtoupper(substr($guru->user->name, 0, 2)) }}
+                    @endif
                 </div>
                 <div style="font-size:15px;font-weight:700;">{{ $guru->user->name }}</div>
                 <div style="font-size:12.5px;color:var(--text-muted);">{{ $guru->user->email }}</div>

@@ -65,8 +65,12 @@
                     <td>{{ $gurus->firstItem() + $loop->index }}</td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px;">
-                            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;">
-                                {{ strtoupper(substr($guru->user->name ?? '-', 0, 2)) }}
+                            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                                @if($guru->user?->foto)
+                                    <img src="{{ asset('storage/' . $guru->user->foto) }}" alt="{{ $guru->user->name }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.style.display='none';this.parentElement.textContent='{{ strtoupper(substr($guru->user->name ?? '-', 0, 2)) }}';">
+                                @else
+                                    {{ strtoupper(substr($guru->user->name ?? '-', 0, 2)) }}
+                                @endif
                             </div>
                             <div>
                                 <div style="font-weight:600;font-size:13.5px;">{{ $guru->user->name ?? '-' }}</div>

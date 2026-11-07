@@ -15,8 +15,12 @@
 
 <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;">
     <div class="card" style="text-align:center;">
-        <div style="width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:32px;margin:0 auto 16px;">
-            {{ strtoupper(substr($guru->user->name ?? '-', 0, 2)) }}
+        <div style="width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:32px;margin:0 auto 16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.12);">
+            @if($guru->user?->foto)
+                <img src="{{ asset('storage/' . $guru->user->foto) }}" alt="{{ $guru->user->name }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.style.display='none';this.parentElement.textContent='{{ strtoupper(substr($guru->user->name ?? '-', 0, 2)) }}';">
+            @else
+                {{ strtoupper(substr($guru->user->name ?? '-', 0, 2)) }}
+            @endif
         </div>
         <div style="font-size:18px;font-weight:800;margin-bottom:4px;">{{ $guru->user->name }}</div>
         <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">{{ $guru->user->email }}</div>

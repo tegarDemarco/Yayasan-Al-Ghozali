@@ -2,6 +2,10 @@
 @section('title','Evaluasi Kinerja')
 @section('page-title','Evaluasi Kinerja')
 
+@php
+    $errors = $errors ?? new \Illuminate\Support\ViewErrorBag();
+@endphp
+
 @section('content')
 <div class="page-header">
     <div class="page-header-left">
@@ -42,8 +46,12 @@
                     <td>{{ $evaluasis->firstItem() + $loop->index }}</td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px;">
-                            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;">
-                                {{ strtoupper(substr($e->guru->user->name ?? '-', 0, 2)) }}
+                            <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;overflow:hidden;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                                @if($e->guru?->user?->foto)
+                                    <img src="{{ asset('storage/' . $e->guru->user->foto) }}" alt="{{ $e->guru->user->name }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.style.display='none';this.parentElement.textContent='{{ strtoupper(substr($e->guru->user->name ?? '-', 0, 2)) }}';">
+                                @else
+                                    {{ strtoupper(substr($e->guru->user->name ?? '-', 0, 2)) }}
+                                @endif
                             </div>
                             <div>
                                 <div style="font-weight:600;font-size:13px;">{{ $e->guru->user->name ?? '-' }}</div>

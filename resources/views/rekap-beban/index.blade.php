@@ -87,8 +87,12 @@
                     <td>{{ $rekaps->firstItem() + $loop->index }}</td>
                     <td>
                         <div style="display:flex;align-items:center;gap:10px;">
-                            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0;">
-                                {{ strtoupper(substr($r->guru->user->name ?? '-', 0, 2)) }}
+                            <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;overflow:hidden;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                                @if($r->guru?->user?->foto)
+                                    <img src="{{ asset('storage/' . $r->guru->user->foto) }}" alt="{{ $r->guru->user->name }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.style.display='none';this.parentElement.textContent='{{ strtoupper(substr($r->guru->user->name ?? '-', 0, 2)) }}';">
+                                @else
+                                    {{ strtoupper(substr($r->guru->user->name ?? '-', 0, 2)) }}
+                                @endif
                             </div>
                             <div>
                                 <div style="font-weight:600;font-size:13.5px;">{{ $r->guru->user->name ?? '-' }}</div>
