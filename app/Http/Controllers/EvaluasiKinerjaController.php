@@ -25,6 +25,23 @@ class EvaluasiKinerjaController extends Controller
             $query->where('guru_id', $guru?->id);
         }
 
+        if ($request->filled('jenjang') && $user->isPengurusYayasan()) {
+            $jenjang = $request->jenjang;
+            $query->where(function ($q) use ($jenjang) {
+                $q->whereHas('sekolah', fn ($s) => $s->where('jenjang', $jenjang))
+                  ->orWhereHas('guru', fn ($g) => $g->where('jenjang', $jenjang));
+            });
+        }
+
+        if ($request->filled('predikat')) {
+            $query->where('predikat', $request->predikat);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('guru.user', fn ($u) => $u->where('name', 'like', "%{$search}%"));
+        }
+
         $evaluasis = $query->latest()->paginate(10)->withQueryString();
 
         return view('evaluasi-kinerja.index', compact('evaluasis'));

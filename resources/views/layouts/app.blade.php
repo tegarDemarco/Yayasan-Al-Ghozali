@@ -1912,6 +1912,10 @@
                 <i data-lucide="users"></i>
                 <span>Data Guru</span>
             </a>
+            <a href="{{ route('evaluasi-kinerja.index') }}" class="sidebar-link {{ request()->routeIs('evaluasi-kinerja.*') ? 'active' : '' }}">
+                <i data-lucide="award"></i>
+                <span>Evaluasi Kinerja</span>
+            </a>
 
         @elseif($role === 'kepala_sekolah')
             {{-- Kepala Sekolah Menu --}}

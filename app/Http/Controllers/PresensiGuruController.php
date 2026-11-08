@@ -30,10 +30,10 @@ class PresensiGuruController extends Controller
 
         $presensi = $query->latest()->paginate(15)->withQueryString();
         $ringkasan = [
-            'hadir' => $query->where('status', 'hadir')->count(),
-            'izin' => $query->where('status', 'izin')->count(),
-            'sakit' => $query->where('status', 'sakit')->count(),
-            'alpha' => $query->where('status', 'alpha')->count(),
+            'hadir' => (clone $query)->where('status', 'hadir')->count(),
+            'izin' => (clone $query)->where('status', 'izin')->count(),
+            'sakit' => (clone $query)->where('status', 'sakit')->count(),
+            'alpha' => (clone $query)->where('status', 'alpha')->count(),
         ];
 
         return view('presensi.index', compact('presensi', 'tanggal', 'ringkasan'));

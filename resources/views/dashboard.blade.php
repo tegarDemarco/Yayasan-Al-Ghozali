@@ -113,11 +113,11 @@
             </div>
         </a>
 
-        <a href="{{ route('guru.index') }}" class="action-white-card">
-            <div class="action-icon-box"><i data-lucide="layout-grid"></i></div>
+        <a href="{{ route('evaluasi-kinerja.index') }}" class="action-white-card">
+            <div class="action-icon-box"><i data-lucide="award"></i></div>
             <div class="action-text-col">
-                <span class="action-title-text">Pilih Unit</span>
-                <span class="action-desc-text">Pantau sekolah</span>
+                <span class="action-title-text">Tinjau Evaluasi</span>
+                <span class="action-desc-text">Hasil kinerja guru</span>
             </div>
         </a>
     </div>
@@ -218,6 +218,152 @@
                     <span class="period-row-val">Hari ini, 09.15</span>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Section: Tinjau Hasil Evaluasi Kinerja Guru -->
+    <div class="surface-white-card" style="margin-top: 24px;">
+        <div class="card-header-flex" style="padding-bottom: 16px; border-bottom: 1px solid var(--card-border, #e2e8f0); margin-bottom: 18px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--forest-100, #dcfce7); color: var(--forest-700, #15803d); display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="award" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div class="card-section-title" style="font-size: 16px;">Tinjau Hasil Evaluasi Kinerja Guru</div>
+                </div>
+                <div class="card-section-subtitle" style="margin-top: 4px;">
+                    Pantau capaian skor dan predikat mutu kerja guru dari seluruh satuan pendidikan (SD, MTs, SMK).
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <a href="{{ route('evaluasi-kinerja.index') }}" class="btn-pill-action btn-pill-secondary" style="font-size: 12.5px; padding: 7px 14px; text-decoration: none;">
+                    <span>Lihat Semua Evaluasi</span>
+                    <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
+                </a>
+            </div>
+        </div>
+
+        {{-- Mini Stat Row for Evaluasi Kinerja --}}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px;">
+            <div style="background: var(--surface-bg, #f8fafc); border: 1px solid var(--card-border, #e2e8f0); border-radius: 10px; padding: 12px 16px;">
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Rata-rata Nilai</div>
+                <div style="display: flex; align-items: baseline; gap: 6px; margin-top: 4px;">
+                    <span style="font-size: 22px; font-weight: 800; color: var(--forest-800, #166534);">
+                        {{ !empty($data['rataRataNilai']) ? number_format($data['rataRataNilai'], 1) : '-' }}
+                    </span>
+                    <span style="font-size: 12px; color: var(--text-muted);">/ 100</span>
+                </div>
+            </div>
+
+            <div style="background: var(--surface-bg, #f8fafc); border: 1px solid var(--card-border, #e2e8f0); border-radius: 10px; padding: 12px 16px;">
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Total Evaluasi</div>
+                <div style="margin-top: 4px;">
+                    <span style="font-size: 22px; font-weight: 800; color: var(--text-heading, #0f172a);">
+                        {{ $data['totalEvaluasi'] ?? 0 }}
+                    </span>
+                    <span style="font-size: 12px; color: var(--text-muted);">guru dinilai</span>
+                </div>
+            </div>
+
+            <div style="background: var(--surface-bg, #f8fafc); border: 1px solid var(--card-border, #e2e8f0); border-radius: 10px; padding: 12px 16px;">
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Predikat Sangat Baik</div>
+                <div style="margin-top: 4px;">
+                    <span style="font-size: 22px; font-weight: 800; color: #16a34a;">
+                        {{ $data['evaluasiSangatBaik'] ?? 0 }}
+                    </span>
+                    <span style="font-size: 12px; color: var(--text-muted);">guru</span>
+                </div>
+            </div>
+
+            <div style="background: var(--surface-bg, #f8fafc); border: 1px solid var(--card-border, #e2e8f0); border-radius: 10px; padding: 12px 16px;">
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Predikat Baik / Cukup</div>
+                <div style="margin-top: 4px;">
+                    <span style="font-size: 22px; font-weight: 800; color: #2563eb;">
+                        {{ ($data['evaluasiBaik'] ?? 0) + ($data['evaluasiCukup'] ?? 0) }}
+                    </span>
+                    <span style="font-size: 12px; color: var(--text-muted);">guru</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Table Evaluasi Kinerja --}}
+        <div style="overflow-x: auto;">
+            <table class="wireframe-table">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Guru</th>
+                        <th style="width: 12%;">Unit</th>
+                        <th style="width: 16%;">Periode</th>
+                        <th style="width: 12%; text-align: center;">Nilai Akhir</th>
+                        <th style="width: 15%;">Predikat</th>
+                        <th style="width: 12%; text-align: right;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php
+                        $predikatBadgeClass = [
+                            'Sangat Baik' => 'badge-green',
+                            'Baik' => 'badge-blue',
+                            'Cukup' => 'badge-yellow',
+                            'Kurang' => 'badge-red',
+                        ];
+                    @endphp
+                    @forelse($data['evaluasiKinerjaList'] ?? [] as $ev)
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#16a34a,#22c55e); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; overflow: hidden; flex-shrink: 0;">
+                                    @if($ev->guru?->user?->foto)
+                                        <img src="{{ asset('storage/' . $ev->guru->user->foto) }}" alt="{{ $ev->guru->user->name }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null;this.style.display='none';this.parentElement.textContent='{{ strtoupper(substr($ev->guru->user->name ?? '-', 0, 2)) }}';">
+                                    @else
+                                        {{ strtoupper(substr($ev->guru->user->name ?? '-', 0, 2)) }}
+                                    @endif
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 13px; color: var(--text-heading, #0f172a);">{{ $ev->guru?->user?->name ?? '-' }}</div>
+                                    <div style="font-size: 11.5px; color: var(--text-muted);">{{ $ev->guru?->spesialisasi ?? 'Guru' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="jenjang-{{ strtolower($ev->guru?->jenjang ?? $ev->sekolah?->jenjang ?? '') }}">
+                                {{ $ev->guru?->jenjang ?? $ev->sekolah?->jenjang ?? '-' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600; font-size: 12.5px;">{{ $ev->tahun_ajaran }}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">Semester {{ $ev->semester }}</div>
+                        </td>
+                        <td style="text-align: center;">
+                            <span style="font-size: 16px; font-weight: 800; color: {{ $ev->nilai_akhir >= 75 ? 'var(--forest-800, #166534)' : '#dc2626' }};">
+                                {{ number_format($ev->nilai_akhir, 1) }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {{ $predikatBadgeClass[$ev->predikat] ?? 'badge-gray' }}" style="font-size: 12px; padding: 4px 10px;">
+                                {{ $ev->predikat }}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <a href="{{ route('evaluasi-kinerja.show', $ev) }}" class="btn-pill-action btn-pill-secondary" style="font-size: 12px; padding: 5px 12px; display: inline-flex; align-items: center; gap: 4px;" title="Tinjau Hasil Evaluasi">
+                                <i data-lucide="eye" style="width: 13px; height: 13px;"></i>
+                                <span>Tinjau</span>
+                            </a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                <i data-lucide="award" style="width: 32px; height: 32px; color: var(--text-subtle);"></i>
+                                <div>Belum ada data evaluasi kinerja guru yang tersimpan.</div>
+                                <a href="{{ route('evaluasi-kinerja.index') }}" class="btn-pill-action btn-pill-secondary" style="margin-top: 4px; font-size: 12px;">Buka Halaman Evaluasi Kinerja</a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 

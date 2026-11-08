@@ -55,6 +55,17 @@ class DashboardController extends Controller
         }
 
         // Aktivitas Lintas Sekolah
+        $evaluasiKinerjaList = EvaluasiKinerja::with(['guru.user', 'sekolah', 'evaluator'])
+            ->latest('dievaluasi_at')
+            ->take(5)
+            ->get();
+        $totalEvaluasi = EvaluasiKinerja::count();
+        $rataRataNilai = EvaluasiKinerja::avg('nilai_akhir');
+        $evaluasiSangatBaik = EvaluasiKinerja::where('predikat', 'Sangat Baik')->count();
+        $evaluasiBaik = EvaluasiKinerja::where('predikat', 'Baik')->count();
+        $evaluasiCukup = EvaluasiKinerja::where('predikat', 'Cukup')->count();
+        $evaluasiKurang = EvaluasiKinerja::where('predikat', 'Kurang')->count();
+
         $aktivitasLintasSekolah = [
             [
                 'unit' => 'SD Al Ghozaly',
@@ -72,10 +83,10 @@ class DashboardController extends Controller
             ],
             [
                 'unit' => 'SMK Al Ghozaly',
-                'aktivitas' => 'Jadwal semester diperbarui',
-                'keterangan' => 'Terpublikasi',
+                'aktivitas' => 'Evaluasi kinerja guru',
+                'keterangan' => ($totalEvaluasi > 0 ? $totalEvaluasi . ' evaluasi siap ditinjau' : 'Hasil evaluasi siap ditinjau'),
                 'status' => 'info',
-                'status_label' => 'Info',
+                'status_label' => 'Tinjau',
             ],
         ];
 
@@ -85,7 +96,14 @@ class DashboardController extends Controller
             'persentaseKehadiran',
             'bebanMenunggu',
             'skDiterbitkan',
-            'aktivitasLintasSekolah'
+            'aktivitasLintasSekolah',
+            'evaluasiKinerjaList',
+            'totalEvaluasi',
+            'rataRataNilai',
+            'evaluasiSangatBaik',
+            'evaluasiBaik',
+            'evaluasiCukup',
+            'evaluasiKurang'
         );
     }
 
