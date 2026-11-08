@@ -141,5 +141,69 @@ class SkTugasFeatureTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_pengurus_yayasan_can_filter_sk_tugas_by_jenjang(): void
+    {
+        $sekolahSd = Sekolah::create([
+            'nama_sekolah' => 'SD Al-Ghozaly',
+            'jenjang' => 'SD',
+            'npsn' => '10000001',
+            'akreditasi' => 'A',
+            'alamat' => 'Brebes',
+            'telepon' => '0283-111111',
+            'email' => 'sd@alghozaly.sch.id',
+            'kepala_sekolah' => 'Drs. Ahmad Kusuma, M.Pd',
+        ]);
+
+        $guruSdUser = User::factory()->create([
+            'name' => 'Siti Aminah',
+            'role' => 'guru',
+            'jenjang' => 'SD',
+            'sekolah_id' => $sekolahSd->id,
+        ]);
+
+        $guruSd = Guru::create([
+            'user_id' => $guruSdUser->id,
+            'sekolah_id' => $sekolahSd->id,
+            'nip' => '199001012020122001',
+            'nuptk' => '9876543210123457',
+            'jenjang' => 'SD',
+            'spesialisasi' => 'Guru Kelas SD',
+            'status_kepegawaian' => 'GTY',
+            'status' => 'aktif',
+        ]);
+
+        $skSmk = SkTugas::create([
+            'guru_id' => $this->guru->id,
+            'sekolah_id' => $this->sekolah->id,
+            'no_sk' => 'SK/004/YAG/SMK/2026',
+            'judul_sk' => 'SK Guru SMK',
+            'jenis_sk' => 'Pengangkatan',
+            'tanggal_sk' => '2026-11-04',
+            'diterbitkan_oleh' => $this->pengurus->id,
+        ]);
+
+        $skSd = SkTugas::create([
+            'guru_id' => $guruSd->id,
+            'sekolah_id' => $sekolahSd->id,
+            'no_sk' => 'SK/003/YAG/SD/2026',
+            'judul_sk' => 'SK Guru SD',
+            'jenis_sk' => 'Tugas Tambahan',
+            'tanggal_sk' => '2026-08-02',
+            'diterbitkan_oleh' => $this->pengurus->id,
+        ]);
+
+        // Filter SD
+        $responseSd = $this->actingAs($this->pengurus)->get(route('sk-tugas.index', ['jenjang' => 'SD']));
+        $responseSd->assertStatus(200);
+        $responseSd->assertSee('SK/003/YAG/SD/2026');
+        $responseSd->assertDontSee('SK/004/YAG/SMK/2026');
+
+        // Filter SMK
+        $responseSmk = $this->actingAs($this->pengurus)->get(route('sk-tugas.index', ['jenjang' => 'SMK']));
+        $responseSmk->assertStatus(200);
+        $responseSmk->assertSee('SK/004/YAG/SMK/2026');
+        $responseSmk->assertDontSee('SK/003/YAG/SD/2026');
+    }
 }
 

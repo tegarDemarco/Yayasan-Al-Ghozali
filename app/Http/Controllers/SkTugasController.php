@@ -26,6 +26,27 @@ class SkTugasController extends Controller
             $query->where('sekolah_id', $sekolahId);
         }
 
+        if ($request->filled('jenjang') && $user->isPengurusYayasan()) {
+            $jenjang = $request->jenjang;
+            $query->where(function ($q) use ($jenjang) {
+                $q->whereHas('sekolah', fn ($s) => $s->where('jenjang', $jenjang))
+                  ->orWhereHas('guru', fn ($g) => $g->where('jenjang', $jenjang));
+            });
+        }
+
+        if ($request->filled('jenis')) {
+            $query->where('jenis_sk', $request->jenis);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('no_sk', 'like', "%{$search}%")
+                  ->orWhere('judul_sk', 'like', "%{$search}%")
+                  ->orWhereHas('guru.user', fn ($u) => $u->where('name', 'like', "%{$search}%"));
+            });
+        }
+
         $skTugas = $query->latest('tanggal_sk')->paginate(10)->withQueryString();
 
         return view('sk-tugas.index', compact('skTugas'));
