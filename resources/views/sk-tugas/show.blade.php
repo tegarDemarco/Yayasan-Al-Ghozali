@@ -52,6 +52,25 @@
             <div style="font-size:14px;color:var(--text-muted);font-style:italic;">Tidak ada keterangan tambahan.</div>
         </div>
         @endif
+
+        @if($skTugas->file_path)
+        <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:10px;">Berkas Dokumen SK</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--body-bg);border:1px solid var(--border);border-radius:var(--radius-sm);">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:36px;height:36px;border-radius:6px;background:#fee2e2;color:#dc2626;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;">PDF</div>
+                    <div>
+                        <div style="font-size:13.5px;font-weight:600;">{{ basename($skTugas->file_path) }}</div>
+                        <div style="font-size:11.5px;color:var(--text-muted);">Dokumen Surat Keputusan Resmi</div>
+                    </div>
+                </div>
+                <a href="{{ asset('storage/'.$skTugas->file_path) }}" target="_blank" class="btn btn-secondary btn-sm" style="display:inline-flex;align-items:center;gap:6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                    Buka Dokumen
+                </a>
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 @endsection

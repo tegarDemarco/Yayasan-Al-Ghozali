@@ -45,7 +45,7 @@
         <div class="card" style="margin-bottom:16px;">
             <div class="card-header">
                 <div class="card-title">Jadwal Mengajar</div>
-                <a href="{{ route('jadwal-mengajar.index') }}" style="font-size:12px;color:var(--primary);text-decoration:none;">Lihat Semua →</a>
+                <a href="{{ route('jadwal-mengajar.index', ['guru_id' => $guru->id]) }}" style="font-size:12px;color:var(--primary);text-decoration:none;">Lihat Semua →</a>
             </div>
             <div class="table-wrapper">
                 <table>

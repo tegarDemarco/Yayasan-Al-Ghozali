@@ -1659,27 +1659,58 @@
             margin-top: 16px;
             font-size: 12px;
             color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .pagination-links {
             display: flex;
-            gap: 4px;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
         }
 
         .page-link {
-            padding: 5px 11px;
-            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border: 1px solid var(--card-border, #e2e8f0);
             border-radius: 6px;
             text-decoration: none;
-            color: var(--text-body);
+            color: var(--text-body, #334155);
             background: #ffffff;
             font-weight: 600;
+            font-size: 12.5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+
+        .page-link:hover:not(.disabled):not(.active) {
+            border-color: var(--forest-600, #16a34a);
+            background: var(--forest-50, #f0fdf4);
+            color: var(--forest-800, #166534);
         }
 
         .page-link.active {
-            background: var(--forest-800);
+            background: var(--forest-800, #166534);
             color: #ffffff;
-            border-color: var(--forest-800);
+            border-color: var(--forest-800, #166534);
+        }
+
+        .page-link.disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+            background: #f8fafc;
+            color: var(--text-muted, #94a3b8);
+        }
+
+        nav[role="navigation"] svg {
+            width: 16px !important;
+            height: 16px !important;
+            max-width: 16px !important;
+            max-height: 16px !important;
+            display: inline-block !important;
         }
 
         /* Modal Dialog */
