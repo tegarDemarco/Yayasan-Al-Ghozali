@@ -33,8 +33,14 @@ class EvaluasiKinerjaController extends Controller
     public function create(Request $request): View
     {
         $user = auth()->user();
-        $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
-        $gurus = Guru::where('sekolah_id', $sekolahId)->where('status', 'aktif')->with('user')->get();
+        $query = Guru::where('status', 'aktif')->with(['user', 'sekolah']);
+
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $query->where('sekolah_id', $sekolahId);
+        }
+
+        $gurus = $query->get();
 
         return view('evaluasi-kinerja.create', compact('gurus'));
     }
@@ -42,7 +48,6 @@ class EvaluasiKinerjaController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $user = auth()->user();
-        $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
 
         $validated = $request->validate([
             'guru_id' => ['required', 'exists:gurus,id'],
@@ -54,6 +59,9 @@ class EvaluasiKinerjaController extends Controller
             'nilai_pembelajaran' => ['required', 'numeric', 'min:0', 'max:100'],
             'catatan' => ['nullable', 'string'],
         ]);
+
+        $guru = Guru::findOrFail($validated['guru_id']);
+        $sekolahId = $guru->sekolah_id ?? ($user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id'));
 
         $nilaiAkhir = (
             $validated['nilai_kinerja'] * 0.3 +

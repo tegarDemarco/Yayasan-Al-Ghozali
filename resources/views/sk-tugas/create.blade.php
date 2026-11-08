@@ -22,7 +22,7 @@
                     <select name="guru_id" class="form-control" required>
                         <option value="">-- Pilih Guru --</option>
                         @foreach($gurus as $g)
-                        <option value="{{ $g->id }}" {{ old('guru_id') == $g->id ? 'selected' : '' }}>{{ $g->user->name }} ({{ $g->jenjang }})</option>
+                        <option value="{{ $g->id }}" {{ old('guru_id') == $g->id ? 'selected' : '' }}>{{ $g->user->name }} ({{ $g->jenjang ?? $g->sekolah?->jenjang ?? '-' }})</option>
                         @endforeach
                     </select>
                 </div>

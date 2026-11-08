@@ -34,8 +34,19 @@ class SkTugasController extends Controller
     public function create(): View
     {
         $user = auth()->user();
-        $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
-        $gurus = Guru::where('sekolah_id', $sekolahId ?? null)->where('status', 'aktif')->with('user')->get();
+
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki akses untuk menerbitkan SK Tugas.');
+        }
+
+        $query = Guru::where('status', 'aktif')->with(['user', 'sekolah']);
+
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $query->where('sekolah_id', $sekolahId);
+        }
+
+        $gurus = $query->get();
 
         return view('sk-tugas.create', compact('gurus'));
     }

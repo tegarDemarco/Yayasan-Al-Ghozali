@@ -125,5 +125,21 @@ class SkTugasFeatureTest extends TestCase
         $response->assertRedirect(route('sk-tugas.index'));
         $this->assertDatabaseMissing('sk_tugas', ['id' => $sk->id]);
     }
+
+    public function test_pengurus_yayasan_can_see_all_active_gurus_in_create_form(): void
+    {
+        $response = $this->actingAs($this->pengurus)->get(route('sk-tugas.create'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Ir. Tegar Tri Wibowo, S.Kom, M.Kom');
+        $response->assertSee('value="'.$this->guru->id.'"', false);
+    }
+
+    public function test_guru_cannot_access_create_sk_tugas(): void
+    {
+        $response = $this->actingAs($this->guruUser)->get(route('sk-tugas.create'));
+
+        $response->assertStatus(403);
+    }
 }
 
