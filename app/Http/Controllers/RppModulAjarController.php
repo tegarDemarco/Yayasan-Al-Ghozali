@@ -172,13 +172,13 @@ class RppModulAjarController extends Controller
         return redirect()->back()->with('success', $pesan);
     }
 
-    public function destroy(RppModulAjar $rppModulAjar): RedirectResponse
+    public function destroy(RppModulAjar $rpp): RedirectResponse
     {
-        if ($rppModulAjar->file_path) {
-            Storage::disk('public')->delete($rppModulAjar->file_path);
+        if ($rpp->file_path) {
+            Storage::disk('public')->delete($rpp->file_path);
         }
 
-        $rppModulAjar->delete();
+        $rpp->delete();
 
         return redirect()->route('rpp.index')->with('success', 'RPP/Modul Ajar berhasil dihapus.');
     }

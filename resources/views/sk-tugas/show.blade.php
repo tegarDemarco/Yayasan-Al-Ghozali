@@ -26,7 +26,7 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
             @foreach([
                 ['Guru', $skTugas->guru?->user?->name ?? '-'],
-                ['Jenjang', $skTugas->guru?->jenjang ?? '-'],
+                ['Jenjang', $skTugas->guru?->jenjang ?? $skTugas->sekolah?->jenjang ?? '-'],
                 ['Jenis SK', $skTugas->jenis_sk ?? '-'],
                 ['Tanggal SK', $skTugas->tanggal_sk?->format('d/m/Y') ?? '-'],
                 ['Berlaku Mulai', $skTugas->berlaku_mulai?->format('d/m/Y') ?? '-'],
@@ -45,6 +45,11 @@
         <div style="background:var(--primary-50);border:1px solid var(--primary-200);border-radius:var(--radius-sm);padding:14px 16px;">
             <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--primary-dark);margin-bottom:6px;">Keterangan</div>
             <div style="font-size:14px;line-height:1.6;">{{ $skTugas->keterangan }}</div>
+        </div>
+        @else
+        <div style="background:var(--body-bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:4px;">Keterangan</div>
+            <div style="font-size:14px;color:var(--text-muted);font-style:italic;">Tidak ada keterangan tambahan.</div>
         </div>
         @endif
     </div>

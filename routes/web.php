@@ -87,7 +87,9 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:kepala_sekolah,admin_sekolah');
 
     // SK Tugas
-    Route::resource('sk-tugas', SkTugasController::class)->except(['edit', 'update'])
+    Route::resource('sk-tugas', SkTugasController::class)
+        ->parameters(['sk-tugas' => 'skTugas'])
+        ->except(['edit', 'update'])
         ->middleware('role:pengurus_yayasan,kepala_sekolah,admin_sekolah,guru');
 
     // Evaluasi Kinerja
