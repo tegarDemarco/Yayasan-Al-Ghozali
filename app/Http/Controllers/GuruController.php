@@ -42,7 +42,11 @@ class GuruController extends Controller
     public function create(): View
     {
         $user = auth()->user();
-        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+        if ($user->isKepalaSekolah()) {
+            abort(403, 'Kepala Sekolah tidak memiliki wewenang untuk menambah data guru.');
+        }
+
+        if ($user->isAdminSekolah()) {
             $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
             $sekolahs = Sekolah::where('id', $sekolahId)->get();
         } else {
@@ -55,7 +59,11 @@ class GuruController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $currentUser = auth()->user();
-        if ($currentUser->isAdminSekolah() || $currentUser->isKepalaSekolah()) {
+        if ($currentUser->isKepalaSekolah()) {
+            abort(403, 'Kepala Sekolah tidak memiliki wewenang untuk menambah data guru.');
+        }
+
+        if ($currentUser->isAdminSekolah()) {
             $userSekolahId = $currentUser->sekolah_id ?? Sekolah::where('jenjang', $currentUser->jenjang)->value('id');
             if ($userSekolahId) {
                 $request->merge(['sekolah_id' => $userSekolahId]);
@@ -126,7 +134,11 @@ class GuruController extends Controller
     public function edit(Guru $guru): View
     {
         $user = auth()->user();
-        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+        if ($user->isKepalaSekolah()) {
+            abort(403, 'Kepala Sekolah tidak memiliki wewenang untuk mengubah data guru.');
+        }
+
+        if ($user->isAdminSekolah()) {
             $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
             if ($guru->sekolah_id !== $sekolahId) {
                 abort(403, 'Anda tidak memiliki akses untuk mengubah data guru sekolah lain.');
@@ -142,7 +154,11 @@ class GuruController extends Controller
     public function update(Request $request, Guru $guru): RedirectResponse
     {
         $currentUser = auth()->user();
-        if ($currentUser->isAdminSekolah() || $currentUser->isKepalaSekolah()) {
+        if ($currentUser->isKepalaSekolah()) {
+            abort(403, 'Kepala Sekolah tidak memiliki wewenang untuk mengubah data guru.');
+        }
+
+        if ($currentUser->isAdminSekolah()) {
             $userSekolahId = $currentUser->sekolah_id ?? Sekolah::where('jenjang', $currentUser->jenjang)->value('id');
             if ($guru->sekolah_id !== $userSekolahId) {
                 abort(403, 'Anda tidak memiliki akses untuk memperbarui data guru sekolah lain.');
@@ -195,7 +211,11 @@ class GuruController extends Controller
     public function destroy(Guru $guru): RedirectResponse
     {
         $currentUser = auth()->user();
-        if ($currentUser->isAdminSekolah() || $currentUser->isKepalaSekolah()) {
+        if ($currentUser->isKepalaSekolah()) {
+            abort(403, 'Kepala Sekolah tidak memiliki wewenang untuk menghapus data guru.');
+        }
+
+        if ($currentUser->isAdminSekolah()) {
             $userSekolahId = $currentUser->sekolah_id ?? Sekolah::where('jenjang', $currentUser->jenjang)->value('id');
             if ($guru->sekolah_id !== $userSekolahId) {
                 abort(403, 'Anda tidak memiliki akses untuk menghapus data guru sekolah lain.');
