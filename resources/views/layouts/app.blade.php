@@ -1973,6 +1973,10 @@
                 <i data-lucide="calendar"></i>
                 <span>Jadwal Mengajar</span>
             </a>
+            <a href="{{ route('rekap-beban.index') }}" class="sidebar-link {{ request()->routeIs('rekap-beban.*') ? 'active' : '' }}">
+                <i data-lucide="table-properties"></i>
+                <span>Rekap Beban Mengajar</span>
+            </a>
             <a href="{{ route('presensi.index') }}" class="sidebar-link {{ request()->routeIs('presensi.*') ? 'active' : '' }}">
                 <i data-lucide="check"></i>
                 <span>Presensi Guru</span>
