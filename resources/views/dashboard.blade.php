@@ -663,19 +663,19 @@
             </div>
         </a>
 
-        <a href="{{ route('jadwal-mengajar.index') }}" class="action-white-card">
+        <a href="{{ route('jadwal-mengajar.create') }}" class="action-white-card">
             <div class="action-icon-box"><i data-lucide="calendar"></i></div>
             <div class="action-text-col">
                 <span class="action-title-text">Susun Jadwal</span>
-                <span class="action-desc-text">Atur jam mengajar</span>
+                <span class="action-desc-text">Buat jadwal baru</span>
             </div>
         </a>
 
-        <a href="{{ route('sk-tugas.create') }}" class="action-white-card">
+        <a href="{{ route('sk-tugas.index') }}" class="action-white-card">
             <div class="action-icon-box"><i data-lucide="file-text"></i></div>
             <div class="action-text-col">
                 <span class="action-title-text">Arsip SK</span>
-                <span class="action-desc-text">Unggah dokumen SK</span>
+                <span class="action-desc-text">Daftar berkas SK</span>
             </div>
         </a>
 
