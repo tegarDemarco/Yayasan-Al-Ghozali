@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sk_tugas', function (Blueprint $table) {
-            //
+            $table->enum('status_publikasi', ['draft', 'terpublikasi'])->default('terpublikasi')->after('file_path');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('sk_tugas', function (Blueprint $table) {
-            //
+            $table->dropColumn('status_publikasi');
         });
     }
 };

@@ -87,6 +87,9 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:kepala_sekolah,admin_sekolah');
 
     // SK Tugas
+    Route::post('sk-tugas/{skTugas}/publish', [SkTugasController::class, 'publish'])
+        ->name('sk-tugas.publish')
+        ->middleware('role:pengurus_yayasan,kepala_sekolah,admin_sekolah');
     Route::resource('sk-tugas', SkTugasController::class)
         ->parameters(['sk-tugas' => 'skTugas'])
         ->except(['edit', 'update'])

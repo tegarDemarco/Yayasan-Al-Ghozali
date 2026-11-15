@@ -5,9 +5,18 @@
 @section('content')
 <div class="page-header">
     <div class="page-header-left"><h1>Detail SK Tugas</h1></div>
-    <div style="display:flex;gap:8px;">
+    <div style="display:flex;gap:8px;align-items:center;">
+        @if(!$skTugas->isTerpublikasi() && !auth()->user()->isGuru())
+        <form method="POST" action="{{ route('sk-tugas.publish', $skTugas) }}" style="display:inline;" onsubmit="return confirm('Publikasikan SK ini agar dapat dilihat oleh guru terkait?')">
+            @csrf
+            <button type="submit" class="btn btn-primary" style="background:#15803d;border-color:#15803d;display:inline-flex;align-items:center;gap:6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+                Publikasikan SK
+            </button>
+        </form>
+        @endif
         @if($skTugas->file_path)
-        <a href="{{ asset('storage/'.$skTugas->file_path) }}" target="_blank" class="btn btn-primary">
+        <a href="{{ asset('storage/'.$skTugas->file_path) }}" target="_blank" class="btn btn-secondary">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
             Download PDF
         </a>
@@ -33,6 +42,7 @@
                 ['Berlaku Sampai', $skTugas->berlaku_sampai?->format('d/m/Y') ?? 'Tidak terbatas'],
                 ['Diterbitkan Oleh', $skTugas->penerbit?->name ?? '-'],
                 ['Tanggal Terbit', $skTugas->created_at?->format('d/m/Y H:i') ?? '-'],
+                ['Status Publikasi', ($skTugas->status_publikasi ?? 'terpublikasi') === 'terpublikasi' ? 'Terpublikasi' : 'Draft (Belum Dipublikasikan)'],
             ] as [$label, $val])
             <div style="background:var(--body-bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;">
                 <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:4px;">{{ $label }}</div>
