@@ -17,12 +17,15 @@ class EvaluasiKinerjaController extends Controller
         $user = auth()->user();
         $query = EvaluasiKinerja::with(['guru.user', 'sekolah', 'evaluator']);
 
-        if ($user->isKepalaSekolah()) {
-            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
             $query->where('sekolah_id', $sekolahId);
         } elseif ($user->isGuru()) {
             $guru = Guru::where('user_id', $user->id)->first();
             $query->where('guru_id', $guru?->id);
+        } elseif ($user->isPengurusYayasan() && $request->filled('jenjang')) {
+            $sekolahId = Sekolah::where('jenjang', $request->jenjang)->value('id');
+            $query->where('sekolah_id', $sekolahId);
         }
 
         $evaluasis = $query->latest()->paginate(10)->withQueryString();
@@ -33,8 +36,14 @@ class EvaluasiKinerjaController extends Controller
     public function create(Request $request): View
     {
         $user = auth()->user();
-        $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
-        $gurus = Guru::where('sekolah_id', $sekolahId)->where('status', 'aktif')->with('user')->get();
+        abort_if($user->isGuru(), 403, 'Guru tidak memiliki izin untuk membuat evaluasi kinerja.');
+
+        if ($user->isPengurusYayasan()) {
+            $gurus = Guru::where('status', 'aktif')->with(['user', 'sekolah'])->get();
+        } else {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $gurus = Guru::where('sekolah_id', $sekolahId)->where('status', 'aktif')->with(['user', 'sekolah'])->get();
+        }
 
         return view('evaluasi-kinerja.create', compact('gurus'));
     }
@@ -42,7 +51,7 @@ class EvaluasiKinerjaController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $user = auth()->user();
-        $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
+        abort_if($user->isGuru(), 403, 'Guru tidak memiliki izin untuk membuat evaluasi kinerja.');
 
         $validated = $request->validate([
             'guru_id' => ['required', 'exists:gurus,id'],
@@ -54,6 +63,16 @@ class EvaluasiKinerjaController extends Controller
             'nilai_pembelajaran' => ['required', 'numeric', 'min:0', 'max:100'],
             'catatan' => ['nullable', 'string'],
         ]);
+
+        $guru = Guru::findOrFail($validated['guru_id']);
+        $sekolahId = $guru->sekolah_id;
+
+        if (! $user->isPengurusYayasan()) {
+            $userSekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($guru->sekolah_id !== $userSekolahId) {
+                abort(403, 'Anda hanya dapat mengevaluasi guru di sekolah Anda.');
+            }
+        }
 
         $nilaiAkhir = (
             $validated['nilai_kinerja'] * 0.3 +
@@ -78,23 +97,36 @@ class EvaluasiKinerjaController extends Controller
             'dievaluasi_at' => now(),
         ]);
 
-        $guru = Guru::find($validated['guru_id']);
         if ($guru && $guru->user) {
-            $guru->user->notify(new AppNotification(
-                title: 'Evaluasi Kinerja Diterbitkan',
-                message: "Evaluasi kinerja semester {$validated['semester']} TA {$validated['tahun_ajaran']} telah diterbitkan dengan predikat {$predikat} (Nilai: {$nilaiAkhir}).",
-                url: route('evaluasi-kinerja.show', $evaluasi->id),
-                type: 'evaluasi',
-                icon: 'bar-chart-2',
-                senderName: $user->name,
-            ));
-        }
+    $guru->user->notify(new AppNotification([
+        'title' => 'Evaluasi Kinerja Diterbitkan',
+        'message' => "Evaluasi kinerja semester {$validated['semester']} TA {$validated['tahun_ajaran']} telah diterbitkan dengan predikat {$predikat} (Nilai: {$nilaiAkhir}).",
+        'url' => route('evaluasi-kinerja.show', $evaluasi->id),
+        'type' => 'evaluasi',
+        'icon' => 'bar-chart-2',
+        'senderName' => $user->name,
+    ]));
+}
 
         return redirect()->route('evaluasi-kinerja.index')->with('success', 'Evaluasi kinerja berhasil disimpan.');
     }
 
     public function show(EvaluasiKinerja $evaluasiKinerja): View
     {
+        $user = auth()->user();
+
+        if ($user->isGuru()) {
+            $guru = Guru::where('user_id', $user->id)->first();
+            if ($evaluasiKinerja->guru_id !== $guru?->id) {
+                abort(403, 'Anda hanya dapat melihat evaluasi kinerja milik Anda.');
+            }
+        } elseif (! $user->isPengurusYayasan()) {
+            $userSekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($evaluasiKinerja->sekolah_id !== $userSekolahId) {
+                abort(403, 'Anda hanya dapat melihat evaluasi kinerja di sekolah Anda.');
+            }
+        }
+
         $evaluasiKinerja->load('guru.user', 'sekolah', 'evaluator');
 
         return view('evaluasi-kinerja.show', compact('evaluasiKinerja'));

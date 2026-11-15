@@ -21,9 +21,23 @@
                     <label class="form-label">Guru <span class="req">*</span></label>
                     <select name="guru_id" class="form-control" required>
                         <option value="">-- Pilih Guru --</option>
-                        @foreach($gurus as $g)
-                        <option value="{{ $g->id }}" {{ old('guru_id') == $g->id ? 'selected' : '' }}>{{ $g->user->name }} ({{ $g->jenjang }})</option>
-                        @endforeach
+                        @if(auth()->user()->isPengurusYayasan())
+                            @foreach($gurus->groupBy(fn($g) => $g->sekolah->nama_sekolah ?? ('Jenjang ' . $g->jenjang)) as $namaSekolah => $guruList)
+                            <optgroup label="{{ $namaSekolah }}">
+                                @foreach($guruList as $g)
+                                <option value="{{ $g->id }}" {{ old('guru_id') == $g->id ? 'selected' : '' }}>
+                                    {{ $g->user->name ?? '-' }} ({{ $g->spesialisasi ?? $g->jenjang }})
+                                </option>
+                                @endforeach
+                            </optgroup>
+                            @endforeach
+                        @else
+                            @foreach($gurus as $g)
+                            <option value="{{ $g->id }}" {{ old('guru_id') == $g->id ? 'selected' : '' }}>
+                                {{ $g->user->name ?? '-' }} ({{ $g->spesialisasi ?? $g->jenjang }})
+                            </option>
+                            @endforeach
+                        @endif
                     </select>
                 </div>
             </div>

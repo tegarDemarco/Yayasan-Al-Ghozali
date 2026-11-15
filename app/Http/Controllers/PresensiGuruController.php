@@ -21,20 +21,24 @@ class PresensiGuruController extends Controller
             $guru = Guru::where('user_id', $user->id)->first();
             $query->where('guru_id', $guru?->id);
         } elseif ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
-            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $query->where('sekolah_id', $sekolahId);
+        } elseif ($user->isPengurusYayasan() && $request->filled('jenjang')) {
+            $sekolahId = Sekolah::where('jenjang', $request->jenjang)->value('id');
             $query->where('sekolah_id', $sekolahId);
         }
 
         $tanggal = $request->get('tanggal', Carbon::today()->format('Y-m-d'));
         $query->whereDate('tanggal', $tanggal);
 
-        $presensi = $query->latest()->paginate(15)->withQueryString();
         $ringkasan = [
-            'hadir' => $query->where('status', 'hadir')->count(),
-            'izin' => $query->where('status', 'izin')->count(),
-            'sakit' => $query->where('status', 'sakit')->count(),
-            'alpha' => $query->where('status', 'alpha')->count(),
+            'hadir' => (clone $query)->where('status', 'hadir')->count(),
+            'izin' => (clone $query)->where('status', 'izin')->count(),
+            'sakit' => (clone $query)->where('status', 'sakit')->count(),
+            'alpha' => (clone $query)->where('status', 'alpha')->count(),
         ];
+
+        $presensi = $query->latest()->paginate(15)->withQueryString();
 
         return view('presensi.index', compact('presensi', 'tanggal', 'ringkasan'));
     }

@@ -22,7 +22,18 @@
             <div class="form-group" style="margin:0;">
                 <input type="date" name="tanggal" class="form-control" value="{{ $tanggal }}">
             </div>
+            @if(auth()->user()->isPengurusYayasan())
+            <select name="jenjang" class="form-control" style="width:auto;">
+                <option value="">Semua Jenjang</option>
+                <option value="SD" {{ request('jenjang') === 'SD' ? 'selected' : '' }}>SD</option>
+                <option value="MTs" {{ request('jenjang') === 'MTs' ? 'selected' : '' }}>MTs</option>
+                <option value="SMK" {{ request('jenjang') === 'SMK' ? 'selected' : '' }}>SMK</option>
+            </select>
+            @endif
             <button type="submit" class="btn btn-secondary">Tampilkan</button>
+            @if(request()->filled('jenjang'))
+            <a href="{{ route('presensi.index', ['tanggal' => $tanggal]) }}" class="btn btn-secondary">Reset Filter</a>
+            @endif
         </div>
     </form>
 </div>

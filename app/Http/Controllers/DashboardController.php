@@ -9,6 +9,7 @@ use App\Models\PresensiGuru;
 use App\Models\RppModulAjar;
 use App\Models\Sekolah;
 use App\Models\SkTugas;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\View\View;
 
@@ -16,6 +17,7 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
+        /** @var User $user */
         $user = auth()->user();
         $data = match ($user->role) {
             'pengurus_yayasan' => $this->dashboardPengurusYayasan(),
@@ -43,19 +45,19 @@ class DashboardController extends Controller
         $aktivitasTerbaru = collect([
             ...PengajuanIzinCuti::with('guru.user')->latest()->take(3)->get()->map(fn ($p) => [
                 'tipe' => 'izin',
-                'pesan' => "Pengajuan {$p->jenis_pengajuan} dari {$p->guru->user->name}",
+                'pesan' => "Pengajuan {$p->jenis_pengajuan} dari " . ($p->guru?->user?->name ?? 'Guru'),
                 'waktu' => $p->created_at,
                 'warna' => 'blue',
             ]),
             ...RppModulAjar::with('guru.user')->latest()->take(3)->get()->map(fn ($r) => [
                 'tipe' => 'rpp',
-                'pesan' => "{$r->tipe} diunggah oleh {$r->guru->user->name}",
+                'pesan' => "{$r->tipe} diunggah oleh " . ($r->guru?->user?->name ?? 'Guru'),
                 'waktu' => $r->created_at,
                 'warna' => 'green',
             ]),
             ...SkTugas::with('guru.user')->latest()->take(2)->get()->map(fn ($s) => [
                 'tipe' => 'sk',
-                'pesan' => "SK {$s->jenis_sk} untuk {$s->guru->user->name}",
+                'pesan' => "SK {$s->jenis_sk} untuk " . ($s->guru?->user?->name ?? 'Guru'),
                 'waktu' => $s->created_at,
                 'warna' => 'yellow',
             ]),
@@ -69,27 +71,32 @@ class DashboardController extends Controller
         );
     }
 
-    private function dashboardKepalaSekolah(mixed $user): array
+    private function dashboardKepalaSekolah(User $user): array
     {
-        $sekolah = Sekolah::where('jenjang', $user->jenjang)->first();
-        $guruAktif = Guru::where('sekolah_id', $sekolah?->id)->where('status', 'aktif')->count();
+        $sekolah = $user->sekolah ?? Sekolah::where('jenjang', $user->jenjang)->first();
+        $sekolahId = $sekolah?->id;
+
+        $guruAktif = $sekolahId ? Guru::where('sekolah_id', $sekolahId)->where('status', 'aktif')->count() : 0;
 
         $today = Carbon::today();
-        $presensiHariIni = PresensiGuru::where('sekolah_id', $sekolah?->id)
-            ->whereDate('tanggal', $today)->get();
+        $presensiHariIni = $sekolahId
+            ? PresensiGuru::where('sekolah_id', $sekolahId)->whereDate('tanggal', $today)->get()
+            : collect();
 
-        $rppMenunggu = RppModulAjar::where('sekolah_id', $sekolah?->id)
-            ->where('status_validasi', 'menunggu')->count();
+        $rppMenunggu = $sekolahId
+            ? RppModulAjar::where('sekolah_id', $sekolahId)->where('status_validasi', 'menunggu')->count()
+            : 0;
 
-        $izinMenunggu = PengajuanIzinCuti::where('sekolah_id', $sekolah?->id)
-            ->where('status_approval', 'menunggu')->count();
+        $izinMenunggu = $sekolahId
+            ? PengajuanIzinCuti::where('sekolah_id', $sekolahId)->where('status_approval', 'menunggu')->count()
+            : 0;
 
-        $kehadiranPerMinggu = $this->getDataKehadiranMingguIni($sekolah?->id);
+        $kehadiranPerMinggu = $sekolahId ? $this->getDataKehadiranMingguIni($sekolahId) : [];
 
         return compact('sekolah', 'guruAktif', 'presensiHariIni', 'rppMenunggu', 'izinMenunggu', 'kehadiranPerMinggu');
     }
 
-    private function dashboardGuru(mixed $user): array
+    private function dashboardGuru(User $user): array
     {
         $guru = Guru::where('user_id', $user->id)->with('sekolah')->first();
         if (! $guru) {
@@ -98,9 +105,7 @@ class DashboardController extends Controller
                 'jadwalHariIni' => collect(),
                 'presensiHariIni' => null,
                 'jurnalBulanIni' => 0,
-                'penilaianMenunggu' => 0,
                 'pengajuanMenunggu' => 0,
-                'pengumuman' => collect(),
             ];
         }
 
@@ -119,54 +124,53 @@ class DashboardController extends Controller
             ->whereYear('tanggal', $today->year)
             ->count();
 
-        $penilaianMenunggu = $guru->penilaians()
-            ->whereMonth('tanggal_penilaian', $today->month)
-            ->count();
-
         $pengajuanMenunggu = $guru->pengajuanIzinCutis()
             ->where('status_approval', 'menunggu')->count();
 
-        $pengumuman = collect();
-
         return compact(
             'guru', 'jadwalHariIni', 'presensiHariIni',
-            'jurnalBulanIni', 'penilaianMenunggu', 'pengajuanMenunggu', 'pengumuman'
+            'jurnalBulanIni', 'pengajuanMenunggu'
         );
     }
 
-    private function dashboardAdminSekolah(mixed $user): array
+    private function dashboardAdminSekolah(User $user): array
     {
-        $sekolah = Sekolah::where('jenjang', $user->jenjang)->first();
-        $guruAktif = Guru::where('sekolah_id', $sekolah?->id)->where('status', 'aktif')->count();
+        $sekolah = $user->sekolah ?? Sekolah::where('jenjang', $user->jenjang)->first();
+        $sekolahId = $sekolah?->id;
+
+        $guruAktif = $sekolahId ? Guru::where('sekolah_id', $sekolahId)->where('status', 'aktif')->count() : 0;
 
         $today = Carbon::today();
-        $presensiHariIni = PresensiGuru::where('sekolah_id', $sekolah?->id)
-            ->whereDate('tanggal', $today)->get();
+        $presensiHariIni = $sekolahId
+            ? PresensiGuru::where('sekolah_id', $sekolahId)->whereDate('tanggal', $today)->get()
+            : collect();
 
-        $izinMenunggu = PengajuanIzinCuti::where('sekolah_id', $sekolah?->id)
-            ->where('status_approval', 'menunggu')->count();
+        $izinMenunggu = $sekolahId
+            ? PengajuanIzinCuti::where('sekolah_id', $sekolahId)->where('status_approval', 'menunggu')->count()
+            : 0;
 
         return compact('sekolah', 'guruAktif', 'presensiHariIni', 'izinMenunggu');
     }
 
     private function getDataKehadiranMingguIni(?int $sekolahId = null): array
     {
-        $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
         $data = [];
+        $startOfWeek = Carbon::now()->startOfWeek();
 
         for ($i = 0; $i < 7; $i++) {
-            $date = Carbon::now()->startOfWeek()->addDays($i);
+            $date = $startOfWeek->copy()->addDays($i);
             $query = PresensiGuru::whereDate('tanggal', $date);
 
             if ($sekolahId) {
                 $query->where('sekolah_id', $sekolahId);
             }
 
-            $total = $query->count();
-            $hadir = $query->where('status', 'hadir')->count();
+            $total = (clone $query)->count();
+            $hadir = (clone $query)->where('status', 'hadir')->count();
 
             $data[] = [
-                'hari' => $days[$i] ?? $date->format('D'),
+                'hari' => $days[$i],
                 'hadir' => $hadir,
                 'total' => $total,
                 'persentase' => $total > 0 ? round(($hadir / $total) * 100) : 0,
