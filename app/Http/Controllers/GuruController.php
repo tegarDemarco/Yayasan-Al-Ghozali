@@ -41,13 +41,27 @@ class GuruController extends Controller
 
     public function create(): View
     {
-        $sekolahs = Sekolah::all();
+        $user = auth()->user();
+        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $sekolahs = Sekolah::where('id', $sekolahId)->get();
+        } else {
+            $sekolahs = Sekolah::all();
+        }
 
         return view('guru.create', compact('sekolahs'));
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $currentUser = auth()->user();
+        if ($currentUser->isAdminSekolah() || $currentUser->isKepalaSekolah()) {
+            $userSekolahId = $currentUser->sekolah_id ?? Sekolah::where('jenjang', $currentUser->jenjang)->value('id');
+            if ($userSekolahId) {
+                $request->merge(['sekolah_id' => $userSekolahId]);
+            }
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
@@ -96,6 +110,14 @@ class GuruController extends Controller
 
     public function show(Guru $guru): View
     {
+        $user = auth()->user();
+        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($guru->sekolah_id !== $sekolahId) {
+                abort(403, 'Anda tidak memiliki akses untuk melihat data guru sekolah lain.');
+            }
+        }
+
         $guru->load(['user', 'sekolah', 'jadwalMengajars', 'presensiGurus' => fn ($q) => $q->latest()->take(10)]);
 
         return view('guru.show', compact('guru'));
@@ -103,13 +125,31 @@ class GuruController extends Controller
 
     public function edit(Guru $guru): View
     {
-        $sekolahs = Sekolah::all();
+        $user = auth()->user();
+        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($guru->sekolah_id !== $sekolahId) {
+                abort(403, 'Anda tidak memiliki akses untuk mengubah data guru sekolah lain.');
+            }
+            $sekolahs = Sekolah::where('id', $sekolahId)->get();
+        } else {
+            $sekolahs = Sekolah::all();
+        }
 
         return view('guru.edit', compact('guru', 'sekolahs'));
     }
 
     public function update(Request $request, Guru $guru): RedirectResponse
     {
+        $currentUser = auth()->user();
+        if ($currentUser->isAdminSekolah() || $currentUser->isKepalaSekolah()) {
+            $userSekolahId = $currentUser->sekolah_id ?? Sekolah::where('jenjang', $currentUser->jenjang)->value('id');
+            if ($guru->sekolah_id !== $userSekolahId) {
+                abort(403, 'Anda tidak memiliki akses untuk memperbarui data guru sekolah lain.');
+            }
+            $request->merge(['sekolah_id' => $userSekolahId]);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email,'.$guru->user_id],
@@ -154,6 +194,14 @@ class GuruController extends Controller
 
     public function destroy(Guru $guru): RedirectResponse
     {
+        $currentUser = auth()->user();
+        if ($currentUser->isAdminSekolah() || $currentUser->isKepalaSekolah()) {
+            $userSekolahId = $currentUser->sekolah_id ?? Sekolah::where('jenjang', $currentUser->jenjang)->value('id');
+            if ($guru->sekolah_id !== $userSekolahId) {
+                abort(403, 'Anda tidak memiliki akses untuk menghapus data guru sekolah lain.');
+            }
+        }
+
         $guru->user->delete();
 
         return redirect()->route('guru.index')->with('success', 'Data guru berhasil dihapus.');

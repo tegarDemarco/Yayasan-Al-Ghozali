@@ -2,6 +2,10 @@
 @section('title','Detail Evaluasi Kinerja')
 @section('page-title','Detail Evaluasi Kinerja')
 
+@php
+    $errors = $errors ?? new \Illuminate\Support\ViewErrorBag();
+@endphp
+
 @section('content')
 <div class="page-header">
     <div class="page-header-left"><h1>Detail Evaluasi Kinerja</h1></div>
@@ -11,8 +15,12 @@
     <div class="card" style="margin-bottom:16px;">
         {{-- Header --}}
         <div style="display:flex;align-items:center;gap:16px;padding-bottom:20px;border-bottom:1px solid var(--border);margin-bottom:20px;">
-            <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px;">
-                {{ strtoupper(substr($evaluasiKinerja->guru->user->name ?? '-', 0, 2)) }}
+            <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px;overflow:hidden;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.12);">
+                @if($evaluasiKinerja->guru?->user?->foto)
+                    <img src="{{ asset('storage/' . $evaluasiKinerja->guru->user->foto) }}" alt="{{ $evaluasiKinerja->guru->user->name }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.style.display='none';this.parentElement.textContent='{{ strtoupper(substr($evaluasiKinerja->guru->user->name ?? '-', 0, 2)) }}';">
+                @else
+                    {{ strtoupper(substr($evaluasiKinerja->guru->user->name ?? '-', 0, 2)) }}
+                @endif
             </div>
             <div style="flex:1;">
                 <div style="font-size:18px;font-weight:800;">{{ $evaluasiKinerja->guru->user->name ?? '-' }}</div>

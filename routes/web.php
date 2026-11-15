@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BahanAjarController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EvaluasiKinerjaController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\JadwalMengajarController;
 use App\Http\Controllers\JurnalMengajarController;
@@ -10,10 +11,10 @@ use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PengajuanIzinCutiController;
 use App\Http\Controllers\PenilaianController;
 use App\Http\Controllers\PresensiGuruController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RekapBebanMengajarController;
 use App\Http\Controllers\RppModulAjarController;
 use App\Http\Controllers\SkTugasController;
-use App\Http\Controllers\EvaluasiKinerjaController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes
@@ -30,6 +31,11 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Profile Management (All authenticated users)
+    Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('profile/photo', [ProfileController::class, 'deletePhoto'])->name('profile.delete-photo');
+
     // Data Guru — pengurus yayasan, kepala sekolah, admin sekolah
     Route::resource('guru', GuruController::class)
         ->middleware('role:pengurus_yayasan,kepala_sekolah,admin_sekolah');
@@ -37,6 +43,9 @@ Route::middleware('auth')->group(function () {
     // Jadwal Mengajar
     Route::resource('jadwal-mengajar', JadwalMengajarController::class)
         ->middleware('role:pengurus_yayasan,kepala_sekolah,admin_sekolah,guru');
+    Route::post('jadwal-mengajar/{jadwalMengajar}/publish', [JadwalMengajarController::class, 'publish'])
+        ->name('jadwal-mengajar.publish')
+        ->middleware('role:pengurus_yayasan,kepala_sekolah,admin_sekolah');
 
     // Presensi Guru
     Route::resource('presensi', PresensiGuruController::class)->except(['edit', 'update', 'show'])
@@ -44,44 +53,51 @@ Route::middleware('auth')->group(function () {
 
     // Jurnal Mengajar
     Route::resource('jurnal', JurnalMengajarController::class)->except(['edit', 'update'])
-        ->middleware('role:pengurus_yayasan,guru,kepala_sekolah,admin_sekolah');
+        ->middleware('role:guru,kepala_sekolah,admin_sekolah,pengurus_yayasan');
 
     // RPP & Modul Ajar
     Route::resource('rpp', RppModulAjarController::class)->except(['edit', 'update'])
-        ->middleware('role:pengurus_yayasan,guru,kepala_sekolah,admin_sekolah');
+        ->middleware('role:guru,kepala_sekolah,admin_sekolah,pengurus_yayasan');
     Route::post('rpp/{rppModulAjar}/validasi', [RppModulAjarController::class, 'validasi'])
         ->name('rpp.validasi')
         ->middleware('role:kepala_sekolah');
 
     // Bahan Ajar
     Route::resource('bahan-ajar', BahanAjarController::class)->except(['edit', 'update'])
-        ->middleware('role:pengurus_yayasan,guru,kepala_sekolah,admin_sekolah');
+        ->middleware('role:guru,kepala_sekolah,admin_sekolah');
 
     // Penilaian
     Route::resource('penilaian', PenilaianController::class)->except(['edit', 'update', 'show'])
-        ->middleware('role:pengurus_yayasan,guru,kepala_sekolah,admin_sekolah');
+        ->middleware('role:guru,kepala_sekolah,admin_sekolah');
 
     // Pengajuan Izin / Cuti
-    Route::resource('pengajuan-izin', PengajuanIzinCutiController::class)->except(['edit', 'update'])
-        ->middleware('role:pengurus_yayasan,guru,kepala_sekolah,admin_sekolah');
+    Route::resource('pengajuan-izin', PengajuanIzinCutiController::class)
+        ->parameters(['pengajuan-izin' => 'pengajuanIzinCuti'])
+        ->except(['edit', 'update'])
+        ->middleware('role:guru,kepala_sekolah,admin_sekolah,pengurus_yayasan');
     Route::post('pengajuan-izin/{pengajuanIzinCuti}/approve', [PengajuanIzinCutiController::class, 'approve'])
         ->name('pengajuan-izin.approve')
-        ->middleware('role:kepala_sekolah,admin_sekolah');
+        ->middleware('role:kepala_sekolah');
 
     // Rekap Beban Mengajar
     Route::get('rekap-beban', [RekapBebanMengajarController::class, 'index'])->name('rekap-beban.index')
         ->middleware('role:pengurus_yayasan,kepala_sekolah,admin_sekolah,guru');
     Route::post('rekap-beban/generate', [RekapBebanMengajarController::class, 'generate'])
         ->name('rekap-beban.generate')
-        ->middleware('role:pengurus_yayasan,kepala_sekolah,admin_sekolah');
+        ->middleware('role:kepala_sekolah,admin_sekolah');
 
     // SK Tugas
-    Route::resource('sk-tugas', SkTugasController::class)->except(['edit', 'update'])
+    Route::post('sk-tugas/{skTugas}/publish', [SkTugasController::class, 'publish'])
+        ->name('sk-tugas.publish')
+        ->middleware('role:pengurus_yayasan,kepala_sekolah,admin_sekolah');
+    Route::resource('sk-tugas', SkTugasController::class)
+        ->parameters(['sk-tugas' => 'skTugas'])
+        ->except(['edit', 'update'])
         ->middleware('role:pengurus_yayasan,kepala_sekolah,admin_sekolah,guru');
 
     // Evaluasi Kinerja
     Route::resource('evaluasi-kinerja', EvaluasiKinerjaController::class)->except(['edit', 'update'])
-        ->middleware('role:pengurus_yayasan,kepala_sekolah,admin_sekolah,guru');
+        ->middleware('role:pengurus_yayasan,kepala_sekolah,guru');
 
     // Notifikasi
     Route::get('notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');

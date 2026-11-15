@@ -23,12 +23,24 @@ class RppModulAjarController extends Controller
             $guru = Guru::where('user_id', $user->id)->first();
             $query->where('guru_id', $guru?->id);
         } elseif ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
-            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
             $query->where('sekolah_id', $sekolahId);
         }
 
+        if ($user->isPengurusYayasan() && $request->filled('jenjang')) {
+            $query->whereHas('sekolah', fn ($s) => $s->where('jenjang', $request->jenjang));
+        }
+
         if ($request->filled('status')) {
-            $query->where('status_validasi', $request->status);
+            $statusMap = [
+                'valid' => 'disetujui',
+                'revisi' => 'ditolak',
+                'disetujui' => 'disetujui',
+                'ditolak' => 'ditolak',
+                'menunggu' => 'menunggu',
+            ];
+            $statusVal = $statusMap[$request->status] ?? $request->status;
+            $query->where('status_validasi', $statusVal);
         }
 
         if ($request->filled('tipe')) {
@@ -66,9 +78,20 @@ class RppModulAjarController extends Controller
         return view('rpp.index', compact('rpps', 'gurus'));
     }
 
+    public function show(RppModulAjar $rpp): View
+    {
+        $rpp->load(['guru.user', 'sekolah', 'validator']);
+
+        return view('rpp.show', compact('rpp'));
+    }
+
     public function create(): View
     {
         $user = auth()->user();
+        if (! $user->isGuru()) {
+            abort(403, 'Hanya Guru yang dapat menyusun dan mengunggah RPP / Modul Ajar.');
+        }
+
         $guru = Guru::where('user_id', $user->id)->with('sekolah')->first();
 
         return view('rpp.create', compact('guru'));
@@ -77,6 +100,10 @@ class RppModulAjarController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $user = auth()->user();
+        if (! $user->isGuru()) {
+            abort(403, 'Hanya Guru yang dapat menyusun dan mengunggah RPP / Modul Ajar.');
+        }
+
         $guru = Guru::where('user_id', $user->id)->firstOrFail();
 
         $validated = $request->validate([
@@ -125,6 +152,17 @@ class RppModulAjarController extends Controller
 
     public function validasi(Request $request, RppModulAjar $rppModulAjar): RedirectResponse
     {
+        $user = auth()->user();
+
+        if (! $user->isKepalaSekolah()) {
+            abort(403, 'Hanya Kepala Sekolah yang memiliki wewenang untuk memvalidasi RPP/Modul Ajar.');
+        }
+
+        $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+        if ($rppModulAjar->sekolah_id !== $sekolahId) {
+            abort(403, 'Tidak memiliki akses untuk memvalidasi RPP sekolah lain.');
+        }
+
         $request->validate([
             'status_validasi' => ['required', 'in:disetujui,ditolak'],
             'catatan_validasi' => ['nullable', 'string'],
@@ -157,13 +195,31 @@ class RppModulAjarController extends Controller
         return redirect()->back()->with('success', $pesan);
     }
 
-    public function destroy(RppModulAjar $rppModulAjar): RedirectResponse
+    public function destroy(RppModulAjar $rpp): RedirectResponse
     {
-        if ($rppModulAjar->file_path) {
-            Storage::disk('public')->delete($rppModulAjar->file_path);
+        $user = auth()->user();
+
+        // Guru hanya bisa hapus RPP miliknya sendiri
+        if ($user->isGuru()) {
+            $guru = Guru::where('user_id', $user->id)->first();
+            if (! $guru || $rpp->guru_id !== $guru->id) {
+                abort(403, 'Anda hanya dapat menghapus RPP/Modul Ajar milik Anda sendiri.');
+            }
         }
 
-        $rppModulAjar->delete();
+        // Kepala Sekolah & Admin Sekolah hanya bisa hapus RPP dari sekolahnya
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($rpp->sekolah_id !== $sekolahId) {
+                abort(403, 'Anda tidak dapat menghapus RPP/Modul Ajar sekolah lain.');
+            }
+        }
+
+        if ($rpp->file_path) {
+            Storage::disk('public')->delete($rpp->file_path);
+        }
+
+        $rpp->delete();
 
         return redirect()->route('rpp.index')->with('success', 'RPP/Modul Ajar berhasil dihapus.');
     }

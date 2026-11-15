@@ -17,15 +17,29 @@ class EvaluasiKinerjaController extends Controller
         $user = auth()->user();
         $query = EvaluasiKinerja::with(['guru.user', 'sekolah', 'evaluator']);
 
-        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
-            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+        if ($user->isKepalaSekolah()) {
+            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
             $query->where('sekolah_id', $sekolahId);
         } elseif ($user->isGuru()) {
             $guru = Guru::where('user_id', $user->id)->first();
             $query->where('guru_id', $guru?->id);
-        } elseif ($user->isPengurusYayasan() && $request->filled('jenjang')) {
-            $sekolahId = Sekolah::where('jenjang', $request->jenjang)->value('id');
-            $query->where('sekolah_id', $sekolahId);
+        }
+
+        if ($request->filled('jenjang') && $user->isPengurusYayasan()) {
+            $jenjang = $request->jenjang;
+            $query->where(function ($q) use ($jenjang) {
+                $q->whereHas('sekolah', fn ($s) => $s->where('jenjang', $jenjang))
+                  ->orWhereHas('guru', fn ($g) => $g->where('jenjang', $jenjang));
+            });
+        }
+
+        if ($request->filled('predikat')) {
+            $query->where('predikat', $request->predikat);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('guru.user', fn ($u) => $u->where('name', 'like', "%{$search}%"));
         }
 
         $evaluasis = $query->latest()->paginate(10)->withQueryString();
@@ -36,14 +50,16 @@ class EvaluasiKinerjaController extends Controller
     public function create(Request $request): View
     {
         $user = auth()->user();
-        abort_if($user->isGuru(), 403, 'Guru tidak memiliki izin untuk membuat evaluasi kinerja.');
 
-        if ($user->isPengurusYayasan()) {
-            $gurus = Guru::where('status', 'aktif')->with(['user', 'sekolah'])->get();
-        } else {
-            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
-            $gurus = Guru::where('sekolah_id', $sekolahId)->where('status', 'aktif')->with(['user', 'sekolah'])->get();
+        if (! $user->isKepalaSekolah()) {
+            abort(403, 'Hanya Kepala Sekolah yang memiliki wewenang untuk menilai kinerja guru.');
         }
+
+        $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+        $gurus = Guru::where('status', 'aktif')
+            ->where('sekolah_id', $sekolahId)
+            ->with(['user', 'sekolah'])
+            ->get();
 
         return view('evaluasi-kinerja.create', compact('gurus'));
     }
@@ -51,7 +67,10 @@ class EvaluasiKinerjaController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $user = auth()->user();
-        abort_if($user->isGuru(), 403, 'Guru tidak memiliki izin untuk membuat evaluasi kinerja.');
+
+        if (! $user->isKepalaSekolah()) {
+            abort(403, 'Hanya Kepala Sekolah yang memiliki wewenang untuk menilai kinerja guru.');
+        }
 
         $validated = $request->validate([
             'guru_id' => ['required', 'exists:gurus,id'],
@@ -65,13 +84,10 @@ class EvaluasiKinerjaController extends Controller
         ]);
 
         $guru = Guru::findOrFail($validated['guru_id']);
-        $sekolahId = $guru->sekolah_id;
+        $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
 
-        if (! $user->isPengurusYayasan()) {
-            $userSekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
-            if ($guru->sekolah_id !== $userSekolahId) {
-                abort(403, 'Anda hanya dapat mengevaluasi guru di sekolah Anda.');
-            }
+        if ($guru->sekolah_id !== $sekolahId) {
+            abort(403, 'Anda hanya dapat mengevaluasi guru pada unit sekolah Anda.');
         }
 
         $nilaiAkhir = (
@@ -98,15 +114,28 @@ class EvaluasiKinerjaController extends Controller
         ]);
 
         if ($guru && $guru->user) {
-    $guru->user->notify(new AppNotification([
-        'title' => 'Evaluasi Kinerja Diterbitkan',
-        'message' => "Evaluasi kinerja semester {$validated['semester']} TA {$validated['tahun_ajaran']} telah diterbitkan dengan predikat {$predikat} (Nilai: {$nilaiAkhir}).",
-        'url' => route('evaluasi-kinerja.show', $evaluasi->id),
-        'type' => 'evaluasi',
-        'icon' => 'bar-chart-2',
-        'senderName' => $user->name,
-    ]));
-}
+            $guru->user->notify(new AppNotification([
+                'title' => 'Evaluasi Kinerja Diterbitkan',
+                'message' => "Evaluasi kinerja semester {$validated['semester']} TA {$validated['tahun_ajaran']} telah diterbitkan dengan predikat {$predikat} (Nilai: {$nilaiAkhir}).",
+                'url' => route('evaluasi-kinerja.show', $evaluasi->id),
+                'type' => 'evaluasi',
+                'icon' => 'bar-chart-2',
+                'senderName' => $user->name,
+            ]));
+        }
+
+        // Sesuai Sequence Diagram 5: Kirim notifikasi ke Pengurus Yayasan
+        $pengurusList = \App\Models\User::where('role', 'pengurus_yayasan')->get();
+        foreach ($pengurusList as $pengurus) {
+            $pengurus->notify(new AppNotification([
+                'title' => 'Evaluasi Kinerja Guru Selesai',
+                'message' => "Kepala Sekolah ({$user->name}) telah menilai kinerja guru {$guru->user?->name} ({$guru->jenjang}).",
+                'url' => route('evaluasi-kinerja.show', $evaluasi->id),
+                'type' => 'evaluasi',
+                'icon' => 'bar-chart-2',
+                'senderName' => $user->name,
+            ]));
+        }
 
         return redirect()->route('evaluasi-kinerja.index')->with('success', 'Evaluasi kinerja berhasil disimpan.');
     }
@@ -118,12 +147,12 @@ class EvaluasiKinerjaController extends Controller
         if ($user->isGuru()) {
             $guru = Guru::where('user_id', $user->id)->first();
             if ($evaluasiKinerja->guru_id !== $guru?->id) {
-                abort(403, 'Anda hanya dapat melihat evaluasi kinerja milik Anda.');
+                abort(403, 'Anda hanya dapat melihat evaluasi kinerja Anda sendiri.');
             }
-        } elseif (! $user->isPengurusYayasan()) {
-            $userSekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
-            if ($evaluasiKinerja->sekolah_id !== $userSekolahId) {
-                abort(403, 'Anda hanya dapat melihat evaluasi kinerja di sekolah Anda.');
+        } elseif ($user->isKepalaSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($evaluasiKinerja->sekolah_id !== $sekolahId) {
+                abort(403, 'Anda tidak memiliki hak untuk melihat evaluasi kinerja sekolah lain.');
             }
         }
 

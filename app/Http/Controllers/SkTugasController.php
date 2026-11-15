@@ -20,10 +20,36 @@ class SkTugasController extends Controller
 
         if ($user->isGuru()) {
             $guru = Guru::where('user_id', $user->id)->first();
-            $query->where('guru_id', $guru?->id);
+            $query->where('guru_id', $guru?->id)
+                ->where('status_publikasi', 'terpublikasi');
         } elseif ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
             $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
             $query->where('sekolah_id', $sekolahId);
+        }
+
+        if ($request->filled('status_publikasi') && ! $user->isGuru()) {
+            $query->where('status_publikasi', $request->status_publikasi);
+        }
+
+        if ($request->filled('jenjang') && $user->isPengurusYayasan()) {
+            $jenjang = $request->jenjang;
+            $query->where(function ($q) use ($jenjang) {
+                $q->whereHas('sekolah', fn ($s) => $s->where('jenjang', $jenjang))
+                    ->orWhereHas('guru', fn ($g) => $g->where('jenjang', $jenjang));
+            });
+        }
+
+        if ($request->filled('jenis')) {
+            $query->where('jenis_sk', $request->jenis);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('no_sk', 'like', "%{$search}%")
+                    ->orWhere('judul_sk', 'like', "%{$search}%")
+                    ->orWhereHas('guru.user', fn ($u) => $u->where('name', 'like', "%{$search}%"));
+            });
         }
 
         $skTugas = $query->latest('tanggal_sk')->paginate(10)->withQueryString();
@@ -34,21 +60,19 @@ class SkTugasController extends Controller
     public function create(): View
     {
         $user = auth()->user();
-        abort_if($user->isGuru(), 403, 'Guru tidak memiliki izin untuk menerbitkan SK Tugas.');
 
-        if ($user->isPengurusYayasan()) {
-            $gurus = Guru::where('status', 'aktif')
-                ->with(['user', 'sekolah'])
-                ->get()
-                ->sortBy(fn ($g) => [$g->sekolah?->jenjang ?? '', $g->user?->name ?? '']);
-        } else {
-            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
-            $gurus = Guru::where('sekolah_id', $sekolahId)
-                ->where('status', 'aktif')
-                ->with(['user', 'sekolah'])
-                ->get()
-                ->sortBy(fn ($g) => $g->user?->name ?? '');
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki akses untuk menerbitkan SK Tugas.');
         }
+
+        $query = Guru::where('status', 'aktif')->with(['user', 'sekolah']);
+
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $query->where('sekolah_id', $sekolahId);
+        }
+
+        $gurus = $query->get();
 
         return view('sk-tugas.create', compact('gurus'));
     }
@@ -56,7 +80,10 @@ class SkTugasController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $user = auth()->user();
-        abort_if($user->isGuru(), 403, 'Guru tidak memiliki izin untuk menerbitkan SK Tugas.');
+
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki akses untuk menerbitkan SK Tugas.');
+        }
 
         $validated = $request->validate([
             'guru_id' => ['required', 'exists:gurus,id'],
@@ -66,16 +93,18 @@ class SkTugasController extends Controller
             'tanggal_sk' => ['required', 'date'],
             'berlaku_mulai' => ['nullable', 'date'],
             'berlaku_sampai' => ['nullable', 'date', 'after_or_equal:berlaku_mulai'],
+            'status_publikasi' => ['nullable', 'in:draft,terpublikasi'],
             'keterangan' => ['nullable', 'string'],
             'file' => ['nullable', 'file', 'mimes:pdf', 'max:5120'],
         ]);
 
-        $guru = Guru::with('sekolah')->findOrFail($validated['guru_id']);
+        $guru = Guru::findOrFail($validated['guru_id']);
 
-        if (! $user->isPengurusYayasan()) {
-            $userSekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
-            if ($guru->sekolah_id !== $userSekolahId) {
-                abort(403, 'Anda hanya dapat menerbitkan SK untuk guru di sekolah Anda.');
+        // Boundary check: Admin/Kepala Sekolah hanya boleh buat SK untuk guru sekolahnya
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($guru->sekolah_id !== $sekolahId) {
+                abort(403, 'Anda tidak dapat menerbitkan SK Tugas untuk guru sekolah lain.');
             }
         }
 
@@ -85,14 +114,17 @@ class SkTugasController extends Controller
             $filePath = $request->file('file')->store('sk-tugas', 'public');
         }
 
+        $statusPublikasi = $request->input('status_publikasi', 'terpublikasi');
+
         $skTugas = SkTugas::create([
             ...$validated,
             'sekolah_id' => $guru->sekolah_id,
             'file_path' => $filePath,
             'diterbitkan_oleh' => $user->id,
+            'status_publikasi' => $statusPublikasi,
         ]);
 
-        if ($guru->user) {
+        if ($statusPublikasi === 'terpublikasi' && $guru->user) {
             $guru->user->notify(new AppNotification(
                 title: 'SK Tugas Baru Diterbitkan',
                 message: "SK No. {$validated['no_sk']} \"{$validated['judul_sk']}\" telah diterbitkan untuk Anda.",
@@ -103,26 +135,64 @@ class SkTugasController extends Controller
             ));
         }
 
-        return redirect()->route('sk-tugas.index')->with('success', 'SK Tugas berhasil diterbitkan.');
+        $msg = $statusPublikasi === 'terpublikasi'
+            ? 'SK Tugas berhasil diterbitkan dan dipublikasikan.'
+            : 'SK Tugas berhasil disimpan sebagai Draft.';
+
+        return redirect()->route('sk-tugas.index')->with('success', $msg);
+    }
+
+    public function publish(SkTugas $skTugas): RedirectResponse
+    {
+        $user = auth()->user();
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki akses untuk mempublikasikan SK Tugas.');
+        }
+
+        // Boundary check: Kepala/Admin hanya boleh publish SK milik sekolahnya
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($skTugas->sekolah_id !== $sekolahId) {
+                abort(403, 'Anda tidak dapat mempublikasikan SK Tugas sekolah lain.');
+            }
+        }
+
+        $skTugas->update(['status_publikasi' => 'terpublikasi']);
+
+        if ($skTugas->guru?->user) {
+            $skTugas->guru->user->notify(new AppNotification(
+                title: 'SK Tugas Telah Dipublikasikan',
+                message: "SK No. {$skTugas->no_sk} \"{$skTugas->judul_sk}\" kini telah dipublikasikan untuk Anda.",
+                url: route('sk-tugas.show', $skTugas->id),
+                type: 'sk_tugas',
+                icon: 'award',
+                senderName: $user->name,
+            ));
+        }
+
+        return redirect()->back()->with('success', "SK Tugas No. {$skTugas->no_sk} berhasil dipublikasikan ke guru terkait.");
     }
 
     public function show(SkTugas $skTugas): View
     {
         $user = auth()->user();
+        $skTugas->load('guru.user', 'sekolah', 'penerbit');
 
+        // Guru hanya boleh lihat SK miliknya yang sudah terpublikasi
         if ($user->isGuru()) {
             $guru = Guru::where('user_id', $user->id)->first();
-            if ($skTugas->guru_id !== $guru?->id) {
-                abort(403, 'Anda hanya dapat melihat SK Tugas milik Anda.');
-            }
-        } elseif (! $user->isPengurusYayasan()) {
-            $userSekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
-            if ($skTugas->sekolah_id !== $userSekolahId) {
-                abort(403, 'Anda hanya dapat melihat SK Tugas di sekolah Anda.');
+            if (! $guru || $skTugas->guru_id !== $guru->id || $skTugas->status_publikasi !== 'terpublikasi') {
+                abort(403, 'Anda tidak memiliki akses untuk melihat SK Tugas ini.');
             }
         }
 
-        $skTugas->load('guru.user', 'sekolah', 'penerbit');
+        // Kepala/Admin hanya boleh lihat SK sekolah mereka
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($skTugas->sekolah_id !== $sekolahId) {
+                abort(403, 'Anda tidak memiliki akses untuk melihat SK Tugas sekolah lain.');
+            }
+        }
 
         return view('sk-tugas.show', compact('skTugas'));
     }
@@ -130,12 +200,17 @@ class SkTugasController extends Controller
     public function destroy(SkTugas $skTugas): RedirectResponse
     {
         $user = auth()->user();
-        abort_if($user->isGuru(), 403, 'Guru tidak memiliki izin untuk menghapus SK Tugas.');
 
-        if (! $user->isPengurusYayasan()) {
-            $userSekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
-            if ($skTugas->sekolah_id !== $userSekolahId) {
-                abort(403, 'Anda hanya dapat menghapus SK Tugas di sekolah Anda.');
+        // Guru tidak boleh menghapus SK Tugas
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki akses untuk menghapus SK Tugas.');
+        }
+
+        // Kepala/Admin hanya boleh hapus SK milik sekolahnya
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($skTugas->sekolah_id !== $sekolahId) {
+                abort(403, 'Anda tidak dapat menghapus SK Tugas sekolah lain.');
             }
         }
 

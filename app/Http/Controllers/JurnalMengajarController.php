@@ -20,9 +20,23 @@ class JurnalMengajarController extends Controller
             $guru = Guru::where('user_id', $user->id)->first();
             $query->where('guru_id', $guru?->id);
         } elseif ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
-            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
             $guruIds = Guru::where('sekolah_id', $sekolahId)->pluck('id');
             $query->whereIn('guru_id', $guruIds);
+        }
+
+        if ($user->isPengurusYayasan() && $request->filled('jenjang')) {
+            $query->whereHas('guru', fn ($g) => $g->where('jenjang', $request->jenjang));
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('mata_pelajaran', 'like', "%{$search}%")
+                  ->orWhere('kelas', 'like', "%{$search}%")
+                  ->orWhere('materi', 'like', "%{$search}%")
+                  ->orWhereHas('guru.user', fn ($u) => $u->where('name', 'like', "%{$search}%"));
+            });
         }
 
         $jurnals = $query->latest('tanggal')->paginate(10)->withQueryString();
@@ -33,6 +47,10 @@ class JurnalMengajarController extends Controller
     public function create(): View
     {
         $user = auth()->user();
+        if (! $user->isGuru()) {
+            abort(403, 'Hanya Guru yang dapat mengisi jurnal mengajar.');
+        }
+
         $guru = Guru::where('user_id', $user->id)->with('jadwalMengajars')->first();
         $jadwals = $guru?->jadwalMengajars()->where('is_aktif', true)->get() ?? collect();
 
@@ -42,6 +60,10 @@ class JurnalMengajarController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $user = auth()->user();
+        if (! $user->isGuru()) {
+            abort(403, 'Hanya Guru yang dapat mengisi jurnal mengajar.');
+        }
+
         $guru = Guru::where('user_id', $user->id)->firstOrFail();
 
         $validated = $request->validate([

@@ -6,17 +6,54 @@
 <div class="page-header">
     <div class="page-header-left">
         <h1>Surat Keputusan (SK) Tugas</h1>
-        <p>Pengelolaan SK pengangkatan, mutasi, dan penugasan guru</p>
+        <p>{{ auth()->user()->isPengurusYayasan() ? 'Penerbitan dan pemantauan SK Tugas guru lintas jenjang' : (auth()->user()->isAdminSekolah() ? 'Pencatatan, pengunggahan, dan publikasi SK Tugas guru' : (auth()->user()->isGuru() ? 'Daftar SK penugasan Anda yang telah diterbitkan' : 'Pengelolaan SK pengangkatan, mutasi, dan penugasan guru')) }}</p>
     </div>
     @if(auth()->user()->isKepalaSekolah() || auth()->user()->isAdminSekolah() || auth()->user()->isPengurusYayasan())
     <a href="{{ route('sk-tugas.create') }}" class="btn btn-primary">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-        Terbitkan SK
+        {{ auth()->user()->isPengurusYayasan() ? 'Terbitkan SK' : 'Catat & Unggah SK' }}
     </a>
     @endif
 </div>
 
 <div class="card">
+    <form method="GET" action="{{ route('sk-tugas.index') }}" autocomplete="off">
+        <div class="filter-bar">
+            @if(auth()->user()->isPengurusYayasan())
+            <select name="jenjang" class="form-control" style="width:auto;">
+                <option value="">Semua Jenjang</option>
+                <option value="SD" {{ request('jenjang') === 'SD' ? 'selected' : '' }}>Unit SD</option>
+                <option value="MTs" {{ request('jenjang') === 'MTs' ? 'selected' : '' }}>Unit MTs</option>
+                <option value="SMK" {{ request('jenjang') === 'SMK' ? 'selected' : '' }}>Unit SMK</option>
+            </select>
+            @endif
+            <select name="jenis" class="form-control" style="width:auto;">
+                <option value="">Semua Jenis SK</option>
+                @foreach(['Pengangkatan','Pemberhentian','Mutasi','Penghargaan','Sanksi','Tugas Tambahan'] as $j)
+                <option value="{{ $j }}" {{ request('jenis') === $j ? 'selected' : '' }}>{{ $j }}</option>
+                @endforeach
+            </select>
+            @if(!auth()->user()->isGuru())
+            <select name="status_publikasi" class="form-control" style="width:auto;">
+                <option value="">Semua Status Publikasi</option>
+                <option value="terpublikasi" {{ request('status_publikasi') === 'terpublikasi' ? 'selected' : '' }}>Terpublikasi</option>
+                <option value="draft" {{ request('status_publikasi') === 'draft' ? 'selected' : '' }}>Draft</option>
+            </select>
+            @endif
+            <div class="search-box" style="max-width:260px;">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                <input type="text" name="search" class="form-control" placeholder="Cari nomor, judul, guru..." value="{{ request('search') }}" autocomplete="off">
+            </div>
+            <button type="submit" class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" /></svg>
+                Filter
+            </button>
+            @if(request()->anyFilled(['jenjang','jenis','search']))
+            <a href="{{ route('sk-tugas.index') }}" class="btn btn-secondary">Reset</a>
+            @endif
+        </div>
+    </form>
+
     <div class="table-wrapper">
         <table>
             <thead>
@@ -28,6 +65,7 @@
                     <th>Tanggal SK</th>
                     <th>Berlaku</th>
                     <th>Diterbitkan Oleh</th>
+                    <th>Status</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -60,7 +98,23 @@
                     </td>
                     <td>{{ $sk->penerbit->name ?? '-' }}</td>
                     <td>
-                        <div style="display:flex;gap:6px;">
+                        @if(($sk->status_publikasi ?? 'terpublikasi') === 'terpublikasi')
+                            <span class="badge badge-green" style="font-weight:700;">Terpublikasi</span>
+                        @else
+                            <span class="badge badge-yellow" style="font-weight:700;">Draft</span>
+                        @endif
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            @if(!$sk->isTerpublikasi() && !auth()->user()->isGuru())
+                            <form method="POST" action="{{ route('sk-tugas.publish', $sk) }}" style="display:inline;" onsubmit="return confirm('Publikasikan SK ini agar dapat dilihat oleh guru terkait?')">
+                                @csrf
+                                <button type="submit" class="btn btn-primary btn-sm" title="Publikasikan SK ke Guru" style="display:inline-flex;align-items:center;gap:4px;padding:4px 8px;font-size:11.5px;font-weight:600;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+                                    Publikasikan
+                                </button>
+                            </form>
+                            @endif
                             <a href="{{ route('sk-tugas.show', $sk) }}" class="btn btn-secondary btn-sm btn-icon" title="Detail">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                             </a>
@@ -81,18 +135,39 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="8">
+                <tr><td colspan="9">
                     <div class="empty-state">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z" />
                         </svg>
                         <h3>Belum ada SK Tugas</h3>
-                        <p>SK Tugas yang diterbitkan akan tampil di sini</p>
+                        <p>{{ request()->anyFilled(['jenjang','jenis','search']) ? 'Tidak ada SK Tugas yang sesuai dengan filter yang dipilih.' : 'SK Tugas yang diterbitkan akan tampil di sini' }}</p>
                     </div>
                 </td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+
+    @if($skTugas->hasPages())
+    <div class="pagination">
+        <div class="pagination-info">Menampilkan {{ $skTugas->firstItem() }}–{{ $skTugas->lastItem() }} dari {{ $skTugas->total() }} data</div>
+        <div class="pagination-links">
+            @if($skTugas->onFirstPage())
+                <span class="page-link disabled">←</span>
+            @else
+                <a href="{{ $skTugas->previousPageUrl() }}" class="page-link">←</a>
+            @endif
+            @foreach($skTugas->getUrlRange(max(1,$skTugas->currentPage()-2), min($skTugas->lastPage(),$skTugas->currentPage()+2)) as $page => $url)
+                <a href="{{ $url }}" class="page-link {{ $page == $skTugas->currentPage() ? 'active' : '' }}">{{ $page }}</a>
+            @endforeach
+            @if($skTugas->hasMorePages())
+                <a href="{{ $skTugas->nextPageUrl() }}" class="page-link">→</a>
+            @else
+                <span class="page-link disabled">→</span>
+            @endif
+        </div>
+    </div>
+    @endif
 </div>
 @endsection

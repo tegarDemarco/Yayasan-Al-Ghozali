@@ -8,8 +8,10 @@ use App\Models\Sekolah;
 use App\Models\User;
 use App\Notifications\AppNotification;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class PengajuanIzinCutiController extends Controller
@@ -23,12 +25,34 @@ class PengajuanIzinCutiController extends Controller
             $guru = Guru::where('user_id', $user->id)->first();
             $query->where('guru_id', $guru?->id);
         } elseif ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
-            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
             $query->where('sekolah_id', $sekolahId);
+        }
+
+        if ($user->isPengurusYayasan() && $request->filled('jenjang')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('sekolah', fn ($s) => $s->where('jenjang', $request->jenjang))
+                  ->orWhereHas('guru', fn ($g) => $g->where('jenjang', $request->jenjang));
+            });
         }
 
         if ($request->filled('status')) {
             $query->where('status_approval', $request->status);
+        }
+
+        if ($request->filled('jenis')) {
+            $query->where('jenis_pengajuan', $request->jenis);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('alasan', 'like', "%{$search}%")
+                    ->orWhere('jenis_pengajuan', 'like', "%{$search}%")
+                    ->orWhereHas('guru.user', function ($qu) use ($search) {
+                        $qu->where('name', 'like', "%{$search}%");
+                    });
+            });
         }
 
         $pengajuans = $query->latest()->paginate(10)->withQueryString();
@@ -38,12 +62,20 @@ class PengajuanIzinCutiController extends Controller
 
     public function create(): View
     {
+        $user = auth()->user();
+        if (! $user->isGuru()) {
+            abort(403, 'Hanya Guru yang dapat mengajukan izin atau cuti.');
+        }
+
         return view('pengajuan-izin.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
         $user = auth()->user();
+        if (! $user->isGuru()) {
+            abort(403, 'Hanya Guru yang dapat mengajukan izin atau cuti.');
+        }
         $guru = Guru::where('user_id', $user->id)->firstOrFail();
 
         $validated = $request->validate([
@@ -75,7 +107,7 @@ class PengajuanIzinCutiController extends Controller
         ]);
 
         $approvers = User::where('sekolah_id', $guru->sekolah_id)
-            ->whereIn('role', ['kepala_sekolah', 'admin_sekolah'])
+            ->where('role', 'kepala_sekolah')
             ->get();
 
         foreach ($approvers as $approver) {
@@ -92,11 +124,46 @@ class PengajuanIzinCutiController extends Controller
         return redirect()->route('pengajuan-izin.index')->with('success', 'Pengajuan berhasil dikirim. Menunggu persetujuan.');
     }
 
+    public function show(PengajuanIzinCuti $pengajuanIzinCuti): JsonResponse|View|RedirectResponse
+    {
+        $user = auth()->user();
+        if ($user->isGuru()) {
+            $guru = Guru::where('user_id', $user->id)->first();
+            if ($pengajuanIzinCuti->guru_id !== $guru?->id) {
+                abort(403);
+            }
+        } elseif ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($pengajuanIzinCuti->sekolah_id !== $sekolahId) {
+                abort(403);
+            }
+        }
+
+        $pengajuanIzinCuti->load(['guru.user', 'sekolah', 'approver']);
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json($pengajuanIzinCuti);
+        }
+
+        return redirect()->route('pengajuan-izin.index');
+    }
+
     public function approve(Request $request, PengajuanIzinCuti $pengajuanIzinCuti): RedirectResponse
     {
+        $user = auth()->user();
+
+        if (! $user->isKepalaSekolah()) {
+            abort(403, 'Hanya Kepala Sekolah yang memiliki wewenang untuk menyetujui atau menolak pengajuan izin/cuti.');
+        }
+
+        $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+        if ($pengajuanIzinCuti->sekolah_id !== $sekolahId) {
+            abort(403, 'Tidak memiliki akses untuk memproses pengajuan sekolah lain.');
+        }
+
         $request->validate([
             'status_approval' => ['required', 'in:disetujui,ditolak'],
-            'catatan_approval' => ['nullable', 'string'],
+            'catatan_approval' => ['nullable', 'string', 'max:500'],
         ]);
 
         $pengajuanIzinCuti->update([
@@ -120,16 +187,34 @@ class PengajuanIzinCutiController extends Controller
         }
 
         $pesan = $request->status_approval === 'disetujui'
-            ? 'Pengajuan berhasil disetujui.'
-            : 'Pengajuan ditolak.';
+            ? 'Pengajuan izin / cuti berhasil disetujui.'
+            : 'Pengajuan izin / cuti telah ditolak.';
 
-        return redirect()->back()->with('success', $pesan);
+        return redirect()->route('pengajuan-izin.index')->with('success', $pesan);
     }
 
     public function destroy(PengajuanIzinCuti $pengajuanIzinCuti): RedirectResponse
     {
+        $user = auth()->user();
+
+        if ($user->isGuru()) {
+            $guru = Guru::where('user_id', $user->id)->first();
+            if ($pengajuanIzinCuti->guru_id !== $guru?->id || $pengajuanIzinCuti->status_approval !== 'menunggu') {
+                abort(403, 'Hanya pengajuan berstatus menunggu milik Anda yang dapat dibatalkan.');
+            }
+        } elseif ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($pengajuanIzinCuti->sekolah_id !== $sekolahId) {
+                abort(403, 'Tidak memiliki akses untuk menghapus pengajuan sekolah lain.');
+            }
+        }
+
+        if ($pengajuanIzinCuti->lampiran) {
+            Storage::disk('public')->delete($pengajuanIzinCuti->lampiran);
+        }
+
         $pengajuanIzinCuti->delete();
 
-        return redirect()->route('pengajuan-izin.index')->with('success', 'Pengajuan berhasil dihapus.');
+        return redirect()->route('pengajuan-izin.index')->with('success', 'Pengajuan izin / cuti berhasil dihapus/dibatalkan.');
     }
 }

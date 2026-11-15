@@ -14,8 +14,13 @@ class SkTugas extends Model
     protected $fillable = [
         'guru_id', 'sekolah_id', 'no_sk', 'judul_sk', 'jenis_sk',
         'tanggal_sk', 'berlaku_mulai', 'berlaku_sampai',
-        'file_path', 'keterangan', 'diterbitkan_oleh',
+        'file_path', 'keterangan', 'diterbitkan_oleh', 'status_publikasi',
     ];
+
+    public function isTerpublikasi(): bool
+    {
+        return ($this->status_publikasi ?? 'terpublikasi') === 'terpublikasi';
+    }
 
     protected function casts(): array
     {

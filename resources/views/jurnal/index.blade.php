@@ -13,6 +13,25 @@
     @endif
 </div>
 <div class="card">
+    <form method="GET" action="{{ route('jurnal.index') }}" autocomplete="off">
+        <div class="filter-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+            @if(auth()->user()->isPengurusYayasan())
+            <select name="jenjang" class="form-control" style="width:auto;">
+                <option value="">Semua Jenjang</option>
+                <option value="SD" {{ request('jenjang') === 'SD' ? 'selected' : '' }}>Unit SD</option>
+                <option value="MTs" {{ request('jenjang') === 'MTs' ? 'selected' : '' }}>Unit MTs</option>
+                <option value="SMK" {{ request('jenjang') === 'SMK' ? 'selected' : '' }}>Unit SMK</option>
+            </select>
+            @endif
+            <div class="search-box" style="max-width:280px;">
+                <input type="text" name="search" class="form-control" placeholder="Cari mapel, kelas, guru, materi..." value="{{ request('search') }}">
+            </div>
+            <button type="submit" class="btn btn-secondary">Filter</button>
+            @if(request()->anyFilled(['jenjang', 'search']))
+            <a href="{{ route('jurnal.index') }}" class="btn btn-secondary">Reset</a>
+            @endif
+        </div>
+    </form>
     <div class="table-wrapper">
         <table>
             <thead>

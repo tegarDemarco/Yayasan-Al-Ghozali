@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Guru;
 use App\Models\RekapBebanMengajar;
 use App\Models\Sekolah;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -14,13 +15,23 @@ class RekapBebanMengajarController extends Controller
     {
         $user = auth()->user();
         $query = RekapBebanMengajar::with(['guru.user', 'sekolah']);
+        $defaultSekolahId = null;
 
         if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
-            $sekolahId = Sekolah::where('jenjang', $user->jenjang)->value('id');
+            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
             $query->where('sekolah_id', $sekolahId);
+            $sekolahs = Sekolah::where('id', $sekolahId)->get();
+            if ($sekolahs->isEmpty() && $user->jenjang) {
+                $sekolahs = Sekolah::where('jenjang', $user->jenjang)->get();
+            }
+            $defaultSekolahId = $sekolahs->first()?->id ?? $sekolahId;
         } elseif ($user->isGuru()) {
             $guru = Guru::where('user_id', $user->id)->first();
             $query->where('guru_id', $guru?->id);
+            $sekolahs = collect();
+        } else {
+            // Pengurus Yayasan
+            $sekolahs = Sekolah::all();
         }
 
         if ($request->filled('tahun_ajaran')) {
@@ -33,18 +44,37 @@ class RekapBebanMengajarController extends Controller
         }
 
         $rekaps = $query->latest()->paginate(15)->withQueryString();
-        $sekolahs = Sekolah::all();
 
-        return view('rekap-beban.index', compact('rekaps', 'sekolahs'));
+        return view('rekap-beban.index', compact('rekaps', 'sekolahs', 'defaultSekolahId'));
     }
 
-    public function generate(Request $request): \Illuminate\Http\RedirectResponse
+    public function generate(Request $request): RedirectResponse
     {
+        $user = auth()->user();
+
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki izin untuk generate rekap beban mengajar.');
+        }
+
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $userSekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($userSekolahId) {
+                $request->merge(['sekolah_id' => $userSekolahId]);
+            }
+        }
+
         $validated = $request->validate([
             'sekolah_id' => ['required', 'exists:sekolahs,id'],
             'tahun_ajaran' => ['required', 'string'],
             'semester' => ['required', 'in:Ganjil,Genap'],
         ]);
+
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            $userSekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
+            if ($userSekolahId && $validated['sekolah_id'] != $userSekolahId) {
+                abort(403, 'Anda tidak memiliki akses untuk generate rekap beban sekolah lain.');
+            }
+        }
 
         $gurus = Guru::where('sekolah_id', $validated['sekolah_id'])->where('status', 'aktif')->get();
 
