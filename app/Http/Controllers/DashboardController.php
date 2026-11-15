@@ -258,62 +258,121 @@ class DashboardController extends Controller
 
     private function dashboardAdminSekolah(mixed $user): array
     {
-        $sekolah = Sekolah::where('jenjang', $user->jenjang)->first() ?? Sekolah::first();
+        $sekolah = Sekolah::where('jenjang', $user->jenjang)->first()
+            ?? ($user->sekolah_id ? Sekolah::find($user->sekolah_id) : Sekolah::first());
         $sekolahId = $sekolah?->id;
 
         $guruAktif = Guru::where('sekolah_id', $sekolahId)->where('status', 'aktif')->count();
-        if ($guruAktif === 0) {
-            $guruAktif = 28;
-        }
 
         $jadwalTerpublikasi = JadwalMengajar::where('sekolah_id', $sekolahId)
             ->where('is_aktif', true)->count();
-        if ($jadwalTerpublikasi === 0) {
-            $jadwalTerpublikasi = 34;
-        }
 
         $jadwalDraft = JadwalMengajar::where('sekolah_id', $sekolahId)
             ->where('is_aktif', false)->count();
-        if ($jadwalDraft === 0) {
-            $jadwalDraft = 2;
-        }
 
         $today = Carbon::today();
         $hadirHariIni = PresensiGuru::where('sekolah_id', $sekolahId)
             ->whereDate('tanggal', $today)
             ->where('status', 'hadir')
             ->count();
-        if ($hadirHariIni === 0) {
-            $hadirHariIni = min(25, $guruAktif);
+        $totalPresensiHariIni = PresensiGuru::where('sekolah_id', $sekolahId)
+            ->whereDate('tanggal', $today)
+            ->count();
+        $belumTercatat = max(0, $guruAktif - $totalPresensiHariIni);
+
+        // Arsip perlu ditinjau dihitung dinamis dari:
+        // 1. RPP yang masih berstatus menunggu validasi
+        // 2. SK Tugas yang belum diunggah berkas PDF-nya
+        // 3. Jadwal mengajar yang masih berstatus draft
+        $rppMenungguCount = RppModulAjar::where('sekolah_id', $sekolahId)
+            ->where('status_validasi', 'menunggu')->count();
+        $skBelumUnggahCount = SkTugas::where('sekolah_id', $sekolahId)
+            ->whereNull('file_path')->count();
+
+        $arsipPerluDitinjau = $rppMenungguCount + $skBelumUnggahCount + $jadwalDraft;
+
+        // Aktivitas Administrasi Dinamis Sesuai Jenjang
+        $aktivitasAdministrasi = [];
+
+        // 1. Ambil jadwal terbaru pada jenjang ini
+        $jadwalRecent = JadwalMengajar::where('sekolah_id', $sekolahId)
+            ->latest('updated_at')
+            ->take(2)
+            ->get();
+
+        foreach ($jadwalRecent as $j) {
+            $waktuMulai = $j->jam_mulai instanceof Carbon ? $j->jam_mulai->format('H:i') : substr((string) $j->jam_mulai, 0, 5);
+            $waktuSelesai = $j->jam_selesai instanceof Carbon ? $j->jam_selesai->format('H:i') : substr((string) $j->jam_selesai, 0, 5);
+
+            $aktivitasAdministrasi[] = [
+                'unit_pengguna' => 'Kelas ' . $j->kelas . ' · ' . $j->mata_pelajaran,
+                'aktivitas' => $j->is_aktif ? 'Jadwal telah terpublikasi' : 'Pembaruan jadwal (Draft)',
+                'keterangan' => $j->hari . ', ' . $waktuMulai . '–' . $waktuSelesai,
+                'status' => $j->is_aktif ? 'selesai' : 'menunggu',
+                'status_label' => $j->is_aktif ? 'Selesai' : 'Draft',
+                'time' => $j->updated_at ?? $j->created_at,
+            ];
         }
-        $belumTercatat = max(0, $guruAktif - $hadirHariIni);
 
-        $arsipPerluDitinjau = 3;
+        // 2. Ambil SK Tugas terbaru pada jenjang ini
+        $skRecent = SkTugas::where('sekolah_id', $sekolahId)
+            ->with('guru.user')
+            ->latest('created_at')
+            ->take(2)
+            ->get();
 
-        // Aktivitas Administrasi
-        $aktivitasAdministrasi = [
-            [
-                'unit_pengguna' => 'Jadwal kelas VI A',
-                'aktivitas' => 'Pembaruan jadwal',
-                'keterangan' => 'Draft',
-                'status' => 'menunggu',
-                'status_label' => 'Menunggu',
-            ],
-            [
-                'unit_pengguna' => 'SK/AG/019/XI/2026',
-                'aktivitas' => 'File SK belum diunggah',
-                'keterangan' => 'Perlu tindakan',
-                'status' => 'perlu_tindakan',
-                'status_label' => 'Perlu tindakan',
-            ],
-            [
-                'unit_pengguna' => 'RPP IPA',
-                'aktivitas' => 'Dokumen valid telah diarsipkan',
-                'keterangan' => 'Selesai',
-                'status' => 'selesai',
-                'status_label' => 'Selesai',
-            ],
-        ];
+        foreach ($skRecent as $sk) {
+            $hasFile = !empty($sk->file_path);
+            $aktivitasAdministrasi[] = [
+                'unit_pengguna' => $sk->no_sk,
+                'aktivitas' => $hasFile ? $sk->judul_sk : 'File SK belum diunggah',
+                'keterangan' => ($sk->guru?->user?->name ? 'Guru: ' . $sk->guru->user->name . ' · ' : '') . $sk->jenis_sk,
+                'status' => $hasFile ? 'selesai' : 'perlu_tindakan',
+                'status_label' => $hasFile ? 'Selesai' : 'Perlu tindakan',
+                'time' => $sk->updated_at ?? $sk->created_at,
+            ];
+        }
+
+        // 3. Ambil RPP / Modul Ajar terbaru pada jenjang ini
+        $rppRecent = RppModulAjar::where('sekolah_id', $sekolahId)
+            ->with('guru.user')
+            ->latest('updated_at')
+            ->take(2)
+            ->get();
+
+        foreach ($rppRecent as $rpp) {
+            if ($rpp->status_validasi === 'disetujui') {
+                $statusKey = 'selesai';
+                $statusLabel = 'Selesai';
+                $aktDesc = 'Dokumen valid telah diarsipkan';
+            } elseif ($rpp->status_validasi === 'ditolak') {
+                $statusKey = 'perlu_tindakan';
+                $statusLabel = 'Perlu tindakan';
+                $aktDesc = 'Memerlukan revisi berkas';
+            } else {
+                $statusKey = 'menunggu';
+                $statusLabel = 'Menunggu';
+                $aktDesc = 'Menunggu validasi kepala sekolah';
+            }
+
+            $aktivitasAdministrasi[] = [
+                'unit_pengguna' => 'RPP ' . $rpp->mata_pelajaran . ' ' . $rpp->kelas,
+                'aktivitas' => $aktDesc,
+                'keterangan' => 'Pengunggah: ' . ($rpp->guru?->user?->name ?? 'Guru'),
+                'status' => $statusKey,
+                'status_label' => $statusLabel,
+                'time' => $rpp->updated_at ?? $rpp->created_at,
+            ];
+        }
+
+        // Urutkan aktivitas berdasarkan waktu pembaruan terbaru
+        usort($aktivitasAdministrasi, function ($a, $b) {
+            $tA = isset($a['time']) ? Carbon::parse($a['time'])->timestamp : 0;
+            $tB = isset($b['time']) ? Carbon::parse($b['time'])->timestamp : 0;
+            return $tB <=> $tA;
+        });
+
+        $aktivitasAdministrasi = array_slice($aktivitasAdministrasi, 0, 5);
 
         return compact(
             'sekolah',

@@ -215,7 +215,7 @@
                 </div>
                 <div class="period-summary-row">
                     <span class="period-row-key">Terakhir diperbarui</span>
-                    <span class="period-row-val">Hari ini, 09.15</span>
+                    <span class="period-row-val">Hari ini, {{ now()->format('H.i') }} WIB</span>
                 </div>
             </div>
         </div>
@@ -570,7 +570,7 @@
                 </div>
                 <div class="period-summary-row">
                     <span class="period-row-key">Terakhir diperbarui</span>
-                    <span class="period-row-val">Hari ini, 09.15</span>
+                    <span class="period-row-val">Hari ini, {{ now()->format('H.i') }} WIB</span>
                 </div>
             </div>
         </div>
@@ -614,7 +614,7 @@
                 <div class="stat-icon-square"><i data-lucide="user"></i></div>
             </div>
             <div>
-                <div class="stat-value-big">{{ $data['guruAktif'] ?? 28 }}</div>
+                <div class="stat-value-big">{{ $data['guruAktif'] ?? 0 }}</div>
                 <div class="stat-subtext-detail">Data aktif pada sekolah</div>
             </div>
         </div>
@@ -625,8 +625,8 @@
                 <div class="stat-icon-square"><i data-lucide="calendar"></i></div>
             </div>
             <div>
-                <div class="stat-value-big">{{ $data['jadwalTerpublikasi'] ?? 34 }}</div>
-                <div class="stat-subtext-detail">{{ $data['jadwalDraft'] ?? 2 }} jadwal masih draft</div>
+                <div class="stat-value-big">{{ $data['jadwalTerpublikasi'] ?? 0 }}</div>
+                <div class="stat-subtext-detail">{{ $data['jadwalDraft'] ?? 0 }} jadwal masih draft</div>
             </div>
         </div>
 
@@ -636,8 +636,8 @@
                 <div class="stat-icon-square"><i data-lucide="check"></i></div>
             </div>
             <div>
-                <div class="stat-value-big">{{ $data['hadirHariIni'] ?? 25 }} / {{ $data['guruAktif'] ?? 28 }}</div>
-                <div class="stat-subtext-detail">{{ $data['belumTercatat'] ?? 3 }} belum tercatat</div>
+                <div class="stat-value-big">{{ $data['hadirHariIni'] ?? 0 }} / {{ $data['guruAktif'] ?? 0 }}</div>
+                <div class="stat-subtext-detail">{{ $data['belumTercatat'] ?? 0 }} belum tercatat</div>
             </div>
         </div>
 
@@ -647,7 +647,7 @@
                 <div class="stat-icon-square"><i data-lucide="folder"></i></div>
             </div>
             <div>
-                <div class="stat-value-big">{{ $data['arsipPerluDitinjau'] ?? 3 }}</div>
+                <div class="stat-value-big">{{ $data['arsipPerluDitinjau'] ?? 0 }}</div>
                 <div class="stat-subtext-detail">Dokumen belum lengkap</div>
             </div>
         </div>
@@ -779,7 +779,7 @@
                 </div>
                 <div class="period-summary-row">
                     <span class="period-row-key">Terakhir diperbarui</span>
-                    <span class="period-row-val">Hari ini, 09.15</span>
+                    <span class="period-row-val">Hari ini, {{ now()->format('H.i') }} WIB</span>
                 </div>
             </div>
         </div>
@@ -984,7 +984,7 @@
                 </div>
                 <div class="period-summary-row">
                     <span class="period-row-key">Terakhir diperbarui</span>
-                    <span class="period-row-val">Hari ini, 09.15</span>
+                    <span class="period-row-val">Hari ini, {{ now()->format('H.i') }} WIB</span>
                 </div>
             </div>
         </div>
