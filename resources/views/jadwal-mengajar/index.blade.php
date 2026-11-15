@@ -200,15 +200,21 @@
 
 
 @push('scripts')
-
+<script>
 function showJadwalDetail(item) {
-document.getElementById('modalMapelTitle').textContent = item.mata_pelajaran + ' - ' + item.kelas;
-document.getElementById('modalDetailBody').innerHTML = <p><strong>Hari:</strong> ${item.hari}</p> <p><strong>Waktu:</strong> ${item.jam_mulai.substring(0,5)} – ${item.jam_selesai.substring(0,5)}</p> <p><strong>Ruangan:</strong> ${item.ruangan || 'Ruang Standar'}</p> <p><strong>Tahun Ajaran:</strong> ${item.tahun_ajaran} (${item.semester})</p> <p><strong>Status:</strong> ${item.is_aktif ? '<span class="pill-status pill-status-terpublikasi">Terpublikasi</span>' : '<span class="pill-status pill-status-draft">Draft</span>'}</p>;
-document.getElementById('jadwalModal').style.display = 'flex';
+    document.getElementById('modalMapelTitle').textContent = item.mata_pelajaran + ' - ' + item.kelas;
+    document.getElementById('modalDetailBody').innerHTML = `
+        <p><strong>Hari:</strong> ${item.hari}</p>
+        <p><strong>Waktu:</strong> ${item.jam_mulai.substring(0,5)} – ${item.jam_selesai.substring(0,5)}</p>
+        <p><strong>Ruangan:</strong> ${item.ruangan || 'Ruang Standar'}</p>
+        <p><strong>Tahun Ajaran:</strong> ${item.tahun_ajaran} (${item.semester})</p>
+        <p><strong>Status:</strong> ${item.is_aktif ? '<span class="pill-status pill-status-terpublikasi">Terpublikasi</span>' : '<span class="pill-status pill-status-draft">Draft</span>'}</p>
+    `;
+    document.getElementById('jadwalModal').style.display = 'flex';
 }
 function closeJadwalModal() {
-document.getElementById('jadwalModal').style.display = 'none';
+    document.getElementById('jadwalModal').style.display = 'none';
 }
-
+</script>
 @endpush
 @endsection
