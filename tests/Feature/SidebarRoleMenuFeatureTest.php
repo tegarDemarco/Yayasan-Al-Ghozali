@@ -85,4 +85,35 @@ class SidebarRoleMenuFeatureTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Rekap Beban Mengajar');
     }
+
+    public function test_sidebar_and_login_page_display_yayasan_logo(): void
+    {
+        // 1. Guest accesses Login page -> should see logo
+        $loginResponse = $this->get(route('login'));
+        $loginResponse->assertStatus(200);
+        $loginResponse->assertSee('images/logo.png');
+        $loginResponse->assertSee('left-brand-badge');
+
+        // 2. Authenticated user accesses Dashboard -> sidebar should see logo
+        $sekolah = Sekolah::create([
+            'nama_sekolah' => 'SD Al-Ghozaly',
+            'jenjang' => 'SD',
+            'npsn' => '10000001',
+            'akreditasi' => 'A',
+            'alamat' => 'Brebes',
+            'telepon' => '0283-111111',
+            'email' => 'sd@alghozaly.sch.id',
+        ]);
+
+        $guru = User::factory()->create([
+            'role' => 'guru',
+            'jenjang' => 'SD',
+            'sekolah_id' => $sekolah->id,
+        ]);
+
+        $response = $this->actingAs($guru)->get(route('dashboard'));
+        $response->assertStatus(200);
+        $response->assertSee('images/logo.png');
+        $response->assertSee('brand-ag-badge');
+    }
 }

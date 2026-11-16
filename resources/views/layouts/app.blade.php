@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Sistem Akademik') – Yayasan Al Ghozaly</title>
     <meta name="description" content="Sistem Informasi Akademik Yayasan Al Ghozaly – SD, MTs, dan SMK">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,19 +124,23 @@
         }
 
         .brand-ag-badge {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            border: 1.5px solid rgba(255, 255, 255, 0.4);
+            width: 40px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #ffffff;
-            font-weight: 800;
-            font-size: 14px;
-            letter-spacing: 0.5px;
             flex-shrink: 0;
-            background: rgba(255, 255, 255, 0.03);
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+
+        .brand-ag-badge img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
         }
 
         .brand-text-col {
@@ -1871,7 +1876,9 @@
 <aside class="app-sidebar" id="appSidebar">
     <!-- Brand -->
     <a href="{{ route('dashboard') }}" class="sidebar-brand-wrapper">
-        <div class="brand-ag-badge">AG</div>
+        <div class="brand-ag-badge">
+            <img src="{{ asset('images/logo.png') }}" alt="Logo Yayasan Al Ghozaly" onerror="this.style.display='none';this.parentElement.innerText='AG';">
+        </div>
         <div class="brand-text-col">
             <span class="brand-main-title">Al Ghozaly</span>
             <span class="brand-sub-caption">SISTEM AKADEMIK</span>

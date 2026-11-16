@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masuk ke akun Anda – Yayasan Al Ghozaly</title>
     <meta name="description" content="Sistem Informasi Akademik Yayasan Al Ghozaly">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -92,19 +93,23 @@
         }
 
         .left-brand-badge {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            border: 1.5px solid rgba(255, 255, 255, 0.45);
-            background: rgba(255, 255, 255, 0.04);
+            width: 44px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 15px;
-            font-weight: 800;
-            color: #ffffff;
-            letter-spacing: 0.5px;
             flex-shrink: 0;
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+
+        .left-brand-badge img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
         }
 
         .left-brand-text {
@@ -422,7 +427,9 @@
     <!-- Left Forest Green Panel -->
     <div class="login-left-panel">
         <div class="left-brand-row">
-            <div class="left-brand-badge">AG</div>
+            <div class="left-brand-badge">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo Yayasan Al Ghozaly" onerror="this.style.display='none';this.parentElement.innerText='AG';">
+            </div>
             <div class="left-brand-text">
                 <span class="left-brand-title">Yayasan Al Ghozaly</span>
                 <span class="left-brand-sub">SISTEM INFORMASI AKADEMIK</span>
