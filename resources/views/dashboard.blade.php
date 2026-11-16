@@ -917,10 +917,10 @@
                 @if($jadwalList->isNotEmpty())
                     @foreach($jadwalList as $j)
                     <div class="timeline-agenda-item">
-                        <div class="timeline-time-badge">{{ substr($j->jam_mulai, 0, 5) }}</div>
+                        <div class="timeline-time-badge">{{ $j->jam_mulai_formatted }}</div>
                         <div class="timeline-content-col">
                             <span class="timeline-item-title">{{ $j->mata_pelajaran }} · {{ $j->kelas }}</span>
-                            <span class="timeline-item-sub">{{ substr($j->jam_mulai, 0, 5) }}–{{ substr($j->jam_selesai, 0, 5) }} · {{ $j->ruangan ?? 'Ruang Kelas' }}</span>
+                            <span class="timeline-item-sub">{{ $j->formatted_waktu }} · {{ $j->ruangan ?? 'Ruang Kelas' }}</span>
                         </div>
                     </div>
                     @endforeach

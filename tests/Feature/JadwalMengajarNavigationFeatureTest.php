@@ -109,5 +109,34 @@ class JadwalMengajarNavigationFeatureTest extends TestCase
         $responsePage2->assertSee('Selanjutnya →');
         $responsePage2->assertSee('Menampilkan 16–18 dari 18 data jadwal');
     }
+
+    public function test_jadwal_mengajar_guru_has_clickable_lihat_button_and_modal(): void
+    {
+        JadwalMengajar::create([
+            'sekolah_id' => $this->sekolah->id,
+            'guru_id' => $this->guru->id,
+            'hari' => 'Senin',
+            'jam_mulai' => '07:30',
+            'jam_selesai' => '09:00',
+            'mata_pelajaran' => 'Matematika Terapan',
+            'kelas' => 'X-A',
+            'ruangan' => 'Lab Komputer 1',
+            'tahun_ajaran' => '2026/2027',
+            'semester' => 'Ganjil',
+            'is_aktif' => true,
+        ]);
+
+        $response = $this->actingAs($this->guruUser)->get(route('jadwal-mengajar.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('id="jadwalModal"', false);
+        $response->assertSee('id="modalMapelTitle"', false);
+        $response->assertSee('id="modalDetailBody"', false);
+        $response->assertSee('openJadwalDetailFromBtn(this)', false);
+        $response->assertSee('data-mapel="Matematika Terapan"', false);
+        $response->assertSee('data-kelas="X-A"', false);
+        $response->assertSee('07:30–09:00');
+        $response->assertDontSee('2026--2026-');
+    }
 }
 

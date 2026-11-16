@@ -107,7 +107,7 @@
                 <!-- Jam Mulai -->
                 <div class="form-group">
                     <label class="form-label" for="jam_mulai">Jam Mulai <span style="color: #ef4444;">*</span></label>
-                    <input type="time" name="jam_mulai" id="jam_mulai" class="form-control" value="{{ old('jam_mulai', substr($jadwalMengajar->jam_mulai, 0, 5)) }}" required>
+                    <input type="time" name="jam_mulai" id="jam_mulai" class="form-control" value="{{ old('jam_mulai', $jadwalMengajar->jam_mulai_formatted) }}" required>
                     @error('jam_mulai')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
@@ -116,7 +116,7 @@
                 <!-- Jam Selesai -->
                 <div class="form-group">
                     <label class="form-label" for="jam_selesai">Jam Selesai <span style="color: #ef4444;">*</span></label>
-                    <input type="time" name="jam_selesai" id="jam_selesai" class="form-control" value="{{ old('jam_selesai', substr($jadwalMengajar->jam_selesai, 0, 5)) }}" required>
+                    <input type="time" name="jam_selesai" id="jam_selesai" class="form-control" value="{{ old('jam_selesai', $jadwalMengajar->jam_selesai_formatted) }}" required>
                     @error('jam_selesai')
                         <div class="form-error">{{ $message }}</div>
                     @enderror

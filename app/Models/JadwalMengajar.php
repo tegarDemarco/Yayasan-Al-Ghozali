@@ -14,6 +14,12 @@ class JadwalMengajar extends Model
         'jam_mulai', 'jam_selesai', 'ruangan', 'tahun_ajaran', 'semester', 'is_aktif',
     ];
 
+    protected $appends = [
+        'jam_mulai_formatted',
+        'jam_selesai_formatted',
+        'formatted_waktu',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -21,6 +27,29 @@ class JadwalMengajar extends Model
             'jam_selesai' => 'datetime:H:i',
             'is_aktif' => 'boolean',
         ];
+    }
+
+    public function getJamMulaiFormattedAttribute(): string
+    {
+        if (! $this->jam_mulai) {
+            return '';
+        }
+        return \Carbon\Carbon::parse($this->jam_mulai)->format('H:i');
+    }
+
+    public function getJamSelesaiFormattedAttribute(): string
+    {
+        if (! $this->jam_selesai) {
+            return '';
+        }
+        return \Carbon\Carbon::parse($this->jam_selesai)->format('H:i');
+    }
+
+    public function getFormattedWaktuAttribute(): string
+    {
+        $mulai = $this->jam_mulai_formatted;
+        $selesai = $this->jam_selesai_formatted;
+        return ($mulai && $selesai) ? "{$mulai}–{$selesai}" : '-';
     }
 
     public function guru(): \Illuminate\Database\Eloquent\Relations\BelongsTo

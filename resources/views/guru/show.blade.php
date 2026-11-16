@@ -54,7 +54,7 @@
                         @forelse($guru->jadwalMengajars as $jadwal)
                         <tr>
                             <td>{{ $jadwal->hari }}</td>
-                            <td>{{ substr($jadwal->jam_mulai,0,5) }}–{{ substr($jadwal->jam_selesai,0,5) }}</td>
+                            <td>{{ $jadwal->formatted_waktu }}</td>
                             <td>{{ $jadwal->mata_pelajaran }}</td>
                             <td>{{ $jadwal->kelas }}</td>
                             <td><span class="badge {{ $jadwal->is_aktif ? 'badge-green' : 'badge-gray' }}">{{ $jadwal->is_aktif ? 'Aktif' : 'Non-Aktif' }}</span></td>
