@@ -67,20 +67,12 @@
                 </select>
             </div>
 
-
-                    <option value="">Semua Jenis</option>
-                    @foreach(['Izin', 'Cuti', 'Sakit', 'Tugas Luar', 'Dinas'] as $j)
-                    <option value="{{ $j }}" {{ request('jenis') === $j ? 'selected' : '' }}>{{ $j }}</option>
-                    @endforeach
-                </select>
-            </div>
-
             <button type="submit" class="btn-forest-primary" style="height:38px;padding:0 16px;">
                 <i data-lucide="filter" style="width:14px;height:14px;"></i>
                 <span>Filter</span>
             </button>
 
-            @if(request()->anyFilled(['search', 'status', 'jenis']))
+            @if(request()->anyFilled(['search', 'status', 'jenjang']))
             <a href="{{ route('pengajuan-izin.index') }}" class="btn-pill-action btn-pill-secondary" style="height:38px;display:inline-flex;align-items:center;padding:0 14px;">
                 Reset
             </a>
