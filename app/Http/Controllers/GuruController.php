@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Guru;
 use App\Models\Sekolah;
 use App\Models\User;
+use App\Notifications\AppNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -101,7 +102,7 @@ class GuruController extends Controller
             'alamat' => $validated['alamat'] ?? null,
         ]);
 
-        Guru::create([
+        $guruModel = Guru::create([
             'user_id' => $user->id,
             'sekolah_id' => $validated['sekolah_id'],
             'nip' => $validated['nip'] ?? null,
@@ -112,6 +113,25 @@ class GuruController extends Controller
             'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? null,
             'tanggal_bergabung' => $validated['tanggal_bergabung'] ?? null,
         ]);
+
+        // Kirim notifikasi HANYA ke Kepala Sekolah pada jenjang sekolah yang bersangkutan
+        $kepalaSekolahs = User::where('role', 'kepala_sekolah')
+            ->where(function ($query) use ($sekolah) {
+                $query->where('sekolah_id', $sekolah->id)
+                    ->orWhere('jenjang', $sekolah->jenjang);
+            })
+            ->get();
+
+        foreach ($kepalaSekolahs as $kepsek) {
+            $kepsek->notify(new AppNotification(
+                title: 'Guru Baru Ditambahkan',
+                message: "Pengurus Yayasan telah menambahkan guru baru: {$user->name} ({$validated['spesialisasi']}) pada unit {$sekolah->jenjang}.",
+                url: route('guru.show', $guruModel->id),
+                type: 'guru',
+                icon: 'user-plus',
+                senderName: $currentUser->name ?? 'Pengurus Yayasan',
+            ));
+        }
 
         return redirect()->route('guru.index')->with('success', 'Data guru berhasil ditambahkan.');
     }
