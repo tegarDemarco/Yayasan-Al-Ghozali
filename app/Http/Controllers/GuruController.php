@@ -142,11 +142,11 @@ class GuruController extends Controller
     public function edit(Guru $guru): View
     {
         $user = auth()->user();
-        if ($user->isKepalaSekolah()) {
-            abort(403, 'Kepala Sekolah tidak memiliki wewenang untuk mengubah data guru.');
+        if ($user->isGuru()) {
+            abort(403, 'Guru tidak memiliki wewenang untuk mengubah data guru.');
         }
 
-        if ($user->isAdminSekolah()) {
+        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
             $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
             if ($guru->sekolah_id !== $sekolahId) {
                 abort(403, 'Anda tidak memiliki akses untuk mengubah data guru sekolah lain.');
@@ -162,11 +162,11 @@ class GuruController extends Controller
     public function update(Request $request, Guru $guru): RedirectResponse
     {
         $currentUser = auth()->user();
-        if ($currentUser->isKepalaSekolah()) {
-            abort(403, 'Kepala Sekolah tidak memiliki wewenang untuk mengubah data guru.');
+        if ($currentUser->isGuru()) {
+            abort(403, 'Guru tidak memiliki wewenang untuk mengubah data guru.');
         }
 
-        if ($currentUser->isAdminSekolah()) {
+        if ($currentUser->isAdminSekolah() || $currentUser->isKepalaSekolah()) {
             $userSekolahId = $currentUser->sekolah_id ?? Sekolah::where('jenjang', $currentUser->jenjang)->value('id');
             if ($guru->sekolah_id !== $userSekolahId) {
                 abort(403, 'Anda tidak memiliki akses untuk memperbarui data guru sekolah lain.');

@@ -48,7 +48,7 @@ class GuruPolicy
             return true;
         }
 
-        if ($user->isAdminSekolah()) {
+        if ($user->isAdminSekolah() || $user->isKepalaSekolah()) {
             return $user->jenjang === $guru->jenjang;
         }
 

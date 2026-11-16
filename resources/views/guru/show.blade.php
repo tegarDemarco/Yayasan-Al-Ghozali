@@ -8,7 +8,9 @@
         <h1>Detail Guru</h1>
     </div>
     <div style="display:flex;gap:8px;">
+        @can('update', $guru)
         <a href="{{ route('guru.edit', $guru) }}" class="btn btn-warning">Edit Data</a>
+        @endcan
         <a href="{{ route('guru.index') }}" class="btn btn-secondary">← Kembali</a>
     </div>
 </div>
