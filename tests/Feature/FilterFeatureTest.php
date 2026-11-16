@@ -268,4 +268,58 @@ class FilterFeatureTest extends TestCase
         $responseSearch->assertSee('Perangkat Pembelajaran Biologi');
         $responseSearch->assertDontSee('Perangkat Pembelajaran Aljabar');
     }
+
+    public function test_penilaian_filter_by_mata_pelajaran(): void
+    {
+        $guruUser = $this->guru1->user;
+
+        \App\Models\Penilaian::create([
+            'guru_id' => $this->guru1->id,
+            'sekolah_id' => $this->sekolahSd->id,
+            'nama_siswa' => 'Akmal Fauzi',
+            'nis' => '12345678',
+            'kelas' => 'IV-A',
+            'mata_pelajaran' => 'Matematika',
+            'jenis_penilaian' => 'Ulangan Harian',
+            'nilai' => 88.00,
+            'tahun_ajaran' => '2025/2026',
+            'semester' => 'Ganjil',
+            'tanggal_penilaian' => '2026-10-10',
+        ]);
+
+        \App\Models\Penilaian::create([
+            'guru_id' => $this->guru1->id,
+            'sekolah_id' => $this->sekolahSd->id,
+            'nama_siswa' => 'Bambang Sudiro',
+            'nis' => '12345679',
+            'kelas' => 'IV-B',
+            'mata_pelajaran' => 'Bahasa Inggris',
+            'jenis_penilaian' => 'UTS',
+            'nilai' => 92.00,
+            'tahun_ajaran' => '2025/2026',
+            'semester' => 'Ganjil',
+            'tanggal_penilaian' => '2026-10-11',
+        ]);
+
+        // Default view: shows both and includes dropdown options
+        $response = $this->actingAs($guruUser)->get(route('penilaian.index'));
+        $response->assertStatus(200);
+        $response->assertSee('Semua Mata Pelajaran');
+        $response->assertSee('Akmal Fauzi');
+        $response->assertSee('Bambang Sudiro');
+        $response->assertSee('value="Matematika"', false);
+        $response->assertSee('value="Bahasa Inggris"', false);
+
+        // Filter by Matematika
+        $responseMapel = $this->actingAs($guruUser)->get(route('penilaian.index', ['mata_pelajaran' => 'Matematika']));
+        $responseMapel->assertStatus(200);
+        $responseMapel->assertSee('Akmal Fauzi');
+        $responseMapel->assertDontSee('Bambang Sudiro');
+
+        // Filter by Bahasa Inggris
+        $responseInggris = $this->actingAs($guruUser)->get(route('penilaian.index', ['mata_pelajaran' => 'Bahasa Inggris']));
+        $responseInggris->assertStatus(200);
+        $responseInggris->assertSee('Bambang Sudiro');
+        $responseInggris->assertDontSee('Akmal Fauzi');
+    }
 }

@@ -14,16 +14,25 @@
 </div>
 
 <div class="card">
-    <form method="GET" style="margin-bottom:16px;">
-        <div class="filter-bar">
+    <form method="GET" action="{{ route('penilaian.index') }}" autocomplete="off" style="margin-bottom:16px;">
+        <div class="filter-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             <select name="jenis" class="form-control" style="width:auto;">
                 <option value="">Semua Jenis</option>
                 @foreach(['Ulangan Harian','UTS','UAS','Tugas','Praktik','Portofolio'] as $j)
                 <option value="{{ $j }}" {{ request('jenis') === $j ? 'selected' : '' }}>{{ $j }}</option>
                 @endforeach
             </select>
+            <select name="mata_pelajaran" class="form-control" style="width:auto;">
+                <option value="">Semua Mata Pelajaran</option>
+                @foreach($daftarMapel as $mapel)
+                <option value="{{ $mapel }}" {{ request('mata_pelajaran') === $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
+                @endforeach
+            </select>
             <input type="text" name="kelas" class="form-control" style="width:160px;" placeholder="Filter kelas..." value="{{ request('kelas') }}">
             <button type="submit" class="btn btn-secondary">Filter</button>
+            @if(request()->anyFilled(['jenis', 'mata_pelajaran', 'kelas']))
+            <a href="{{ route('penilaian.index') }}" class="btn btn-secondary" style="text-decoration:none;">Reset</a>
+            @endif
         </div>
     </form>
 
@@ -78,5 +87,16 @@
             </tbody>
         </table>
     </div>
+
+    @if($penilaians->hasPages())
+    <div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border,#e2e8f0);padding-top:16px;">
+        <span style="font-size:12.5px;color:var(--text-muted);">
+            Menampilkan {{ $penilaians->firstItem() }}–{{ $penilaians->lastItem() }} dari {{ $penilaians->total() }} data penilaian
+        </span>
+        <div>
+            {{ $penilaians->links() }}
+        </div>
+    </div>
+    @endif
 </div>
 @endsection
