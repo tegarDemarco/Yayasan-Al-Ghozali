@@ -16,13 +16,13 @@
 <div class="card">
     <form method="GET" action="{{ route('penilaian.index') }}" autocomplete="off" style="margin-bottom:16px;">
         <div class="filter-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <select name="jenis" class="form-control" style="width:auto;">
+            <select name="jenis" class="form-control" style="width:auto;" onchange="this.form.submit()">
                 <option value="">Semua Jenis</option>
                 @foreach(['Ulangan Harian','UTS','UAS','Tugas','Praktik','Portofolio'] as $j)
                 <option value="{{ $j }}" {{ request('jenis') === $j ? 'selected' : '' }}>{{ $j }}</option>
                 @endforeach
             </select>
-            <select name="mata_pelajaran" class="form-control" style="width:auto;">
+            <select name="mata_pelajaran" class="form-control" style="width:auto;" onchange="this.form.submit()">
                 <option value="">Semua Mata Pelajaran</option>
                 @foreach($daftarMapel as $mapel)
                 <option value="{{ $mapel }}" {{ request('mata_pelajaran') === $mapel ? 'selected' : '' }}>{{ $mapel }}</option>

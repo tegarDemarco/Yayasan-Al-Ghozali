@@ -17,10 +17,10 @@
 {{-- Filter & Generate Action Card --}}
 <div class="surface-white-card" style="padding: 16px 20px; margin-bottom: 20px;">
     <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-        <form method="GET" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0;">
+        <form method="GET" action="{{ route('rekap-beban.index') }}" autocomplete="off" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0;">
             <input type="text" name="tahun_ajaran" class="form-control" style="width: 220px;" placeholder="Tahun Ajaran (Mis: 2025/2026)" value="{{ request('tahun_ajaran') }}">
             @if(auth()->user()->isPengurusYayasan())
-            <select name="jenjang" class="form-control" style="width: auto;">
+            <select name="jenjang" class="form-control" style="width: auto;" onchange="this.form.submit()">
                 <option value="">Semua Jenjang</option>
                 <option value="SD" {{ request('jenjang') === 'SD' ? 'selected' : '' }}>Unit SD</option>
                 <option value="MTs" {{ request('jenjang') === 'MTs' ? 'selected' : '' }}>Unit MTs</option>

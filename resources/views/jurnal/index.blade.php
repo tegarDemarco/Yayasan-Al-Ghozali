@@ -16,7 +16,7 @@
     <form method="GET" action="{{ route('jurnal.index') }}" autocomplete="off">
         <div class="filter-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
             @if(auth()->user()->isPengurusYayasan())
-            <select name="jenjang" class="form-control" style="width:auto;">
+            <select name="jenjang" class="form-control" style="width:auto;" onchange="this.form.submit()">
                 <option value="">Semua Jenjang</option>
                 <option value="SD" {{ request('jenjang') === 'SD' ? 'selected' : '' }}>Unit SD</option>
                 <option value="MTs" {{ request('jenjang') === 'MTs' ? 'selected' : '' }}>Unit MTs</option>

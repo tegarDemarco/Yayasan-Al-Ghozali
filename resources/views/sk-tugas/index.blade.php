@@ -20,21 +20,21 @@
     <form method="GET" action="{{ route('sk-tugas.index') }}" autocomplete="off">
         <div class="filter-bar">
             @if(auth()->user()->isPengurusYayasan())
-            <select name="jenjang" class="form-control" style="width:auto;">
+            <select name="jenjang" class="form-control" style="width:auto;" onchange="this.form.submit()">
                 <option value="">Semua Jenjang</option>
                 <option value="SD" {{ request('jenjang') === 'SD' ? 'selected' : '' }}>Unit SD</option>
                 <option value="MTs" {{ request('jenjang') === 'MTs' ? 'selected' : '' }}>Unit MTs</option>
                 <option value="SMK" {{ request('jenjang') === 'SMK' ? 'selected' : '' }}>Unit SMK</option>
             </select>
             @endif
-            <select name="jenis" class="form-control" style="width:auto;">
+            <select name="jenis" class="form-control" style="width:auto;" onchange="this.form.submit()">
                 <option value="">Semua Jenis SK</option>
                 @foreach(['Pengangkatan','Pemberhentian','Mutasi','Penghargaan','Sanksi','Tugas Tambahan'] as $j)
                 <option value="{{ $j }}" {{ request('jenis') === $j ? 'selected' : '' }}>{{ $j }}</option>
                 @endforeach
             </select>
             @if(!auth()->user()->isGuru())
-            <select name="status_publikasi" class="form-control" style="width:auto;">
+            <select name="status_publikasi" class="form-control" style="width:auto;" onchange="this.form.submit()">
                 <option value="">Semua Status Publikasi</option>
                 <option value="terpublikasi" {{ request('status_publikasi') === 'terpublikasi' ? 'selected' : '' }}>Terpublikasi</option>
                 <option value="draft" {{ request('status_publikasi') === 'draft' ? 'selected' : '' }}>Draft</option>

@@ -49,7 +49,7 @@
 
             @if($user->isPengurusYayasan())
             <div style="min-width:140px;">
-                <select name="jenjang" class="form-control-input" style="width:100%;height:38px;">
+                <select name="jenjang" class="form-control-input" style="width:100%;height:38px;" onchange="this.form.submit()">
                     <option value="">Semua Jenjang</option>
                     <option value="SD" {{ request('jenjang') === 'SD' ? 'selected' : '' }}>Unit SD</option>
                     <option value="MTs" {{ request('jenjang') === 'MTs' ? 'selected' : '' }}>Unit MTs</option>
@@ -59,7 +59,7 @@
             @endif
 
             <div style="min-width:140px;">
-                <select name="status" class="form-control-input" style="width:100%;height:38px;">
+                <select name="status" class="form-control-input" style="width:100%;height:38px;" onchange="this.form.submit()">
                     <option value="">Semua Status</option>
                     <option value="menunggu" {{ request('status') === 'menunggu' ? 'selected' : '' }}>⏳ Menunggu</option>
                     <option value="disetujui" {{ request('status') === 'disetujui' ? 'selected' : '' }}>✓ Disetujui</option>

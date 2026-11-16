@@ -2432,10 +2432,75 @@
         }, 4000);
     }
 
-    // Search input enhancements
-    document.querySelectorAll('.search-input-wrap input, .search-box input').forEach(input => {
-        input.setAttribute('autocomplete', 'off');
-    });
+    // Auto-filter on select change and debounced search typing for all GET filter forms
+    (function() {
+        // Restore focus and cursor position after auto-filter page reload
+        try {
+            const autoFocusName = sessionStorage.getItem('agy_autofocus_input_name');
+            if (autoFocusName) {
+                sessionStorage.removeItem('agy_autofocus_input_name');
+                const savedPos = parseInt(sessionStorage.getItem('agy_autofocus_cursor_pos'), 10);
+                sessionStorage.removeItem('agy_autofocus_cursor_pos');
+
+                const getForms = document.querySelectorAll('form[method="GET" i], form[method="get"]');
+                for (const form of getForms) {
+                    const targetInput = form.querySelector(`input[name="${autoFocusName}"]`);
+                    if (targetInput) {
+                        targetInput.focus();
+                        const len = targetInput.value.length;
+                        const pos = (!isNaN(savedPos) && savedPos <= len) ? savedPos : len;
+                        try {
+                            targetInput.setSelectionRange(pos, pos);
+                        } catch (e) {}
+                        break;
+                    }
+                }
+            }
+        } catch (e) {}
+
+        const getForms = document.querySelectorAll('form[method="GET" i], form[method="get"]');
+        getForms.forEach(form => {
+            // 1. Auto-submit immediately when any select option changes
+            form.querySelectorAll('select').forEach(sel => {
+                sel.addEventListener('change', function() {
+                    form.submit();
+                });
+            });
+
+            // 2. Debounced auto-submit when typing in search or filter inputs
+            const textInputs = form.querySelectorAll('input[type="text"], input[type="search"], input:not([type])');
+            textInputs.forEach(input => {
+                input.setAttribute('autocomplete', 'off');
+                let timer = null;
+                let lastValue = input.value;
+
+                function doSubmit() {
+                    if (input.value !== lastValue) {
+                        try {
+                            sessionStorage.setItem('agy_autofocus_input_name', input.name);
+                            sessionStorage.setItem('agy_autofocus_cursor_pos', input.selectionStart || input.value.length);
+                        } catch (e) {}
+                        form.submit();
+                    }
+                }
+
+                input.addEventListener('input', function() {
+                    clearTimeout(timer);
+                    timer = setTimeout(doSubmit, 500);
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        clearTimeout(timer);
+                        try {
+                            sessionStorage.setItem('agy_autofocus_input_name', input.name);
+                            sessionStorage.setItem('agy_autofocus_cursor_pos', input.selectionStart || input.value.length);
+                        } catch (e) {}
+                    }
+                });
+            });
+        });
+    })();
 </script>
 
 @stack('scripts')

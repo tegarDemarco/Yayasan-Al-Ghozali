@@ -24,14 +24,14 @@
     <form method="GET" action="{{ route('evaluasi-kinerja.index') }}" autocomplete="off">
         <div class="filter-bar">
             @if(auth()->user()->isPengurusYayasan())
-            <select name="jenjang" class="form-control" style="width:auto;">
+            <select name="jenjang" class="form-control" style="width:auto;" onchange="this.form.submit()">
                 <option value="">Semua Jenjang</option>
                 <option value="SD" {{ request('jenjang') === 'SD' ? 'selected' : '' }}>Unit SD</option>
                 <option value="MTs" {{ request('jenjang') === 'MTs' ? 'selected' : '' }}>Unit MTs</option>
                 <option value="SMK" {{ request('jenjang') === 'SMK' ? 'selected' : '' }}>Unit SMK</option>
             </select>
             @endif
-            <select name="predikat" class="form-control" style="width:auto;">
+            <select name="predikat" class="form-control" style="width:auto;" onchange="this.form.submit()">
                 <option value="">Semua Predikat</option>
                 @foreach(['Sangat Baik', 'Baik', 'Cukup', 'Kurang'] as $p)
                 <option value="{{ $p }}" {{ request('predikat') === $p ? 'selected' : '' }}>{{ $p }}</option>

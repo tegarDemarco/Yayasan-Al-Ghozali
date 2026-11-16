@@ -322,4 +322,34 @@ class FilterFeatureTest extends TestCase
         $responseInggris->assertSee('Bambang Sudiro');
         $responseInggris->assertDontSee('Akmal Fauzi');
     }
+
+    public function test_filter_forms_support_automatic_filter_on_change_and_typing(): void
+    {
+        $guruUser = $this->guru1->user;
+
+        // SK Tugas
+        $responseSk = $this->actingAs($this->pengurus)->get(route('sk-tugas.index'));
+        $responseSk->assertStatus(200);
+        $responseSk->assertSee('name="jenis" class="form-control" style="width:auto;" onchange="this.form.submit()"', false);
+        $responseSk->assertSee('name="jenjang" class="form-control" style="width:auto;" onchange="this.form.submit()"', false);
+        $responseSk->assertSee('name="status_publikasi" class="form-control" style="width:auto;" onchange="this.form.submit()"', false);
+        $responseSk->assertSee('agy_autofocus_input_name', false);
+
+        // Penilaian
+        $responsePenilaian = $this->actingAs($guruUser)->get(route('penilaian.index'));
+        $responsePenilaian->assertStatus(200);
+        $responsePenilaian->assertSee('name="jenis" class="form-control" style="width:auto;" onchange="this.form.submit()"', false);
+        $responsePenilaian->assertSee('name="mata_pelajaran" class="form-control" style="width:auto;" onchange="this.form.submit()"', false);
+
+        // Guru
+        $responseGuru = $this->actingAs($this->pengurus)->get(route('guru.index'));
+        $responseGuru->assertStatus(200);
+        $responseGuru->assertSee('name="jenjang" class="form-control" style="width:auto;" onchange="this.form.submit()"', false);
+        $responseGuru->assertSee('name="status" class="form-control" style="width:auto;" onchange="this.form.submit()"', false);
+
+        // Evaluasi Kinerja
+        $responseEvaluasi = $this->actingAs($this->pengurus)->get(route('evaluasi-kinerja.index'));
+        $responseEvaluasi->assertStatus(200);
+        $responseEvaluasi->assertSee('name="predikat" class="form-control" style="width:auto;" onchange="this.form.submit()"', false);
+    }
 }

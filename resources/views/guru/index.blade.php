@@ -23,13 +23,13 @@
                 <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
                 <input type="text" name="search" class="form-control" placeholder="Cari nama guru..." value="{{ request('search') }}" autocomplete="off">
             </div>
-            <select name="jenjang" class="form-control" style="width:auto;">
+            <select name="jenjang" class="form-control" style="width:auto;" onchange="this.form.submit()">
                 <option value="">Semua Jenjang</option>
                 <option value="SD" {{ request('jenjang') === 'SD' ? 'selected' : '' }}>SD</option>
                 <option value="MTs" {{ request('jenjang') === 'MTs' ? 'selected' : '' }}>MTs</option>
                 <option value="SMK" {{ request('jenjang') === 'SMK' ? 'selected' : '' }}>SMK</option>
             </select>
-            <select name="status" class="form-control" style="width:auto;">
+            <select name="status" class="form-control" style="width:auto;" onchange="this.form.submit()">
                 <option value="">Semua Status</option>
                 <option value="aktif" {{ request('status') === 'aktif' ? 'selected' : '' }}>Aktif</option>
                 <option value="nonaktif" {{ request('status') === 'nonaktif' ? 'selected' : '' }}>Non-Aktif</option>
