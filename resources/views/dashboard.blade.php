@@ -655,11 +655,11 @@
 
     <!-- 4 Quick Action Cards -->
     <div class="action-four-grid">
-        <a href="{{ route('guru.create') }}" class="action-white-card">
-            <div class="action-icon-box"><i data-lucide="user-plus"></i></div>
+        <a href="{{ route('guru.index') }}" class="action-white-card">
+            <div class="action-icon-box"><i data-lucide="users"></i></div>
             <div class="action-text-col">
-                <span class="action-title-text">Tambah Guru</span>
-                <span class="action-desc-text">Kelola data guru</span>
+                <span class="action-title-text">Data Guru</span>
+                <span class="action-desc-text">Lihat daftar guru</span>
             </div>
         </a>
 

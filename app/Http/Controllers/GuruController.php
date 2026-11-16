@@ -43,16 +43,11 @@ class GuruController extends Controller
     public function create(): View
     {
         $user = auth()->user();
-        if ($user->isKepalaSekolah()) {
-            abort(403, 'Kepala Sekolah tidak memiliki wewenang untuk menambah data guru.');
+        if ($user->isKepalaSekolah() || $user->isAdminSekolah()) {
+            abort(403, 'Anda tidak memiliki wewenang untuk menambah data guru.');
         }
 
-        if ($user->isAdminSekolah()) {
-            $sekolahId = $user->sekolah_id ?? Sekolah::where('jenjang', $user->jenjang)->value('id');
-            $sekolahs = Sekolah::where('id', $sekolahId)->get();
-        } else {
-            $sekolahs = Sekolah::all();
-        }
+        $sekolahs = Sekolah::all();
 
         return view('guru.create', compact('sekolahs'));
     }
@@ -60,15 +55,8 @@ class GuruController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $currentUser = auth()->user();
-        if ($currentUser->isKepalaSekolah()) {
-            abort(403, 'Kepala Sekolah tidak memiliki wewenang untuk menambah data guru.');
-        }
-
-        if ($currentUser->isAdminSekolah()) {
-            $userSekolahId = $currentUser->sekolah_id ?? Sekolah::where('jenjang', $currentUser->jenjang)->value('id');
-            if ($userSekolahId) {
-                $request->merge(['sekolah_id' => $userSekolahId]);
-            }
+        if ($currentUser->isKepalaSekolah() || $currentUser->isAdminSekolah()) {
+            abort(403, 'Anda tidak memiliki wewenang untuk menambah data guru.');
         }
 
         $validated = $request->validate([

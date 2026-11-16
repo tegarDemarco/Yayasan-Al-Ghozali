@@ -36,7 +36,7 @@ class GuruPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isPengurusYayasan() || $user->isAdminSekolah();
+        return $user->isPengurusYayasan();
     }
 
     /**
